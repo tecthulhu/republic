@@ -1,0 +1,714 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform/schemas/atoms/1.0.0",
+  "title": "Atom Type Schemas v1.0.0 (governed by DOC-0000, ratified via DEC-0001)",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^(PRIN|SPEC|RSTR|CTRL|ENF|RULE|DEC|MAND|STRAT|SPRINT|STORY|EVID|WVR|BLK|PROV|DOC|MEM)-[0-9A-Za-z._-]+$"
+    },
+    "ref": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/id"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id"
+            },
+            "version": {
+              "$ref": "#/$defs/semver"
+            },
+            "instantiated_at": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "scope": {
+      "type": "string",
+      "pattern": "^(platform|project:[A-Za-z0-9._-]+|repo:[A-Za-z0-9._/-]+|story:[A-Za-z0-9._-]+)$"
+    },
+    "state": {
+      "enum": [
+        "draft",
+        "proposed",
+        "ratified",
+        "active",
+        "rejected",
+        "deprecated",
+        "superseded"
+      ]
+    },
+    "relation": {
+      "type": "object",
+      "required": [
+        "rel",
+        "target"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "rel": {
+          "enum": [
+            "binds",
+            "satisfies",
+            "supersedes",
+            "blocks",
+            "advances",
+            "grants",
+            "contains",
+            "derives"
+          ]
+        },
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+    "base": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "scope",
+        "state",
+        "version",
+        "instantiated_at",
+        "author",
+        "title"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": [
+            "principle",
+            "specification",
+            "restriction",
+            "control",
+            "enforcement",
+            "rule",
+            "decision",
+            "mandate",
+            "strategy",
+            "sprint",
+            "story",
+            "evidence",
+            "waiver",
+            "blocker",
+            "provenance-link",
+            "document",
+            "memory"
+          ]
+        },
+        "scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "state": {
+          "$ref": "#/$defs/state"
+        },
+        "version": {
+          "$ref": "#/$defs/semver"
+        },
+        "instantiated_at": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "authorized_by": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relation"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "enum": [
+                  "ratified",
+                  "active",
+                  "deprecated",
+                  "superseded"
+                ]
+              },
+              "type": {
+                "not": {
+                  "enum": [
+                    "evidence",
+                    "memory",
+                    "provenance-link",
+                    "blocker"
+                  ]
+                }
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "authorized_by"
+            ],
+            "properties": {
+              "authorized_by": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "principle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "binding": {
+          "const": "injected"
+        }
+      },
+      "required": [
+        "binding"
+      ]
+    },
+    "specification": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "binding": {
+          "const": "checked"
+        },
+        "check": {
+          "enum": [
+            "machine",
+            "human"
+          ]
+        },
+        "story_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "binding",
+        "check"
+      ]
+    },
+    "restriction": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "binding": {
+          "const": "checked"
+        },
+        "phase": {
+          "const": "pre+post"
+        },
+        "injection": {
+          "const": "never"
+        },
+        "check": {
+          "enum": [
+            "machine",
+            "human"
+          ]
+        }
+      },
+      "required": [
+        "binding",
+        "phase",
+        "injection",
+        "check"
+      ]
+    },
+    "control": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "target": {
+          "enum": [
+            "codebase",
+            "artifact",
+            "runtime"
+          ]
+        },
+        "implementation": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "target",
+        "implementation"
+      ]
+    },
+    "enforcement": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "on_fail": {
+                "const": "suspend-escalate"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "escalation_target"
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "on_fail": {
+          "enum": [
+            "block-merge",
+            "refuse-spawn",
+            "suspend-escalate",
+            "advisory"
+          ]
+        },
+        "on_pass": {
+          "type": "string"
+        },
+        "escalation_target": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/exception"
+          }
+        }
+      },
+      "required": [
+        "on_fail"
+      ]
+    },
+    "exception": {
+      "type": "object",
+      "required": [
+        "given",
+        "when",
+        "meets",
+        "then",
+        "for"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "given": {
+          "$ref": "#/$defs/ref"
+        },
+        "when": {
+          "type": "string"
+        },
+        "meets": {
+          "type": "string"
+        },
+        "then": {
+          "type": "string",
+          "pattern": "^(suspend|select [A-Z]+-[0-9A-Za-z._-]+|modify .+)$"
+        },
+        "for": {
+          "$ref": "#/$defs/scope"
+        }
+      }
+    },
+    "rule": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "claim": {
+          "$ref": "#/$defs/ref"
+        },
+        "control": {
+          "$ref": "#/$defs/ref"
+        },
+        "enforcement": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "claim",
+        "control",
+        "enforcement"
+      ]
+    },
+    "decision": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "question": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string"
+        },
+        "process_ref": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "target",
+              "transition"
+            ],
+            "properties": {
+              "target": {
+                "$ref": "#/$defs/ref"
+              },
+              "transition": {
+                "$ref": "#/$defs/state"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "question",
+        "outcome",
+        "effects"
+      ]
+    },
+    "mandate": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "citizen": {
+          "type": "string"
+        },
+        "imperium": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "model_band": {
+          "type": "string",
+          "pattern": "^B[0-9]+$"
+        },
+        "role_layer": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "citizen",
+        "imperium",
+        "model_band",
+        "role_layer"
+      ]
+    },
+    "strategy": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "horizon": {
+          "type": "string"
+        },
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        }
+      },
+      "required": [
+        "horizon",
+        "outcomes"
+      ]
+    },
+    "sprint": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "arc_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "stories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        },
+        "gate": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "arc_ref",
+        "gate"
+      ]
+    },
+    "story": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        },
+        "sprint_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "tracker_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "acceptance"
+      ]
+    },
+    "evidence": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "control_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "verdict": {
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "checked_at": {
+          "type": "string"
+        },
+        "checker": {
+          "type": "string"
+        },
+        "detail_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "control_ref",
+        "subject",
+        "verdict",
+        "checked_at",
+        "checker"
+      ]
+    },
+    "waiver": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "rule_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "waived_scope": {
+          "$ref": "#/$defs/scope"
+        },
+        "expires": {
+          "type": "string"
+        },
+        "condition": {
+          "$ref": "#/$defs/exception"
+        }
+      },
+      "required": [
+        "rule_ref",
+        "waived_scope",
+        "expires"
+      ]
+    },
+    "blocker": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "raised_by": {
+          "type": "string"
+        },
+        "blocks_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "escalation": {
+          "type": "string"
+        },
+        "resolved_by": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "raised_by",
+        "blocks_refs",
+        "escalation"
+      ]
+    },
+    "provenance-link": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "directive": {
+          "type": "string"
+        },
+        "decision_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "story_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "directive",
+        "actor"
+      ]
+    },
+    "document": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ]
+    },
+    "memory": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/base"
+        }
+      ],
+      "properties": {
+        "context_class": {
+          "enum": [
+            "core",
+            "relevant",
+            "nuance",
+            "reference-cue"
+          ]
+        },
+        "keywords": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          }
+        },
+        "groomed_from": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "context_class",
+        "keywords"
+      ]
+    }
+  }
+}

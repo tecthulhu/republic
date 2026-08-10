@@ -1,0 +1,56 @@
+# --- Generated truth (ONT-016: the index is regenerable, never source) ---
+index/
+*.embeddings.json
+standing_queries.json
+
+# --- Secrets & credential material (never committed; handoff is runtime-mounted per L0-011) ---
+*.cred
+*.token
+*.seed
+*.nk
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+/run/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node (Rostra / tooling, when it arrives) ---
+node_modules/
+dist/
+.npm/
+*.tsbuildinfo
+
+# --- Containers & build output ---
+*.tar
+*.oci
+.build/
+out/
+
+# --- Local scratch (agents work in-container; host scratch is never truth) ---
+/work/
+/tmp-*/
+*.log
+
+# --- Editors & OS noise ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Claude Code local state (project settings are shared; local overrides are not) ---
+.claude/settings.local.json
