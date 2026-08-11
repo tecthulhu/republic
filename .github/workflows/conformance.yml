@@ -21,7 +21,10 @@ permissions:
 
 jobs:
   corpus:
-    name: CTRL-0001 atom-lint + CTRL-0002 grammar + CTRL-0007 embedder
+    # Context name is stable and short on purpose: renaming a job after it is a
+    # required check silently breaks the requirement — the old context never reports
+    # again, so the rule matches nothing. The controls it runs are listed in steps.
+    name: corpus-controls
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +33,7 @@ jobs:
           python-version: '3.12'
       - name: Install pinned tool dependencies
         working-directory: platform
-        run: python -m pip install --require-virtualenv=false -r tools/requirements.txt
+        run: python -m pip install -r tools/requirements.txt
       - name: CTRL-0001 — atom-lint over the whole tree
         working-directory: platform
         run: python tools/atom_lint.py ..
@@ -45,7 +48,7 @@ jobs:
         run: python tools/test_embedder.py
 
   citizenship:
-    name: CTRL-0004 citizenship conformance
+    name: citizenship-conformance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
