@@ -22,7 +22,12 @@ BEGIN = re.compile(r"<!--\s*atom:begin\s+id=([A-Z]+-[0-9A-Za-z._-]+)\s*-->")
 END   = re.compile(r"<!--\s*atom:end\s+id=([A-Z]+-[0-9A-Za-z._-]+)\s*-->")
 
 def parse_file(path):
-    """Yield (atom_dict, source) from frontmatter and/or ONT-070a blocks."""
+    """Yield (atom_dict, source, body) from frontmatter and/or ONT-070a blocks.
+
+    `body` is the atom's prose — everything the atom says that is not its machine
+    record. It is carried so content-addressed subjects (SPEC-0096) cover what an
+    atom actually asserts, not merely which ids exist.
+    """
     text = path.read_text()
     atoms, errors = [], []
     # frontmatter form
@@ -32,7 +37,7 @@ def parse_file(path):
             try:
                 fm = yaml.safe_load(text[4:end])
                 if isinstance(fm, dict) and "id" in fm:
-                    atoms.append((fm, f"{path}::frontmatter"))
+                    atoms.append((fm, f"{path}::frontmatter", text[end + 5:]))
             except yaml.YAMLError as e:
                 errors.append(f"{path}: frontmatter YAML error: {e}")
     # marker blocks
@@ -50,8 +55,8 @@ def parse_file(path):
             ym = re.search(r"```yaml\n(.*?)```", block, re.S)
             if not ym: errors.append(f"{path}: atom {aid}: no yaml block"); continue
             try:
-                body = yaml.safe_load(ym.group(1))
-                if isinstance(body, dict): atoms.append((body, f"{path}::{aid}"))
+                rec = yaml.safe_load(ym.group(1))
+                if isinstance(rec, dict): atoms.append((rec, f"{path}::{aid}", block[ym.end():]))
                 else: errors.append(f"{path}: atom {aid}: yaml is not a mapping")
             except yaml.YAMLError as e:
                 errors.append(f"{path}: atom {aid}: YAML error: {e}")
@@ -59,6 +64,22 @@ def parse_file(path):
     return atoms, errors, text
 
 def ref_id(r): return r if isinstance(r, str) else (r or {}).get("id")
+
+def corpus_digest(all_atoms):
+    """SPEC-0096: the evidence subject is content-addressed.
+
+    Digest over the sorted sequence of (id, version, canonical atom record, prose
+    body). Hashing the id set alone — the prior behaviour — meant editing any
+    atom's text left the subject unchanged, so ONT-046's "current evidence against
+    the current subject digest" could not detect content drift at all.
+    """
+    h = hashlib.sha256()
+    for aid in sorted(all_atoms):
+        a, _src, body = all_atoms[aid]
+        h.update(json.dumps({"id": aid, "version": str(a.get("version", "")),
+                             "record": a, "body": body},
+                            sort_keys=True, separators=(",", ":"), default=str).encode())
+    return h.hexdigest()[:16]
 
 def expand_inputs(inputs):
     """Accept files and directories alike (SPEC-0092): a directory contributes its
@@ -79,11 +100,11 @@ def lint(corpus_dirs, schema_path):
     files, errors = expand_inputs(corpus_dirs)
     for p in files:
         atoms, errs, text = parse_file(p); errors += errs; texts[p] = text
-        for a, src in atoms:
+        for a, src, body in atoms:
             aid = a.get("id", "?")
             if aid in all_atoms: errors.append(f"{src}: duplicate id {aid} (also {all_atoms[aid][1]})")
-            all_atoms[aid] = (a, src)
-    for aid, (a, src) in all_atoms.items():
+            all_atoms[aid] = (a, src, body)
+    for aid, (a, src, body) in all_atoms.items():
         pfx = aid.split("-")[0]
         t = a.get("type")
         if PREFIX.get(pfx) != t: errors.append(f"{src}: prefix {pfx} does not match type {t}")
@@ -131,7 +152,7 @@ def main():
     schema = "schemas/atoms-1.0.0.json"
     atoms, errors = lint(corpus, schema)
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    digest = hashlib.sha256("".join(sorted(atoms)).encode()).hexdigest()[:16]
+    digest = corpus_digest(atoms)
     verdict = "pass" if not errors else "fail"
     # SPEC-0092: the parsed-atom count rides in the subject, so a vacuous run cannot
     # masquerade in the evidence stream even where the exit code is swallowed.
@@ -146,7 +167,7 @@ def main():
     pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     print(f"atoms parsed: {len(atoms)}")
     by_type = {}
-    for aid,(a,_) in atoms.items(): by_type[a.get('type','?')] = by_type.get(a.get('type','?'),0)+1
+    for aid,(a,_src,_body) in atoms.items(): by_type[a.get('type','?')] = by_type.get(a.get('type','?'),0)+1
     print("by type:", json.dumps(by_type))
     if errors:
         print(f"\nFAIL — {len(errors)} finding(s):")

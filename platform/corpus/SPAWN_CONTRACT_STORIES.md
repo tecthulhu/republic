@@ -21,13 +21,13 @@ id: STORY-0001
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-11T01:20:00Z"
+author: agent-worker-story-0004
 authorized_by: null
 title: "Gold base image with citizenship conformance green"
 tags: [step-4, l0]
-tracker_ref: "gh:eldritch-labs/platform#1"
+tracker_ref: "gh:tecthulhu/republic_semantic_mesh#1"
 acceptance: [SPEC-0071, SPEC-0072, SPEC-0073]
 relations:
   - { rel: derives, target: DOC-0003 }
@@ -64,19 +64,25 @@ id: SPEC-0072
 type: specification
 scope: story:story-0001
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-11T01:20:00Z"
+author: agent-worker-story-0004
 authorized_by: null
-title: "Violating fixture fails BASE-AC-15 through BASE-AC-17"
+title: "Violating fixture fails BASE-AC-15 and BASE-AC-16"
 tags: [acceptance-criterion]
 binding: checked
 check: machine
 story_ref: STORY-0001
 ```
 The deliberately non-conformant image (shell restored, capability
-re-added, root regained, missing base label, over-ceiling caveat request)
-fails the suite on every count — the sealing claims proven falsifiable.
+re-added, root regained, missing or mismatched base label) fails the
+suite on every count — the sealing claims proven falsifiable.
+
+v1.1.0 (D5): narrowed to the image-level negatives, which are runnable
+inside STORY-0001. BASE-AC-9 (host bind/volume refused) and BASE-AC-17
+(over-ceiling caveat request refused) are harness-tested, and the harness
+is STORY-0002's deliverable; they move to SPEC-0081 v1.1.0, where they
+always belonged, and SPRINT-0001's gate still runs all seventeen.
 <!-- atom:end id=SPEC-0072 -->
 
 <!-- atom:begin id=SPEC-0073 -->
@@ -107,13 +113,13 @@ id: STORY-0002
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-11T01:20:00Z"
+author: agent-worker-story-0004
 authorized_by: null
 title: "Spawn contract: supervised CLI-session agent in a citizen container"
 tags: [step-5, risky-hop, spawn-contract]
-tracker_ref: "gh:eldritch-labs/platform#2"
+tracker_ref: "gh:tecthulhu/republic_semantic_mesh#2"
 acceptance: [SPEC-0081, SPEC-0082, SPEC-0083, SPEC-0084, SPEC-0085, SPEC-0086]
 sprint_ref: SPRINT-0001
 relations:
@@ -131,11 +137,11 @@ id: SPEC-0081
 type: specification
 scope: story:story-0002
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-11T01:20:00Z"
+author: agent-worker-story-0004
 authorized_by: null
-title: "Spawn gate: refusal without story, mint and inject with one"
+title: "Spawn gate: refusal without story, mint and inject with one, ceiling and mount refusals"
 tags: [acceptance-criterion, spawn-ac-1]
 binding: checked
 check: machine
@@ -147,6 +153,13 @@ audience = the story id (ES-020) and whose transport grant is the ES-003
 projection; the container starts on the gold base with zero host mounts;
 core-class context (laws, strategy hash-verified, mandate) is injected
 per L0-051 with restrictions armed pre/post, never in-prompt.
+
+v1.1.0 (D5) absorbs the two harness-tested conformance criteria that
+STORY-0001 cannot run because the harness is this story's deliverable:
+BASE-AC-9 — a spawn spec containing any host bind or volume is refused
+by the harness, recorded against the image digest; and BASE-AC-17 — a
+derived image requesting caveats outside its role layer's
+`l0.caveat_ceiling` is refused at spawn.
 <!-- atom:end id=SPEC-0081 -->
 
 <!-- atom:begin id=SPEC-0082 -->
@@ -277,9 +290,9 @@ id: SPRINT-0001
 type: sprint
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-11T01:20:00Z"
+author: agent-worker-story-0004
 authorized_by: null
 title: "Foundation sprint: base + spawn contract to convergence"
 tags: [c1-path]
@@ -294,6 +307,13 @@ real running components): the gate library suite executes STORY-0002's
 full acceptance set end-to-end on the gold base image with the pinned
 CLI — one horizontal pass through spawn, stream, isolate, attribute,
 supervise. Green here is the platform's first walked hop.
+
+The gate runs the full citizenship set, BASE-AC-1 through BASE-AC-17, in
+one pass: BASE-AC-1..14 and 15..16 at the image level (SPEC-0071,
+SPEC-0072 v1.1.0) and BASE-AC-9 and BASE-AC-17 at the harness (SPEC-0081
+v1.1.0). Splitting the seventeen across two stories by where they are
+testable does not split them at the convergence point — that is what
+makes it one.
 <!-- atom:end id=SPRINT-0001 -->
 
 <!-- atom:begin id=STRAT-0001 -->
