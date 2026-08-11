@@ -3,11 +3,11 @@ id: DOC-0000
 type: document
 title: Ontology Specification
 scope: platform
-state: draft
-version: 0.1.1
-instantiated_at: "2026-08-11T01:15:00Z"
+state: ratified
+version: 1.0.0
+instantiated_at: "2026-08-11T19:05:00Z"
 author: consul-draft
-authorized_by: null
+authorized_by: DEC-0001
 relations:
   - { rel: contains, target: "ONT-*" }
 ---
