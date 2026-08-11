@@ -337,7 +337,7 @@ def main():
     ap.add_argument("--image", required=True)
     ap.add_argument("--expect-fail", action="store_true",
                     help="violating fixture: the suite must report failures")
-    ap.add_argument("--evidence-dir", default="index")
+    ap.add_argument("--evidence-dir", default="acta")
     a = ap.parse_args()
 
     print(f"CTRL-0004 citizenship conformance suite against {a.image}")
