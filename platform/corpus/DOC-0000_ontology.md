@@ -4,8 +4,8 @@ type: document
 title: Ontology Specification
 scope: platform
 state: draft
-version: 0.1.0
-instantiated_at: "2026-08-10T12:00:00Z"
+version: 0.1.1
+instantiated_at: "2026-08-11T01:15:00Z"
 author: consul-draft
 authorized_by: null
 relations:
@@ -433,7 +433,11 @@ A raised impediment with escalation binding.
 
 ```yaml
 raised_by:               # Identity-chain reference.
-blocks:                  # Atom or citizen references impeded.
+blocks_refs:             # Atom or citizen references impeded. Named _refs, not
+                         #   `blocks`, because the bare token names the relation
+                         #   in §5: the relation states that something is
+                         #   impeded, this field lists what. One token, one
+                         #   meaning.
 escalation:              # ENF- reference or escalation target.
 resolved_by:             # DEC- or EVID- reference once resolved.
 ```

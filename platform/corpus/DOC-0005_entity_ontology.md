@@ -4,8 +4,8 @@ type: document
 title: Entity Interface Ontology
 scope: platform
 state: draft
-version: 0.1.0
-instantiated_at: "2026-08-10T12:00:00Z"
+version: 0.1.1
+instantiated_at: "2026-08-11T01:20:00Z"
 author: consul-draft
 authorized_by: null
 relations:
@@ -321,7 +321,7 @@ signed act that gave them force.
 per-act ceremonies of ENT-073/075 define *what* must be proven. The
 mechanisms by which presence is proven continuously and non-intrusively —
 pulse applications, proximity attestation, multi-factor liveness collections
-— are specified in the companion **Liveness Extension** document. That
+— are specified in the companion **Liveness Extension** (DOC-0006). That
 document composes with this section solely by producing the assertions and
 renewals defined here; it may not weaken any requirement of §8, and its
 factors feed the lease/assertion machinery rather than bypassing it.

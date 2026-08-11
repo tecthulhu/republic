@@ -10,6 +10,11 @@ standing_queries.json
 *.nk
 *.pem
 *.key
+# Developer tokens live outside the repository; these patterns exist so a stray
+# copy inside it is un-committable rather than merely discouraged.
+*_token
+*_developer_token
+.tecthulhu_*
 .env
 .env.*
 !.env.example

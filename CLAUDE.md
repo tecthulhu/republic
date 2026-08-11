@@ -1,18 +1,28 @@
 # CLAUDE.md — worker bootstrap
 
 You are a build worker on this platform. This file is a bootloader, not the
-law: the law is the governed corpus in `corpus/`. Read this, then load the
-core set, then work the loop. If anything here conflicts with a resolved
-corpus atom, the resolved atom wins (ONT-049c: resolution wins).
+law: the law is the governed corpus in `platform/corpus/`. Read this, then
+load the core set, then work the loop. If anything here conflicts with a
+resolved corpus atom, the resolved atom wins (ONT-049c: resolution wins).
+
+**The canonical tree is `platform/`.** It holds the only copy of every
+governed document; the repo root carries this bootloader and nothing
+governed. A document presented at a second path for reading convenience is
+a copy, and a copy is never committed (D2 of ARCHITECT_RESPONSE_001: two
+independent sources of truth for one fact are a source of falsehood,
+ONT-016). Tool commands below run from `platform/`.
 
 ## Load order (core context — re-assert after any context compaction)
 
-1. `corpus/DOC-0000_ontology.md` — the atom system. Skim §2 (base fields,
-   truth model), §4 (types), §6 (lifecycle), §7 (encoding standard).
-2. `corpus/DOC-0002_platform_architecture.md` — what you are building.
-3. The document for your current story: STORY-0001 → `corpus/DOC-0003_l0_base_contract.md`;
-   STORY-0002 → DOC-0003 + `corpus/DOC-0004_envelope_subject_spec.md`.
-4. `corpus/SPAWN_CONTRACT_STORIES.md` — your acceptance criteria, verbatim.
+1. `platform/corpus/DOC-0000_ontology.md` — the atom system. Skim §2 (base
+   fields, truth model), §4 (types), §6 (lifecycle), §7 (encoding standard).
+2. `platform/corpus/DOC-0002_platform_architecture.md` — what you are building.
+3. The document for your current story: STORY-0001 →
+   `platform/corpus/DOC-0003_l0_base_contract.md`; STORY-0002 → DOC-0003 +
+   `platform/corpus/DOC-0004_envelope_subject_spec.md`.
+4. `platform/corpus/SPAWN_CONTRACT_STORIES.md` — your acceptance criteria,
+   verbatim. Architect dispositions and later story cuts land as further
+   files in `platform/corpus/`.
 
 ## Non-negotiables (these survive every context cycle)
 
@@ -41,7 +51,9 @@ corpus atom, the resolved atom wins (ONT-049c: resolution wins).
 2. Plan against the referenced documents; list which L0-/ES-/BASE-AC-
    requirements the plan satisfies.
 3. Build in small verified steps. Run `python3 tools/atom_lint.py corpus`
-   before any commit that touches `corpus/` — a red lint is a stop.
+   from `platform/` before any commit that touches `platform/corpus/` — a
+   red lint is a stop. Zero atoms parsed is a red lint, not a green one
+   (SPEC-0092).
 4. When an acceptance check can run, run it and capture output. Evidence
    rows land in `index/` (generated — never hand-edit, never commit).
 5. Commit with the story ID in the message trailer: `Story: STORY-000X`.
@@ -51,16 +63,26 @@ corpus atom, the resolved atom wins (ONT-049c: resolution wins).
 
 ## Repository facts
 
+All paths below are under `platform/`.
+
 - `corpus/` — governed atoms and documents. Source of truth. Lintable.
 - `schemas/atoms-1.0.0.json` — atom schemas (DEC-0001 rulings encoded).
 - `tools/` — atom_lint.py (CTRL-0001), test_grammar.py (CTRL-0002),
-  embedder.py (ONT-085–089), extract.py (corpus generator — regenerating
-  overwrites REQUIREMENTS_REGISTER/CONTROLS/ENFORCEMENT_RULES; do not run
-  it casually).
+  test_atom_lint.py (CTRL-0001's own fixture suite), embedder.py
+  (ONT-085–089), extract.py (corpus generator — regenerating overwrites
+  REQUIREMENTS_REGISTER/CONTROLS/ENFORCEMENT_RULES; do not run it casually).
+- `tools/requirements.txt` — the dependency pin. Deps are a versioned
+  measurement (SPEC-0086's pattern): a bump re-runs what it touches.
 - `index/` — generated: evidence rows, embeddings, standing queries.
   Regenerable, git-ignored, never truth.
-- Current build order: PA-030 in DOC-0002. Steps 1–3 done with evidence.
-  You are on step 4 (STORY-0001) unless told otherwise.
+- Current build order: PA-030 in DOC-0002. **Evidence is environment-scoped**
+  (ONT-014): a step is "done" only against a named environment and a subject
+  digest, never in the abstract. Steps 1–2 (atom-lint, grammar suite) are
+  re-verified in the worker environment; step 3 (embedder/index/standing
+  queries) carries drafting-environment evidence and re-verifies per
+  environment. Cite the digest when you claim a step.
+- Active story: STORY-0003 (corpus integrity) precedes STORY-0001; STORY-0001
+  (step 4, gold base) follows it unless told otherwise.
 
 ## Interim honesty
 
