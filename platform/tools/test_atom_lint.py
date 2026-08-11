@@ -42,7 +42,7 @@ check("zero atoms raises empty-input", any("empty-input" in e for e in errors), 
 # reported, not worked around — this test simply must not depend on it.
 r = subprocess.run([sys.executable, "tools/atom_lint.py", VACUOUS], capture_output=True, text=True)
 check("vacuous invocation exits non-zero", r.returncode != 0, f"exit={r.returncode}\n{r.stdout}")
-rows = sorted(pathlib.Path("index").glob("EVID-lint-*.json"), key=lambda p: p.stat().st_mtime)
+rows = sorted(pathlib.Path("acta").glob("EVID-lint-*.json"), key=lambda p: p.stat().st_mtime)
 if not rows:
     check("vacuous invocation emits an evidence row", False, "no EVID- row in index/")
 else:
@@ -88,6 +88,51 @@ with tempfile.TemporaryDirectory() as td:
     check("prose-only edit moves the subject digest", before != after, f"{before} == {after}")
     check("identical content yields a stable digest", corpus_digest(a2) == after, "digest is unstable")
 
-print(f"\n{'PASS' if not failures else 'FAIL'} — atom-lint fixture suite (SPEC-0092/0095/0096)"
+# G — SPEC-0106: committed evidence rows are resolvable references
+acta_rows = sorted(pathlib.Path("acta").glob("EVID-*.json")) if pathlib.Path("acta").is_dir() else []
+check("acta/ holds committed evidence rows", bool(acta_rows), "no EVID- rows under acta/")
+atoms, errors = lint(["corpus", "acta"], SCHEMA)
+evid_atoms = [a for a, *_ in ((v[0],) for v in atoms.values()) if a.get("type") == "evidence"]
+check("evidence rows load as atoms and validate", bool(evid_atoms) and not errors,
+      f"{len(evid_atoms)} evidence atoms, {len(errors)} findings: {errors[:3]}")
+
+if acta_rows:
+    real_evid = json.loads(acta_rows[-1].read_text())["id"]
+    blk = ("<!-- atom:begin id=BLK-9998 -->\n```yaml\n"
+           "id: BLK-9998\ntype: blocker\nscope: platform\nstate: active\nversion: 1.0.0\n"
+           'instantiated_at: "2026-01-01T00:00:00Z"\nauthor: fixture\nauthorized_by: null\n'
+           'title: "resolved_by fixture"\nraised_by: fixture\nblocks_refs: [DEC-0001]\n'
+           "escalation: platform-owner\nresolved_by: %s\n```\n<!-- atom:end id=BLK-9998 -->\n")
+    with tempfile.TemporaryDirectory() as td:
+        shutil.copytree("corpus", pathlib.Path(td, "corpus"))
+        shutil.copytree("acta", pathlib.Path(td, "acta"))
+        pathlib.Path(td, "corpus", "blk_fixture.md").write_text(blk % real_evid)
+        _, errs = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+        check("blocker resolved_by a committed EVID row lints green",
+              not any("BLK-9998" in e for e in errs), str([e for e in errs if "BLK-9998" in e]))
+        pathlib.Path(td, "corpus", "blk_fixture.md").write_text(blk % "EVID-does-not-exist-0000")
+        _, errs = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+        check("blocker resolved_by a nonexistent EVID id fails resolution",
+              any("EVID-does-not-exist-0000" in e for e in errs), str(errs[:2]))
+
+# Evidence must not drift the subject digest: a record of a check is not the thing
+# checked. Adding a row leaves the corpus subject exactly where it was.
+with tempfile.TemporaryDirectory() as td:
+    shutil.copytree("corpus", pathlib.Path(td, "corpus"))
+    shutil.copytree("acta", pathlib.Path(td, "acta"))
+    a1, _ = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+    d1 = corpus_digest(a1)
+    pathlib.Path(td, "acta", "EVID-fixture-9999.json").write_text(json.dumps({
+        "id": "EVID-fixture-9999", "type": "evidence", "scope": "platform", "state": "active",
+        "version": "1.0.0", "instantiated_at": "2026-01-01T00:00:00Z", "author": "fixture",
+        "authorized_by": None, "title": "digest stability fixture", "control_ref": "CTRL-0001",
+        "subject": "fixture", "verdict": "pass", "checked_at": "2026-01-01T00:00:00Z",
+        "checker": "fixture"}))
+    a2, _ = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+    check("a new evidence row does not move the corpus subject digest",
+          corpus_digest(a2) == d1 and "EVID-fixture-9999" in a2,
+          f"{d1} -> {corpus_digest(a2)}")
+
+print(f"\n{'PASS' if not failures else 'FAIL'} — atom-lint fixture suite (SPEC-0092/0095/0096/0106)"
       f"{'' if not failures else ': ' + ', '.join(failures)}")
 sys.exit(1 if failures else 0)

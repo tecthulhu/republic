@@ -1,7 +1,15 @@
 # --- Generated truth (ONT-016: the index is regenerable, never source) ---
+# Derived only: embedding vectors and standing-query reports. Losing this
+# directory loses nothing — it rebuilds from the corpus.
 index/
 *.embeddings.json
 standing_queries.json
+
+# NOT ignored, deliberately: platform/acta/ (D17 / SPEC-0106). Evidence rows are
+# records, not derivations — true-at-T, born once, never regenerable (ONT-014/046).
+# A record that lives only in an ignored directory or an expiring CI artifact is
+# provenance with a countdown timer. Interim until the data-access citizen's
+# durable consumer exists (PA-007), then retired by decision.
 
 # --- Secrets & credential material (never committed; handoff is runtime-mounted per L0-011) ---
 *.cred

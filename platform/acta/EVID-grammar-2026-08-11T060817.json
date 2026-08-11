@@ -1,0 +1,16 @@
+{
+ "id": "EVID-grammar-2026-08-11T060817",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-11T06:08:17.582963+00:00",
+ "author": "ctrl-0002",
+ "authorized_by": null,
+ "title": "grammar property suite",
+ "control_ref": "CTRL-0002",
+ "subject": "caveat-algebra@ENT-091..095",
+ "verdict": "pass",
+ "checked_at": "2026-08-11T06:08:17.582963+00:00",
+ "checker": "ctrl-0002-grammar-suite"
+}

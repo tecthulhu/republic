@@ -74,8 +74,8 @@ def run():
             "state":"active","version":"1.0.0","instantiated_at":now,"author":"ctrl-0002","authorized_by":None,
             "title":"grammar property suite","control_ref":"CTRL-0002","subject":"caveat-algebra@ENT-091..095",
             "verdict":"pass" if not failures else "fail","checked_at":now,"checker":"ctrl-0002-grammar-suite"}
-    pathlib.Path("index").mkdir(exist_ok=True)
-    pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+    pathlib.Path("acta").mkdir(exist_ok=True)
+    pathlib.Path(f"acta/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     print(f"properties P1–P6 over ~{N} generated cases: {'PASS' if not failures else 'FAIL'}")
     for f in failures: print("  •", f)
     sys.exit(1 if failures else 0)

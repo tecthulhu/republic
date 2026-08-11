@@ -41,11 +41,25 @@ check("no row carries a model literal in place of a band",
       all(r["embedding_model_band"] in ("B0", "B1", "B2", "B3") for r in rows),
       str({r["embedding_model_band"] for r in rows}))
 
-# 2 — ONT-087: the atom is the chunk
-check("row count equals lint's parsed atom count", len(rows) == len(atoms),
-      f"{len(rows)} rows vs {len(atoms)} atoms")
-check("row ids are exactly the parsed atom ids", {r["atom_id"] for r in rows} == set(atoms),
-      "row id set differs from lint's")
+# 2 — ONT-087: the atom is the chunk.
+#
+# Scoped to governed corpus atoms, because that is what the embedder reads. Since
+# D17 committed evidence rows under acta/, lint parses them as atoms too, and the
+# two sets no longer coincide.
+#
+# That raises a question this story does not settle and must not pretend to:
+# ONT-085 says *every* persisted instance is embedded at persistence, with no
+# per-type opt-out, which now includes evidence records. But evidence is written
+# by control runs directly rather than through the persistence pipeline (PA-007),
+# so every run would emit a row lacking a vector and ONT-089's target-zero
+# coverage query would be permanently red through no fault of the corpus.
+# Either evidence embeds inside the emitting pipeline, or records are excluded
+# from the coverage query by ruling. Flagged, not decided here.
+governed = {aid for aid, (a, *_) in atoms.items() if a.get("type") != "evidence"}
+check("row count equals the governed atom count", len(rows) == len(governed),
+      f"{len(rows)} rows vs {len(governed)} governed atoms ({len(atoms)} parsed incl. records)")
+check("row ids are exactly the governed atom ids", {r["atom_id"] for r in rows} == governed,
+      "row id set differs from the governed set")
 
 # 3 — ONT-089: coverage query behaviour
 rep = queries(["corpus"], idx)
@@ -96,8 +110,8 @@ evid = {"id": f"EVID-ctrl0007-{now[:19].replace(':','')}", "type": "evidence", "
         "control_ref": "CTRL-0007",
         "subject": f"corpus@{idx['corpus_digest']}#atoms={len(rows)}@{idx['model_generation']}",
         "verdict": "pass" if not failures else "fail", "checked_at": now, "checker": "ctrl-0007-embedder-suite"}
-pathlib.Path("index").mkdir(exist_ok=True)
-pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+pathlib.Path("acta").mkdir(exist_ok=True)
+pathlib.Path(f"acta/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
 
 print(f"\n{'PASS' if not failures else 'FAIL'} — CTRL-0007 embedder pipeline suite"
       f"{'' if not failures else ': ' + ', '.join(failures)}")
