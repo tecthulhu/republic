@@ -21,13 +21,13 @@ id: STORY-0001
 type: story
 scope: platform
 state: proposed
-version: 1.1.0
-instantiated_at: "2026-08-11T01:20:00Z"
-author: agent-worker-story-0004
+version: 1.2.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Gold base image with citizenship conformance green"
 tags: [step-4, l0]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#1"
+tracker_ref: "gh:tecthulhu/republic#1"
 acceptance: [SPEC-0071, SPEC-0072, SPEC-0073]
 relations:
   - { rel: derives, target: DOC-0003 }
@@ -113,13 +113,13 @@ id: STORY-0002
 type: story
 scope: platform
 state: proposed
-version: 1.1.0
-instantiated_at: "2026-08-11T01:20:00Z"
-author: agent-worker-story-0004
+version: 1.2.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Spawn contract: supervised CLI-session agent in a citizen container"
 tags: [step-5, risky-hop, spawn-contract]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#2"
+tracker_ref: "gh:tecthulhu/republic#2"
 acceptance: [SPEC-0081, SPEC-0082, SPEC-0083, SPEC-0084, SPEC-0085, SPEC-0086]
 sprint_ref: SPRINT-0001
 relations:

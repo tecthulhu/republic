@@ -131,13 +131,13 @@ id: STORY-0003
 type: story
 scope: platform
 state: proposed
-version: 1.2.0
-instantiated_at: "2026-08-11T01:20:00Z"
-author: agent-worker-story-0004
+version: 1.3.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Corpus integrity: canonical tree, fail-closed lint, claim scoping"
 tags: [corpus-integrity, pre-ratification]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#3"
+tracker_ref: "gh:tecthulhu/republic#3"
 acceptance: [SPEC-0091, SPEC-0092, SPEC-0093]
 ```
 Fixes the three defects surfaced by bootstrap report 001 before the

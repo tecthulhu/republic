@@ -107,13 +107,13 @@ id: STORY-0007
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-11T06:00:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "CI substrate bump: actions checkout/setup-python off deprecated Node"
 tags: [ci, parked, non-blocking]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#9"
+tracker_ref: "gh:tecthulhu/republic#9"
 acceptance: [SPEC-0107]
 ```
 Parked until convenient; never rides another story's commit because it
