@@ -68,6 +68,10 @@ def build(corpus_dirs, band="B0"):
     idx = {"model_generation": digest, "instrument_manifest": manifest,
            "corpus_digest": corpus_digest(all_atoms),
            "vocabulary_size": len(vec.vocabulary_), "rows": rows}
+    # index/ is git-ignored, so on a clean checkout it does not exist. It used to be
+    # created as a side effect of evidence emission; since records moved to acta/
+    # (SPEC-0106), nothing else creates it and this write has to.
+    pathlib.Path("index").mkdir(exist_ok=True)
     pathlib.Path("index/embeddings.json").write_text(json.dumps(idx))
     return idx, vec, M, rows
 
