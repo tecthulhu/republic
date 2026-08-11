@@ -75,7 +75,7 @@ jobs:
       # SPEC-0071: the conforming fixture must pass every in-scope criterion.
       - name: CTRL-0004 against hello-citizen (must pass)
         working-directory: platform
-        run: python suite/citizenship/run.py --image l0-hello:dev --evidence-dir index
+        run: python suite/citizenship/run.py --image l0-hello:dev --evidence-dir acta
 
       # SPEC-0072 v1.1.0: the sealing claims must be falsifiable. A suite that
       # cannot fail is decoration, so this step fails the job if the violating
@@ -84,12 +84,27 @@ jobs:
         working-directory: platform
         run: |
           python suite/citizenship/run.py --image l0-violating:dev \
-            --expect-fail --evidence-dir index/violating
+            --expect-fail --evidence-dir acta/violating
 
-      - name: Upload EVID- rows
+      # The artifact is a convenience, never the record (D17): artifacts expire,
+      # and a record with a countdown timer is not provenance. The rows that count
+      # are the ones committed under platform/acta/ by the story branch.
+      - name: Upload EVID- rows (convenience copy)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ctrl-0004-evidence
-          path: platform/index/**/EVID-*.json
+          path: platform/acta/**/EVID-*.json
           if-no-files-found: error
+
+      # A CI run that produced rows the author never committed would leave the
+      # record incomplete while reporting green. Surface the drift rather than
+      # letting the gate imply the record is whole.
+      - name: Report evidence rows not present in the commit
+        if: always()
+        working-directory: platform
+        run: |
+          git status --porcelain acta/ | tee /tmp/acta-drift
+          if [ -s /tmp/acta-drift ]; then
+            echo "::notice::CI emitted evidence rows absent from this commit; commit platform/acta/ on the story branch"
+          fi

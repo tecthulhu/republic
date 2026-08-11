@@ -21,6 +21,11 @@ LOCATION_REF = re.compile(r"^(\.{0,2}/|[A-Za-z]:\\|https?://|file://)")
 BEGIN = re.compile(r"<!--\s*atom:begin\s+id=([A-Z]+-[0-9A-Za-z._-]+)\s*-->")
 END   = re.compile(r"<!--\s*atom:end\s+id=([A-Z]+-[0-9A-Za-z._-]+)\s*-->")
 
+# The interim Acta (D17). Records live here and are committed; the generated index
+# keeps only regenerable derivations. Retires by decision when the data-access
+# citizen's durable consumer exists (PA-007).
+ACTA_DIR = "acta"
+
 def parse_file(path):
     """Yield (atom_dict, source, body) from frontmatter and/or ONT-070a blocks.
 
@@ -30,6 +35,19 @@ def parse_file(path):
     """
     text = path.read_text()
     atoms, errors = [], []
+    # Record form: one committed evidence row per file, the whole file being the
+    # atom's machine record. No prose body — a record states what happened, and
+    # anything a reader needs is already a field.
+    if path.suffix == ".json":
+        try:
+            rec = json.loads(text)
+            if isinstance(rec, dict) and "id" in rec:
+                atoms.append((rec, f"{path}::record", ""))
+            else:
+                errors.append(f"{path}: record has no id")
+        except ValueError as e:
+            errors.append(f"{path}: record JSON error: {e}")
+        return atoms, errors, text
     # frontmatter form
     if text.startswith("---\n"):
         end = text.find("\n---\n", 4)
@@ -76,6 +94,13 @@ def corpus_digest(all_atoms):
     h = hashlib.sha256()
     for aid in sorted(all_atoms):
         a, _src, body = all_atoms[aid]
+        # Evidence is excluded deliberately. A subject digest answers "what was
+        # checked", so folding the record of checks into it would mean every run
+        # changed the thing it was checking: no evidence row could ever be current
+        # for a corpus that contains it. Records are validated and resolvable
+        # (SPEC-0106) without being part of the subject.
+        if a.get("type") == "evidence":
+            continue
         h.update(json.dumps({"id": aid, "version": str(a.get("version", "")),
                              "record": a, "body": body},
                             sort_keys=True, separators=(",", ":"), default=str).encode())
@@ -83,13 +108,40 @@ def corpus_digest(all_atoms):
 
 def expand_inputs(inputs):
     """Accept files and directories alike (SPEC-0092): a directory contributes its
-    *.md tree, a file contributes itself. A path that does not exist is a finding,
-    never a silent zero."""
-    files, errors = [], []
+    *.md tree plus any acta/ evidence rows, and a file contributes itself. A path
+    that does not exist is a finding, never a silent zero.
+
+    SPEC-0106/D17: evidence rows are records, not derived data. They are committed
+    under acta/ and loaded here so an EVID- id is a resolvable reference like any
+    other — which is what ONT-046/048 always implied. Derived data (vectors, query
+    reports) stays in the ignored index and is never loaded as an atom.
+    """
+    files, errors, seen = [], [], set()
+
+    def add(q):
+        # Dedupe on the resolved path: the same file reached by two spellings
+        # (corpus/../acta and ../platform/acta) is one file, not a duplicate id.
+        key = q.resolve()
+        if key not in seen:
+            seen.add(key)
+            files.append(q)
+
     for i in inputs:
         p = pathlib.Path(i)
-        if p.is_dir(): files += sorted(p.rglob("*.md"))
-        elif p.is_file(): files.append(p)
+        if p.is_dir():
+            for q in sorted(p.rglob("*.md")):
+                add(q)
+            for q in sorted(q for q in p.rglob("*.json") if ACTA_DIR in q.parts):
+                add(q)
+            # Governed corpus content now cites records (a blocker's resolved_by,
+            # an evidence satisfies), so linting the corpus without the Acta would
+            # report those citations as unresolved. Pull in the sibling acta/ so
+            # the documented `atom_lint.py corpus` keeps meaning what it says.
+            for candidate in (p / ACTA_DIR, p.parent / ACTA_DIR):
+                if candidate.is_dir():
+                    for q in sorted(candidate.rglob("*.json")):
+                        add(q)
+        elif p.is_file(): add(p)
         else: errors.append(f"{i}: input path does not exist")
     return files, errors
 
@@ -153,6 +205,7 @@ def main():
     atoms, errors = lint(corpus, schema)
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = corpus_digest(atoms)
+    governed = sum(1 for a, _s, _b in atoms.values() if a.get("type") != "evidence")
     verdict = "pass" if not errors else "fail"
     # SPEC-0092: the parsed-atom count rides in the subject, so a vacuous run cannot
     # masquerade in the evidence stream even where the exit code is swallowed.
@@ -160,11 +213,13 @@ def main():
             "state": "active", "version": "1.0.0", "instantiated_at": now,
             "author": "ctrl-0001-atom-lint", "authorized_by": None,
             "title": f"atom-lint run over {len(atoms)} atoms", "control_ref": "CTRL-0001",
-            "subject": f"corpus@{digest}#atoms={len(atoms)}", "verdict": verdict,
+            # The count annotates the digest, so it counts what the digest covers:
+            # governed atoms, not the evidence records excluded from it above.
+            "subject": f"corpus@{digest}#atoms={governed}", "verdict": verdict,
             "checked_at": now, "checker": "ctrl-0001-atom-lint"}
     if not atoms: evid["reason"] = "empty-input"
-    pathlib.Path("index").mkdir(exist_ok=True)
-    pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+    pathlib.Path(ACTA_DIR).mkdir(exist_ok=True)
+    pathlib.Path(f"{ACTA_DIR}/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     print(f"atoms parsed: {len(atoms)}")
     by_type = {}
     for aid,(a,_src,_body) in atoms.items(): by_type[a.get('type','?')] = by_type.get(a.get('type','?'),0)+1
