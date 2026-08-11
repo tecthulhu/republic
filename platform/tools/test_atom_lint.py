@@ -26,9 +26,12 @@ def check(name, ok, detail=""):
 
 # A — a file argument parses that file, not zero (previously: rglob over a file → 0 atoms)
 atoms, errors = lint([SINGLE], SCHEMA)
-check("file argument parses the file", len(atoms) == 1 and "MEM-0001" in atoms,
+# Asserts the file's atoms are parsed, not an exact count. The seed file legitimately
+# gains atoms, and a fixture that breaks when the corpus grows is testing the wrong
+# thing: what matters is that a file argument yields that file's contents, not zero.
+check("file argument parses the file", "MEM-0001" in atoms and len(atoms) >= 1,
       f"parsed {len(atoms)} atoms: {sorted(atoms)}")
-check("valid single-atom file yields no findings", not errors, str(errors[:3]))
+check("valid atom file yields no findings", not errors, str(errors[:3]))
 
 # B — zero atoms is a finding, not a pass
 atoms, errors = lint([VACUOUS], SCHEMA)
