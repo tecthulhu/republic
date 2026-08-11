@@ -60,11 +60,23 @@ def parse_file(path):
 
 def ref_id(r): return r if isinstance(r, str) else (r or {}).get("id")
 
+def expand_inputs(inputs):
+    """Accept files and directories alike (SPEC-0092): a directory contributes its
+    *.md tree, a file contributes itself. A path that does not exist is a finding,
+    never a silent zero."""
+    files, errors = [], []
+    for i in inputs:
+        p = pathlib.Path(i)
+        if p.is_dir(): files += sorted(p.rglob("*.md"))
+        elif p.is_file(): files.append(p)
+        else: errors.append(f"{i}: input path does not exist")
+    return files, errors
+
 def lint(corpus_dirs, schema_path):
     schema = json.loads(pathlib.Path(schema_path).read_text())
     validators = {t: jsonschema.Draft202012Validator({**schema, "$ref": f"#/$defs/{t}"}) for t in PREFIX.values()}
-    all_atoms, errors, texts = {}, [], {}
-    files = [p for d in corpus_dirs for p in sorted(pathlib.Path(d).rglob("*.md"))]
+    all_atoms, texts = {}, {}
+    files, errors = expand_inputs(corpus_dirs)
     for p in files:
         atoms, errs, text = parse_file(p); errors += errs; texts[p] = text
         for a, src in atoms:
@@ -107,6 +119,11 @@ def lint(corpus_dirs, schema_path):
         for m in MODEL_LITERAL.finditer(text):
             line = text[:m.start()].count("\n") + 1
             errors.append(f"{p}:{line}: model literal '{m.group(0)}' (ONT-039: band labels only)")
+    # SPEC-0092: the null case is a failure. A control that checked nothing must never
+    # report pass — ENT-094's fail-closed law applied to controls themselves.
+    if not all_atoms:
+        errors.append(f"empty-input: zero atoms parsed from {list(corpus_dirs)} "
+                      f"({len(files)} file(s) read) — a check over nothing is not a pass")
     return all_atoms, errors
 
 def main():
@@ -116,11 +133,15 @@ def main():
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = hashlib.sha256("".join(sorted(atoms)).encode()).hexdigest()[:16]
     verdict = "pass" if not errors else "fail"
+    # SPEC-0092: the parsed-atom count rides in the subject, so a vacuous run cannot
+    # masquerade in the evidence stream even where the exit code is swallowed.
     evid = {"id": f"EVID-lint-{now[:19].replace(':','')}", "type": "evidence", "scope": "platform",
             "state": "active", "version": "1.0.0", "instantiated_at": now,
             "author": "ctrl-0001-atom-lint", "authorized_by": None,
             "title": f"atom-lint run over {len(atoms)} atoms", "control_ref": "CTRL-0001",
-            "subject": f"corpus@{digest}", "verdict": verdict, "checked_at": now, "checker": "ctrl-0001-atom-lint"}
+            "subject": f"corpus@{digest}#atoms={len(atoms)}", "verdict": verdict,
+            "checked_at": now, "checker": "ctrl-0001-atom-lint"}
+    if not atoms: evid["reason"] = "empty-input"
     pathlib.Path("index").mkdir(exist_ok=True)
     pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     print(f"atoms parsed: {len(atoms)}")
@@ -132,6 +153,6 @@ def main():
         for e in errors[:40]: print("  •", e)
         if len(errors) > 40: print(f"  … and {len(errors)-40} more")
         sys.exit(1)
-    print(f"\nPASS — evidence {evid['id']} emitted (subject corpus@{digest})")
+    print(f"\nPASS — evidence {evid['id']} emitted (subject {evid['subject']})")
 
 if __name__ == "__main__": main()
