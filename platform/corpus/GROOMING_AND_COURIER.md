@@ -14,7 +14,7 @@ blocks enactment.
 Target tree (the shape the repo presents to a public reader):
 
 ```
-republic_semantic_mesh/
+republic/
 ├── README.md                  # what this is, status, corpus map, how to read it
 ├── LICENSE                    # lands via DEC-0002 signing, not here
 ├── CLAUDE.md                  # bootloader (root, per D4)
@@ -46,13 +46,13 @@ id: STORY-0005
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-11T01:30:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Repository grooming: public shape, naming, README, correspondence shelf"
 tags: [grooming]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#5"
+tracker_ref: "gh:tecthulhu/republic#5"
 acceptance: [SPEC-0100, SPEC-0101, SPEC-0102]
 ```
 <!-- atom:end id=STORY-0005 -->
@@ -177,13 +177,13 @@ id: STORY-0006
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-11T01:30:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Courier: local MCP bridging doc generation and delivery via inbox"
 tags: [tooling, delivery]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#6"
+tracker_ref: "gh:tecthulhu/republic#6"
 acceptance: [SPEC-0103, SPEC-0104, SPEC-0105]
 ```
 <!-- atom:end id=STORY-0006 -->

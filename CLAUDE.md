@@ -54,9 +54,17 @@ ONT-016). Tool commands below run from `platform/`.
    from `platform/` before any commit that touches `platform/corpus/` — a
    red lint is a stop. Zero atoms parsed is a red lint, not a green one
    (SPEC-0092).
-4. When an acceptance check can run, run it and capture output. Evidence
-   rows land in `index/` (generated — never hand-edit, never commit).
-5. Commit with the story ID in the message trailer: `Story: STORY-000X`.
+4. When an acceptance check can run, run it and capture output. Evidence rows
+   land in `platform/acta/` and **are committed** (D17/SPEC-0106): they are
+   records, true-at-T and never regenerable, so a row that lives only in an
+   ignored directory or an expiring CI artifact is provenance with a countdown
+   timer. Never hand-author or edit a row. `index/` holds only derived data —
+   vectors and query reports — and stays git-ignored.
+5. Commit with the story ID in the message trailer: `Story: STORY-000X`. Push
+   the branch and open a PR whose body carries `Closes #N` for the story's
+   tracker issue (D23) — the tracker is the status of record (ONT-044), so the
+   transition rides the merge mechanically instead of depending on memory.
+   Never merge: the merge is the owner's signing act (PA-002, ENT-079).
 6. If blocked, record the blocker plainly and stop; do not route around a
    gate, do not weaken a check to pass it, do not mark anything done that
    has not run green.

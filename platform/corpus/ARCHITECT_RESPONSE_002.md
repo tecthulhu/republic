@@ -116,13 +116,13 @@ id: STORY-0004
 type: story
 scope: platform
 state: proposed
-version: 1.1.0
-instantiated_at: "2026-08-11T06:10:00Z"
-author: agent-worker-story-0004
+version: 1.2.0
+instantiated_at: "2026-08-11T14:50:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Pre-ratification corrections: findings 1–7 of report 002"
 tags: [corpus-integrity, pre-ratification]
-tracker_ref: "gh:tecthulhu/republic_semantic_mesh#4"
+tracker_ref: "gh:tecthulhu/republic#4"
 acceptance: [SPEC-0094, SPEC-0095, SPEC-0096, SPEC-0097, SPEC-0098, SPEC-0099, SPEC-0106]
 ```
 Carries every correction surfaced by worker report 002 that STORY-0003
