@@ -1,0 +1,15 @@
+# Tool dependency pin — a versioned measurement (SPEC-0093, SPEC-0086's pattern).
+#
+# Resolved in the worker environment on 2026-08-11 under CPython 3.12.3.
+# A bump re-runs whatever the bumped dependency touches: CTRL-0001 and
+# CTRL-0002 for the first two, the embedder pipeline and its coverage query
+# for the last two. Evidence emitted under one pin does not carry to another.
+#
+#   python3 -m venv .venv && .venv/bin/python -m pip install -r tools/requirements.txt
+#
+# atom-lint (CTRL-0001) + grammar suite (CTRL-0002)
+PyYAML==6.0.3
+jsonschema==4.26.0
+# embedder pipeline (ONT-085–089), B0 lexical instrument
+scikit-learn==1.9.0
+numpy==2.5.2

@@ -131,21 +131,22 @@ id: STORY-0003
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T23:00:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-11T00:45:00Z"
+author: agent-worker-story-0003
 authorized_by: null
 title: "Corpus integrity: canonical tree, fail-closed lint, claim scoping"
 tags: [corpus-integrity, pre-ratification]
 tracker_ref: "gh:eldritch-labs/platform#3"
 acceptance: [SPEC-0091, SPEC-0092, SPEC-0093]
-relations:
-  - { rel: blocks, target: DEC-0001 }
 ```
 Fixes the three defects surfaced by bootstrap report 001 before the
 corpus is ratified: duplicate sources of truth removed, the lint null
-case fails closed, environment-scoped claims corrected. Blocks DEC-0001
-enactment by design — the ratified corpus must be the corrected one.
+case fails closed, environment-scoped claims corrected. Enactment of
+DEC-0001 waits on this story by design — the ratified corpus must be the
+corrected one. That impediment is carried by BLK-0001; v1.0.0 of this
+atom carried `rel: blocks` directly, which is outside ONT-050 (`blocks`
+runs blocker → any). v1.0.0 remains addressable in history.
 <!-- atom:end id=STORY-0003 -->
 
 <!-- atom:begin id=SPEC-0091 -->

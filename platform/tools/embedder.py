@@ -77,11 +77,42 @@ def search(q, vec, M, rows, k=5):
     top = sims.argsort()[::-1][:k]
     return [(rows[i]["atom_id"], round(float(sims[i]),3), rows[i]["title"]) for i in top if sims[i] > 0]
 
+PROVENANCE_FIELDS = ("atom_id", "version", "instantiated_at",
+                     "embedding_model_band", "embedding_model_digest", "embedded_at")
+
+def emit_evidence(idx, rows, rep, corpus_digest):
+    """SPEC-0093 / PA-005: a pipeline run records. Scope is deliberately narrow —
+    the two CTRL-0007 assertions this pipeline can check on itself: measurement
+    provenance completeness (ONT-088) and coverage under the current generation
+    (ONT-089). CTRL-0007's full suite (tools/test_embedder.py) does not exist yet,
+    so this row must not be read as a complete CTRL-0007 verdict."""
+    incomplete = [r["atom_id"] for r in rows if any(not r.get(f) for f in PROVENANCE_FIELDS)]
+    gap = rep["embedding_coverage_gap"]
+    verdict = "pass" if not incomplete and not gap else "fail"
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    evid = {"id": f"EVID-embed-{now[:19].replace(':','')}", "type": "evidence", "scope": "platform",
+            "state": "active", "version": "1.0.0", "instantiated_at": now,
+            "author": "embedder-pipeline", "authorized_by": None,
+            "title": f"embedder pipeline: {len(rows)} instances, provenance complete, "
+                     f"coverage gap {len(gap)} (partial CTRL-0007: suite not yet implemented)",
+            "control_ref": "CTRL-0007",
+            "subject": f"corpus@{corpus_digest}#atoms={len(rows)}@{idx['model_generation']}",
+            "verdict": verdict, "checked_at": now, "checker": "embedder-pipeline",
+            "assertions_run": ["ONT-088-provenance-completeness", "ONT-089-coverage"],
+            "assertions_not_run": ["ONT-087-chunk-boundary", "ONT-086-generated-rendering"]}
+    if incomplete: evid["incomplete_provenance"] = incomplete[:20]
+    pathlib.Path("index").mkdir(exist_ok=True)
+    pathlib.Path(f"index/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+    return evid
+
 if __name__ == "__main__":
     dirs = ["corpus"]
     idx, vec, M, rows = build(dirs)
     print(f"embedded {len(rows)} instances under generation {idx['model_generation']} (band B0)")
     rep = queries(dirs, idx)
+    corpus_digest = hashlib.sha256("".join(sorted(r["atom_id"] for r in rows)).encode()).hexdigest()[:16]
+    ev = emit_evidence(idx, rows, rep, corpus_digest)
+    print(f"evidence {ev['id']}: {ev['verdict']} (subject {ev['subject']})")
     print(json.dumps({k:(v if not isinstance(v,list) or len(v)<8 else f"{len(v)} items") for k,v in rep.items()}, indent=1))
     pathlib.Path("index/standing_queries.json").write_text(json.dumps(rep, indent=1))
     for q in ["restrictions about credentials and authority escalation",

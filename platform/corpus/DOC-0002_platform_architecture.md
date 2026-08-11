@@ -4,8 +4,8 @@ type: document
 title: Platform Architecture — Enforcement Plane, Core Components, MVP
 scope: platform
 state: draft
-version: 0.1.0
-instantiated_at: "2026-08-10T12:00:00Z"
+version: 0.1.1
+instantiated_at: "2026-08-11T00:40:00Z"
 author: consul-draft
 authorized_by: null
 relations:
@@ -142,12 +142,21 @@ exists as a governed posture atom. Done is a query result (ONT-081).
 
 ## 4. Build order
 
-**PA-030** — Sequence, each step gated by its predecessor's evidence:
+**PA-030** — Sequence, each step gated by its predecessor's evidence.
+**Evidence is environment-scoped** (ONT-014): a step is achieved *in a named
+environment against a subject digest*, never in the abstract, and
+re-verifies per environment. An untimed, unscoped "achieved" is the decayed
+statement ONT-014 describes.
 
-1. Corpus + schemas + atom-lint green (achieved — first evidence emitted).
-2. Grammar property suite green (achieved).
-3. Embedder pipeline + index + standing queries running (achieved under the
-   B0 lexical instrument; semantic instrument is a band re-resolution).
+1. Corpus + schemas + atom-lint green (evidenced in the drafting
+   environment against corpus@a1084129, and re-verified in the worker
+   environment — first evidence emitted).
+2. Grammar property suite green (evidenced in the drafting environment,
+   re-verified in the worker environment).
+3. Embedder pipeline + index + standing queries running (evidenced in the
+   drafting environment under the B0 lexical instrument; re-verification
+   required per environment, dependencies pinned in tools/requirements.txt;
+   semantic instrument is a band re-resolution).
 4. Gold base image + conformance suite (CTRL-0004) against a hello-citizen.
 5. Agent layer + harness: spawn gate + supervised session (CTRL-0005;
    pinned CLI version — the spawn contract remains the risky hop).
