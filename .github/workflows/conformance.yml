@@ -1,0 +1,92 @@
+# The build gate (PA-004): one gate library mounted at CI.
+#
+# SPEC-0073 — CTRL-0004 runs on every change and a red suite blocks merge
+# (ENF-0001, RULE-0076..0078). Nothing here is advisory: every step that can
+# fail does fail the job, and the evidence rows produced are uploaded so a
+# reader can check the claim rather than trust the badge.
+#
+# Branch protection is the other half of this gate and lives in repository
+# settings, not here: "a red suite blocks merge" is only true once this check is
+# required on main. That is an owner action.
+
+name: conformance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  corpus:
+    name: CTRL-0001 atom-lint + CTRL-0002 grammar + CTRL-0007 embedder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned tool dependencies
+        working-directory: platform
+        run: python -m pip install --require-virtualenv=false -r tools/requirements.txt
+      - name: CTRL-0001 — atom-lint over the whole tree
+        working-directory: platform
+        run: python tools/atom_lint.py ..
+      - name: atom-lint fixture suite (SPEC-0092/0095/0096)
+        working-directory: platform
+        run: python tools/test_atom_lint.py
+      - name: CTRL-0002 — grammar property suite
+        working-directory: platform
+        run: python tools/test_grammar.py
+      - name: CTRL-0007 — embedder pipeline suite
+        working-directory: platform
+        run: python tools/test_embedder.py
+
+  citizenship:
+    name: CTRL-0004 citizenship conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build the L0 gold base
+        working-directory: platform
+        run: docker build -f base/Dockerfile -t l0-base:BASE-v1 .
+
+      - name: Build the hello-citizen fixture
+        working-directory: platform
+        run: |
+          docker build -f base/fixtures/hello-citizen/Dockerfile \
+            --build-arg BASE=l0-base:BASE-v1 -t l0-hello:dev .
+
+      - name: Build the violating fixture
+        working-directory: platform
+        run: |
+          docker build -f base/fixtures/violating/Dockerfile \
+            --build-arg BASE=l0-base:BASE-v1 -t l0-violating:dev .
+
+      # SPEC-0071: the conforming fixture must pass every in-scope criterion.
+      - name: CTRL-0004 against hello-citizen (must pass)
+        working-directory: platform
+        run: python suite/citizenship/run.py --image l0-hello:dev --evidence-dir index
+
+      # SPEC-0072 v1.1.0: the sealing claims must be falsifiable. A suite that
+      # cannot fail is decoration, so this step fails the job if the violating
+      # fixture passes.
+      - name: CTRL-0004 against the violating fixture (must fail the suite)
+        working-directory: platform
+        run: |
+          python suite/citizenship/run.py --image l0-violating:dev \
+            --expect-fail --evidence-dir index/violating
+
+      - name: Upload EVID- rows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ctrl-0004-evidence
+          path: platform/index/**/EVID-*.json
+          if-no-files-found: error

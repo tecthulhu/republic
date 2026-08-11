@@ -1,0 +1,10 @@
+# L0 base runtime dependencies — versioned measurements (L0-001 pattern).
+# A bump is a new BASE minor version and re-runs the full conformance suite,
+# because every one of these sits under a signature or a wire contract.
+#
+# Ed25519 signing and verification (ES-011, ES-020)
+cryptography==50.0.0
+# bus client; the bus is adopted infrastructure (PA-013)
+nats-py==2.15.0
+# JCS / RFC 8785 canonicalization — closes DOC-0004 open item (a) for Python
+rfc8785==0.1.4
