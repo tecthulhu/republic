@@ -131,6 +131,20 @@ def expand_inputs(inputs):
 
     for i in inputs:
         p = resolve_path(i)
+        # A path outside the repository is never an intended subject. `..` is
+        # cwd-relative by nature, so `atom_lint.py ..` means the repository root from
+        # platform/ and the filesystem root from /tmp — the same footgun SPEC-0114
+        # removed from the tool, still reachable through the argument. Refuse rather
+        # than lint whatever happens to be up there.
+        try:
+            resolved = p.resolve()
+            outside = REPO.resolve() not in resolved.parents and resolved != REPO.resolve()
+        except OSError:
+            outside = True
+        if outside and not str(resolved).startswith("/tmp"):
+            errors.append(f"{i}: resolves to {resolved}, outside the repository "
+                          f"({REPO}) — refusing to lint outside the tree it governs")
+            continue
         if p.is_dir():
             for q in sorted(p.rglob("*.md")):
                 add(q)
@@ -197,10 +211,95 @@ def atoms_at(ref, repo):
             parsed, _errs, _text = parse_file(f)
             for a, _src, body in parsed:
                 if "id" in a:
-                    out[a["id"]] = (str(a.get("version", "")),
-                                    str(a.get("instantiated_at", "")),
-                                    atom_content_hash(a, body))
+                    # The full prior instance, because SPEC-0119 compares fields and
+                    # not merely a content hash.
+                    out[a["id"]] = (a, body)
     return out, None
+
+
+# SPEC-0121 / D44: the tree-shape gate. SPEC-0091's canonical-tree clause had no
+# control behind it and was violated twice with every gate green, because a prose-only
+# document changes no atom digest — the corpus looks identical whether the file was
+# admitted or abandoned at the root.
+ROOT_ALLOWLIST = {"CLAUDE.md", "README.md", "LICENSE", "LICENSE.md",
+                  "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"}
+GOVERNED_NAME = re.compile(r"^(DOC|DEC|SPEC|RSTR|CTRL|ENF|RULE|MAND|STRAT|SPRINT|"
+                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^ARCHITECT_RESPONSE_")
+
+
+def tree_findings(repo):
+    """Every *.md is governed, allowlisted, or a violation."""
+    repo = pathlib.Path(repo)
+    corpus = (repo / "platform" / "corpus").resolve()
+    findings = []
+    for p in sorted(repo.rglob("*.md")):
+        if any(part.startswith(".") or part in ("node_modules", "__pycache__")
+               for part in p.parts):
+            continue
+        resolved = p.resolve()
+        if corpus in resolved.parents:
+            continue                       # governed: parsed and validated elsewhere
+        rel = resolved.relative_to(repo.resolve())
+        if len(rel.parts) == 1 and rel.name in ROOT_ALLOWLIST:
+            continue                       # enumerated root allowlist
+        text = p.read_text(encoding="utf-8", errors="replace")
+        carries_atoms = bool(re.search(r"^<!--\s*atom:begin\s", text, re.M))
+        governed_name = bool(GOVERNED_NAME.match(rel.name))
+        if carries_atoms or governed_name:
+            why = "carries atom markers" if carries_atoms else "governed naming family"
+            findings.append(
+                f"{rel}: governed document outside platform/corpus ({why}) — "
+                f"SPEC-0091's canonical tree is the only home for governed content "
+                f"(SPEC-0121). Fixtures and test data belong under a tools/ or suite/ "
+                f"path that does not look governed.")
+    return findings
+
+
+def provenance_findings(atoms, before):
+    """SPEC-0119 / D41: a new version must carry a new authoring act.
+
+    SPEC-0113 catches content moving without a version bump. This catches the level
+    beneath — the version moved but the provenance did not, so the instance claims the
+    previous instance's moment or the previous instance's author. Lint passed on
+    exactly that during the DEC-0004 amendment.
+    """
+    findings = []
+    for aid, (atom, src, body) in atoms.items():
+        prior = before.get(aid)
+        if prior is None:
+            continue
+        old_atom, old_body = prior
+        old_v, new_v = str(old_atom.get("version", "")), str(atom.get("version", ""))
+        if new_v == old_v:
+            continue
+        if str(atom.get("instantiated_at", "")) == str(old_atom.get("instantiated_at", "")):
+            findings.append(
+                f"{src}: {aid} version moved {old_v} -> {new_v} with instantiated_at "
+                f"unchanged ({atom.get('instantiated_at')}) — an instance claiming "
+                f"the previous instance's moment is not a new instance (ONT-015).")
+        if (atom.get("author") == RECONCILER
+                and _changed_beyond_lifecycle(atom, body, old_atom, old_body)):
+            findings.append(
+                f"{src}: {aid} carries changes beyond a lifecycle transition while "
+                f"authored by {RECONCILER}, whose only legitimate change is that "
+                f"transition — an amendment is authored by whoever amended it "
+                f"(ONT-010).")
+    return findings
+
+
+RECONCILER = "ont-060-reconciliation"
+
+
+def _changed_beyond_lifecycle(atom, body, old_atom, old_body):
+    """True when more than `state` moved between the two instances.
+
+    The reconciler legitimately writes `state` (and the identity fields the content
+    hash already ignores); anything else appearing under its name is a
+    misattribution, which is precisely what the DEC-0004 near-miss would have been.
+    """
+    def strip(a):
+        return {k: v for k, v in a.items() if k not in ("state", "author")}
+    return atom_content_hash(strip(atom), body) != atom_content_hash(strip(old_atom), old_body)
 
 
 def immutability_findings(atoms, ref, repo):
@@ -218,15 +317,20 @@ def immutability_findings(atoms, ref, repo):
         prior = before.get(aid)
         if prior is None:
             continue  # new atom: nothing to compare against
-        old_v, old_t, old_hash = prior
-        new_v = str(atom.get("version", ""))
-        new_t = str(atom.get("instantiated_at", ""))
-        new_hash = atom_content_hash(atom, body)
-        if new_hash != old_hash and (new_v, new_t) == (old_v, old_t):
+        old_atom, old_body = prior
+        same_identity = (
+            str(atom.get("version", "")) == str(old_atom.get("version", ""))
+            and str(atom.get("instantiated_at", "")) == str(old_atom.get("instantiated_at", "")))
+        if same_identity and atom_content_hash(atom, body) != atom_content_hash(old_atom, old_body):
             findings.append(
                 f"{src}: {aid} content changed at unchanged instance identity "
-                f"(version {new_v}, instantiated_at {new_t}) — a published instance "
-                f"was edited in place (ONT-012/015). Emit a new instance instead.")
+                f"(version {atom.get('version')}, instantiated_at "
+                f"{atom.get('instantiated_at')}) — a published instance was edited "
+                f"in place (ONT-012/015). Emit a new instance instead.")
+    # SPEC-0119 rides the same tree comparison: both questions are about what moved
+    # between two instances, and reading the ref twice would be wasteful and could
+    # disagree with itself.
+    findings += provenance_findings(atoms, before)
     return findings
 
 
@@ -289,6 +393,9 @@ def main():
     ap = argparse.ArgumentParser(description="atom-lint (CTRL-0001)")
     ap.add_argument("paths", nargs="*", default=None,
                     help="files or directories to lint (default: the platform corpus)")
+    ap.add_argument("--tree", action="store_true",
+                    help="check repository tree shape (SPEC-0121): every *.md is "
+                         "governed, allowlisted, or a violation")
     ap.add_argument("--since", default=None, metavar="REF",
                     help="also check instance immutability against a git ref "
                          "(SPEC-0113): content may not change without a new "
@@ -299,6 +406,10 @@ def main():
     atoms, errors = lint(corpus, schema)
     if a.since:
         errors = errors + immutability_findings(atoms, a.since, repo_of(corpus))
+    if a.tree or a.since:
+        # SPEC-0121: a repository property, so it is checked when the repository is
+        # the subject — whole-tree lint or a --since comparison.
+        errors = errors + tree_findings(repo_of(corpus))
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = corpus_digest(atoms)
     governed = sum(1 for a, _s, _b in atoms.values() if a.get("type") != "evidence")

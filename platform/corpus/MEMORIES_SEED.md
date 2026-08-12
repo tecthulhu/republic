@@ -60,13 +60,13 @@ citizen start failed and the failure turned out to be the shredding working.
 id: MEM-0004
 type: memory
 scope: platform
-state: active
-version: 1.0.0
-instantiated_at: "2026-08-12T18:15:00Z"
-author: agent-worker-story-0009
+state: superseded
+version: 1.1.0
+instantiated_at: "2026-08-12T22:00:00Z"
+author: agent-worker-story-0012
 authorized_by: null
 title: "A monitor must verify its target exists; usage-text-and-exit-0 is not observation"
-tags: [tooling, doc-truth]
+tags: [tooling, doc-truth, superseded]
 context_class: relevant
 keywords: [watcher, exit-zero, verify-target]
 source_refs: [SPEC-0092]
@@ -81,4 +81,44 @@ reports success. The rule generalizes past this tool — a monitor must confirm 
 watched resource exists before its exit status means anything, and any wrapper built
 for CI watching fails closed on a missing target. Practically: resolve the id first,
 assert it is non-empty, then watch.
+
+v1.1.0 records the transition only: superseded by MEM-0005, which generalizes the
+rule past watchers after a third sibling appeared. Content unchanged and true at
+its own time (D30).
 <!-- atom:end id=MEM-0004 -->
+
+<!-- atom:begin id=MEM-0005 -->
+```yaml
+id: MEM-0005
+type: memory
+scope: platform
+state: active
+version: 1.0.0
+instantiated_at: "2026-08-12T22:00:00Z"
+author: agent-worker-story-0012
+authorized_by: null
+title: "Verify a command against the world it claims to have changed, not its exit status"
+tags: [tooling, doc-truth, groomed]
+context_class: relevant
+keywords: [exit-zero, verify-target, silent-failure]
+source_refs: [SPEC-0092]
+groomed_from: MEM-0004
+relations:
+  - { rel: supersedes, target: MEM-0004 }
+```
+A command whose failure path is indistinguishable from an empty success must be
+verified against the world it claims to have changed. Its exit status is not
+evidence. Three siblings of one rule, found separately:
+
+- **The vacuous lint** (SPEC-0092): a check over zero atoms reported pass.
+- **The watcher** (MEM-0004): an empty run id made the CLI print usage and exit 0,
+  read as "watching"; then a non-empty id pointed at the *previous* commit; then a
+  merge mid-flight left a branch whose run could never start.
+- **`gh issue create --jq`**: the flag is unsupported, `|| true` swallowed the error,
+  and empty issue numbers were reported as created issues. Caught by listing the
+  issues.
+
+The practice: after a command that should have changed something, read the thing it
+changed — list the issues, match the run's head sha, count the parsed atoms. Bound
+every wait so a target that can never exist reports instead of hanging.
+<!-- atom:end id=MEM-0005 -->
