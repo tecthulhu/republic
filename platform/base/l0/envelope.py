@@ -72,11 +72,21 @@ def verify(env, chain, facts, now=None):
     token = env.get("act_token")
     if not isinstance(token, dict):
         raise VerificationError("envelope carries no act token")
+    subject = env.get("subject", "")
     op_facts = dict(facts)
-    op_facts.update({"leaf": leaf, "subject": env.get("subject", ""),
-                     "resource": env.get("subject", "").split(".")[-1]})
+    op_facts.update({"leaf": leaf, "subject": subject,
+                     "resource": subject.split(".")[-1]})
     op_facts.setdefault("action", "publish")
     op_facts.setdefault("now", env.get("sent_at"))
+    # ES-022: `audience` is an operation fact the verifier supplies, and omitting it
+    # denied every audience-bound token — which is every authority-bearing token
+    # (ES-023). For acta.<citizen>.<context>.* the context segment *is* the audience,
+    # so it is derived here; for subjects that carry no context the caller supplies it,
+    # because only the caller knows the act's binding.
+    if "audience" not in op_facts:
+        parts = subject.split(".")
+        if len(parts) == 4 and parts[0] == "acta":
+            op_facts["audience"] = parts[2]
     used = walk(chain, token, op_facts, now=now)
     verify_caveats(token.get("caveats", []), used)
     return used
