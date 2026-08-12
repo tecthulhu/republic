@@ -137,11 +137,11 @@ that corrects the others.
 id: SPEC-0094
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "D5 amendments executed; tracker refs corrected to the real repo"
 tags: [acceptance-criterion]
 binding: checked
@@ -159,11 +159,11 @@ org/name and the referenced issues exist.
 id: SPEC-0095
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Blocker field reconciled: schema blocks_refs wins, prose amended"
 tags: [acceptance-criterion]
 binding: checked
@@ -180,11 +180,11 @@ no field/relation name collision remains in the vocabulary.
 id: SPEC-0096
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Evidence subjects are content-addressed"
 tags: [acceptance-criterion]
 binding: checked
@@ -202,11 +202,11 @@ rewritten.
 id: SPEC-0097
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Dangling query per definition plus labeled bootstrap line"
 tags: [acceptance-criterion]
 binding: checked
@@ -224,11 +224,11 @@ pre-ratification the former reads zero and the latter carries today's
 id: SPEC-0098
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "CTRL-0007 suite exists; instrument-manifest generation boundary"
 tags: [acceptance-criterion]
 binding: checked
@@ -248,11 +248,11 @@ unchanged and a parameter change moves it.
 id: SPEC-0099
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "DOC-0006 delivered; ENT-080 citation resolves"
 tags: [acceptance-criterion]
 binding: checked

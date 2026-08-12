@@ -4,9 +4,9 @@ type: document
 title: Platform Architecture — Enforcement Plane, Core Components, MVP
 scope: platform
 state: draft
-version: 0.1.1
-instantiated_at: "2026-08-11T00:40:00Z"
-author: consul-draft
+version: 0.1.2
+instantiated_at: "2026-08-12T20:00:00Z"
+author: agent-worker-dec-0004
 authorized_by: null
 relations:
   - { rel: derives, target: DOC-0000 }
@@ -136,9 +136,19 @@ ladder await the chain-verifier deliverable); agent role layer only under
 full citizenship conformance (ui/data-access citizens may run as scaffolds);
 liveness suite parked; JIRA, semantic enforcement rungs, and federation out.
 
-**PA-022** — **MVP done-test**: the PA-020 chain's evidence set passes; the
-standing-query report is clean for in-scope claims; every PA-021 item
-exists as a governed posture atom. Done is a query result (ONT-081).
+**PA-022** — **MVP done-test**, stated as the numbers it reads (ONT-080 as
+amended by DEC-0004): the PA-020 chain's evidence set passes; for in-scope
+claims `unbound_claims = 0` and `unevidenced_claims = 0`; the embedding
+coverage gap is zero; `dangling_claims = 0` as a drift guard; and every
+PA-021 item exists as a governed posture atom. Done is a query result
+(ONT-081).
+
+The coverage number is `unbound_claims`, not `dangling_claims`. The two are
+not interchangeable and this requirement previously named the wrong one:
+ONT-060 activates a claim only when a rule binds it, so `dangling_claims` is
+structurally zero at activation and cannot measure whether the law is wired
+up (ONT-080a). It stays in the list because a nonzero reading means a rule
+was removed from under a live claim, which is an incident worth gating on.
 
 ## 4. Build order
 

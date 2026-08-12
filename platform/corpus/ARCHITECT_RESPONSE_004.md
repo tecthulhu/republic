@@ -145,11 +145,11 @@ exercises it).
 id: SPEC-0108
 type: specification
 scope: story:story-0008
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "CTRL-0002 exercises the citizen algebra; duplicate deleted"
 tags: [acceptance-criterion]
 binding: checked
@@ -168,11 +168,11 @@ evidence subject names the chainverify module digest.
 id: SPEC-0109
 type: specification
 scope: story:story-0008
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Acta rows embed; coverage spans records; batch-with-gate posture recorded"
 tags: [acceptance-criterion]
 binding: checked
@@ -191,11 +191,11 @@ condition (Acta consumer synchronous pipeline, PA-007).
 id: SPEC-0110
 type: specification
 scope: story:story-0008
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Rename executed: republic; tracker refs re-versioned in one commit"
 tags: [acceptance-criterion, rename]
 binding: checked

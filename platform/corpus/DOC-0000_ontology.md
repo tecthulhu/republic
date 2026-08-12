@@ -5,9 +5,9 @@ title: Ontology Specification
 scope: platform
 state: active
 version: 1.1.0
-instantiated_at: "2026-08-12T18:38:23.725032+00:00"
-author: ont-060-reconciliation
-authorized_by: DEC-0001
+instantiated_at: "2026-08-12T20:00:00Z"
+author: agent-worker-dec-0004
+authorized_by: DEC-0004
 relations:
   - { rel: contains, target: "ONT-*" }
 ---
@@ -579,6 +579,7 @@ draft → proposed → ratified → active → deprecated
 | proposed → ratified | Decision atom with matching `effects` entry. |
 | proposed → rejected | Decision atom. Terminal. |
 | ratified → active | Binding complete: for claims, an active rule references it; for controls, `implementation` resolves; for others, ratification implies activation. |
+| ratified → deprecated | Decision atom. The exit for an atom that was ratified but never activated and no longer needs to be — a story-scoped specification whose story has closed with evidence, for instance (ONT-045: its lifetime tracks its story). Without this edge such atoms sit in `ratified` forever, misreporting finished work as missing coverage. |
 | active → deprecated | Decision atom. Gate consumers stop enforcing. |
 | active → superseded | A `supersedes` relation from a ratified successor, authorized by decision. |
 
@@ -658,10 +659,26 @@ They MUST be computable from atom frontmatter plus evidence records alone:
 | Query | Definition | Use |
 |---|---|---|
 | Backlog | Stories at scope X in open tracker states | Planning surface. |
-| Dangling claims | Active SPEC-/RSTR- with no active rule binding | Launch blocker report. |
+| Dangling claims | Active SPEC-/RSTR- with no active rule binding | **Drift guard.** Structurally zero at activation (see below); any nonzero reading is an incident, not a backlog. |
+| Unbound claims | Ratified SPEC-/RSTR- that no active rule binds | **Coverage meter.** The claims awaiting a binding rule; the launch-readiness number. |
 | Unevidenced claims | Active rules with no passing evidence against current subject digests | Doc-truth report. |
 | Expired waivers | Waivers past `expires` | Gate re-arm audit. |
-| Launch readiness | Dangling claims = 0 AND unevidenced claims = 0 AND C1 evidence passing | Ship gate. |
+| Launch readiness | Unbound claims (in-scope) = 0 AND unevidenced claims (in-scope) = 0 AND embedding coverage gap = 0 AND C1 evidence passing AND dangling claims = 0 | Ship gate. |
+
+**ONT-080a** — **Why two claim meters, not one.** Dangling claims and unbound
+claims answer different questions, and conflating them makes one of them lie.
+ONT-031 defines dangling over *active* claims, while ONT-060 activates a claim
+only *when* a rule binds it: jointly, dangling claims reads zero at every
+activation, by construction rather than by achievement. It therefore cannot
+measure coverage, and it was never measuring it. What it does measure is drift —
+a rule deprecated or deactivated out from under a still-active claim — which is a
+real failure mode with no other detector, so it stays in the readiness gate as a
+guard whose target is permanently zero.
+
+Coverage is the *ratified but unbound* population: claims that have been ratified
+and are waiting for a rule to make them enforceable (ONT-036). That is the number
+the ship gate needs, and the one a reader means by "how much of the law is
+actually wired up".
 
 **ONT-081** — Launch readiness is therefore a countable property of the atom
 store, not a review outcome.

@@ -102,6 +102,12 @@ def queries(corpus_dirs, idx):
     active_claims = [i for i in claims if atoms[i].get("state") == "active"]
     dangling = sorted(i for i in active_claims if i not in bound_active)
     dangling_all = sorted(i for i in claims if i not in bound_any)
+    # D36 / ONT-080a: the coverage meter. Claims that are ratified and waiting for a
+    # rule to make them enforceable (ONT-036). `dangling` cannot answer this — ONT-060
+    # activates a claim only when a rule binds it, so it reads zero at activation by
+    # construction and measures drift instead. Two questions, two names.
+    ratified_claims = [i for i in claims if atoms[i].get("state") == "ratified"]
+    unbound = sorted(i for i in ratified_claims if i not in bound_active)
     evidenced = {rid(json.loads(f.read_text()).get("control_ref"))
                  for f in ACTA.glob("EVID-*.json")
                  if json.loads(f.read_text()).get("verdict")=="pass"}
@@ -110,6 +116,7 @@ def queries(corpus_dirs, idx):
     embedded = {r["atom_id"] for r in idx["rows"] if r["embedding_model_digest"]==idx["model_generation"]}
     coverage_gap = sorted(set(atoms) - embedded)
     return {"total_atoms": len(atoms), "claims": len(claims), "active_claims": len(active_claims),
+            "unbound_claims": unbound,
             "dangling_claims": dangling,
             "dangling_claims_all_states": dangling_all,
             "rules_without_passing_evidence": len(rules_unevidenced),
