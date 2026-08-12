@@ -120,6 +120,19 @@ def run():
     if actual_dead != expected_dead:
         failures.append(("P5-revocation-fixture", sorted(actual_dead)))
 
+    # SPEC-0120 — the revocation posture, checked so it cannot linger as stale prose.
+    # P5 above tests a tree this suite built, because the verifier has no revocation
+    # surface to test. Asserting that absence makes the posture self-retiring: when
+    # STORY-0011 implements revocation this fails, forcing the posture's supersession
+    # instead of leaving a false claim of behaviour-attestation standing.
+    import chainverify as _cv
+    revocation_surface = [n for n in dir(_cv)
+                          if "revoke" in n.lower() or "revocation" in n.lower()]
+    if revocation_surface:
+        failures.append(("SPEC-0120-posture-stale", revocation_surface,
+                         "chainverify now exposes revocation: supersede SPEC-0120 and "
+                         "move P5 onto the verifier (SPEC-0118)"))
+
     # P6 — the decay ladder is expressible in the vocabulary (ENT-074).
     ladder = [[["lease_age", "<", 48]],
               [["lease_age", "<", 72], ["action", "=", "read"]]]
