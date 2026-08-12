@@ -10,11 +10,11 @@ index, not recorded here (ONT-016: no second source of truth).
 id: PRIN-0001
 type: principle
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Governed atom defined as smallest independently-governed unit"
 tags: [ont-001]
 binding: injected
@@ -26,11 +26,11 @@ binding: injected
 id: SPEC-0001
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Genres are serialization containers; governance attaches to atom IDs only"
 tags: [ont-002]
 binding: checked
@@ -43,11 +43,11 @@ check: human
 id: SPEC-0002
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Scope values conform to platform|project|repo|story grammar"
 tags: [ont-003]
 binding: checked
@@ -60,11 +60,11 @@ check: machine
 id: SPEC-0003
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No intermediate governance layers without an owning artifact"
 tags: [ont-004]
 binding: checked
@@ -77,11 +77,11 @@ check: human
 id: SPEC-0004
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Entity types never appear in the atom type registry"
 tags: [ont-005]
 binding: checked
@@ -94,11 +94,11 @@ check: machine
 id: SPEC-0005
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every atom carries the complete base interface with semver version"
 tags: [ont-010]
 binding: checked
@@ -111,11 +111,11 @@ check: machine
 id: SPEC-0006
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "IDs unique, correctly prefixed, never reused or renumbered"
 tags: [ont-011]
 binding: checked
@@ -128,11 +128,11 @@ check: machine
 id: SPEC-0007
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Versions immutable past draft; change produces a new version"
 tags: [ont-012]
 binding: checked
@@ -145,11 +145,11 @@ check: machine
 id: SPEC-0008
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No alternative authorship or approval fields on any type"
 tags: [ont-013]
 binding: checked
@@ -162,11 +162,11 @@ check: machine
 id: PRIN-0002
 type: principle
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Truth is temporal; instances are time-specified statements"
 tags: [ont-014]
 binding: injected
@@ -178,11 +178,11 @@ binding: injected
 id: SPEC-0009
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Mutation is a new instance; instance store is append-only"
 tags: [ont-015]
 binding: checked
@@ -195,11 +195,11 @@ check: machine
 id: RSTR-0001
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No location references; references identify by id/version/time only"
 tags: [ont-016]
 binding: checked
@@ -214,11 +214,11 @@ check: machine
 id: PRIN-0003
 type: principle
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Documents are assemblies of resolved atoms at a given time"
 tags: [ont-017]
 binding: injected
@@ -230,11 +230,11 @@ binding: injected
 id: SPEC-0010
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Components bind to facets, never the full ontology"
 tags: [ont-020]
 binding: checked
@@ -247,11 +247,11 @@ check: human
 id: RSTR-0002
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Facets are never widened to satisfy a component"
 tags: [ont-021]
 binding: checked
@@ -266,11 +266,11 @@ check: human
 id: SPEC-0011
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No rule references a principle as its claim"
 tags: [ont-030]
 binding: checked
@@ -283,11 +283,11 @@ check: machine
 id: SPEC-0012
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Dangling-claim query computable over the index"
 tags: [ont-031]
 binding: checked
@@ -300,11 +300,11 @@ check: machine
 id: SPEC-0013
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Restriction fixed fields (pre+post, injection never) cannot be overridden"
 tags: [ont-032]
 binding: checked
@@ -317,11 +317,11 @@ check: machine
 id: SPEC-0014
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Control implementation references resolve to invocable checkers"
 tags: [ont-033]
 binding: checked
@@ -334,11 +334,11 @@ check: machine
 id: SPEC-0015
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Enforcement ladder closed; no kill value exists"
 tags: [ont-034]
 binding: checked
@@ -351,11 +351,11 @@ check: machine
 id: SPEC-0016
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every rule is a complete claim+control+enforcement triple"
 tags: [ont-035]
 binding: checked
@@ -368,11 +368,11 @@ check: machine
 id: PRIN-0004
 type: principle
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Single responsibility per atom; consequences and claims change independently"
 tags: [ont-037]
 binding: injected
@@ -384,11 +384,11 @@ binding: injected
 id: SPEC-0017
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No lifecycle transition past proposed without a ratifying decision"
 tags: [ont-038]
 binding: checked
@@ -401,11 +401,11 @@ check: machine
 id: RSTR-0003
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No model literals anywhere in governed content; band labels only"
 tags: [ont-039]
 binding: checked
@@ -420,11 +420,11 @@ check: machine
 id: SPEC-0018
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Identity leaves never exceed mandate imperium"
 tags: [ont-040]
 binding: checked
@@ -437,11 +437,11 @@ check: machine
 id: SPEC-0019
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Strategy hash-pinned in mandate context and injected at spawn"
 tags: [ont-041]
 binding: checked
@@ -454,11 +454,11 @@ check: machine
 id: SPEC-0020
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every sprint declares an exit gate control"
 tags: [ont-042]
 binding: checked
@@ -471,11 +471,11 @@ check: machine
 id: SPEC-0021
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every story references at least one acceptance specification"
 tags: [ont-043]
 binding: checked
@@ -488,11 +488,11 @@ check: machine
 id: RSTR-0004
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Platform never owns backlog state; tracker is source of truth"
 tags: [ont-044]
 binding: checked
@@ -507,11 +507,11 @@ check: human
 id: SPEC-0022
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Acceptance criteria are story-scoped SPEC- atoms with tags"
 tags: [ont-045]
 binding: checked
@@ -524,11 +524,11 @@ check: machine
 id: SPEC-0023
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Evidence atoms append-only, never versioned"
 tags: [ont-046]
 binding: checked
@@ -541,11 +541,11 @@ check: machine
 id: SPEC-0024
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every waiver carries an expiry; gates re-arm on expiry"
 tags: [ont-047]
 binding: checked
@@ -558,11 +558,11 @@ check: machine
 id: SPEC-0025
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Provenance chain walkable end to end from any element"
 tags: [ont-048]
 binding: checked
@@ -575,11 +575,11 @@ check: machine
 id: SPEC-0026
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Relations restricted to the ratified vocabulary"
 tags: [ont-050]
 binding: checked
@@ -592,11 +592,11 @@ check: machine
 id: SPEC-0027
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Exception grammar parses per the given/when/meets/then/for shape"
 tags: [ont-055]
 binding: checked
@@ -609,11 +609,11 @@ check: machine
 id: SPEC-0028
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Exception constructs only on waiver and enforcement atoms"
 tags: [ont-056]
 binding: checked
@@ -626,11 +626,11 @@ check: machine
 id: RSTR-0005
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No exception grammar in credentials; no limiter caveats as rule exceptions"
 tags: [ont-057]
 binding: checked
@@ -645,11 +645,11 @@ check: machine
 id: SPEC-0029
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Exception instances governed: scope-narrowing, ratified targets, expiring suspends"
 tags: [ont-058]
 binding: checked
@@ -662,11 +662,11 @@ check: machine
 id: SPEC-0030
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "All lifecycle transitions conform to the single state machine"
 tags: [ont-060]
 binding: checked
@@ -679,11 +679,11 @@ check: machine
 id: SPEC-0031
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Only decision atoms move other atoms past proposed"
 tags: [ont-061]
 binding: checked
@@ -696,11 +696,11 @@ check: machine
 id: SPEC-0032
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Ratification shape identical across platform and repo scopes"
 tags: [ont-062]
 binding: checked
@@ -713,11 +713,11 @@ check: human
 id: SPEC-0033
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Atoms parse from frontmatter or marker-delimited blocks"
 tags: [ont-070]
 binding: checked
@@ -730,11 +730,11 @@ check: machine
 id: SPEC-0034
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Encoding markers pair, never nest, ids match; outside content ungoverned"
 tags: [ont-070a]
 binding: checked
@@ -747,11 +747,11 @@ check: machine
 id: SPEC-0035
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every atom type validates against its versioned JSON Schema"
 tags: [ont-071]
 binding: checked
@@ -764,11 +764,11 @@ check: machine
 id: SPEC-0036
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "atom-lint validates every governed file in CI"
 tags: [ont-072]
 binding: checked
@@ -781,11 +781,11 @@ check: machine
 id: SPEC-0037
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Standing queries computable from frontmatter plus evidence alone"
 tags: [ont-080]
 binding: checked
@@ -798,11 +798,11 @@ check: machine
 id: SPEC-0038
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every persisted instance embedded at persistence; no opt-out path"
 tags: [ont-085]
 binding: checked
@@ -815,11 +815,11 @@ check: machine
 id: RSTR-0006
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No embedding vectors in authored content"
 tags: [ont-086]
 binding: checked
@@ -834,11 +834,11 @@ check: machine
 id: SPEC-0039
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Embedding chunk boundary is the atom instance"
 tags: [ont-087]
 binding: checked
@@ -851,11 +851,11 @@ check: machine
 id: SPEC-0040
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every vector row carries full measurement provenance with digest-pinned instrument"
 tags: [ont-088]
 binding: checked
@@ -868,11 +868,11 @@ check: machine
 id: SPEC-0041
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Embedding coverage query computable with target zero"
 tags: [ont-089]
 binding: checked
@@ -885,11 +885,11 @@ check: machine
 id: SPEC-0042
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "One entity type only; no human/agent type branching"
 tags: [ent-001]
 binding: checked
@@ -902,11 +902,11 @@ check: human
 id: SPEC-0043
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every entity is a node in exactly one root-anchored chain"
 tags: [ent-002]
 binding: checked
@@ -919,11 +919,11 @@ check: machine
 id: RSTR-0007
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Child credentials never carry capabilities absent from parent grants"
 tags: [ent-003]
 binding: checked
@@ -938,11 +938,11 @@ check: machine
 id: RSTR-0008
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Authority never inferred, widened, or promoted at runtime"
 tags: [ent-004]
 binding: checked
@@ -957,11 +957,11 @@ check: machine
 id: SPEC-0044
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Human and agent credentials share one shape and verification path"
 tags: [ent-005]
 binding: checked
@@ -974,11 +974,11 @@ check: machine
 id: RSTR-0009
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Kind never informs authorization, gating, veto, or verification"
 tags: [ent-010]
 binding: checked
@@ -993,11 +993,11 @@ check: human
 id: SPEC-0045
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Chain position carries parent, depth, caveats in §9 grammar"
 tags: [ent-011]
 binding: checked
@@ -1010,11 +1010,11 @@ check: machine
 id: SPEC-0046
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Citizenship classes enforced: citizen, adopted, external"
 tags: [ent-012]
 binding: checked
@@ -1027,11 +1027,11 @@ check: machine
 id: SPEC-0047
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Citizens born via birth process with decision-authorized mandates"
 tags: [ent-013]
 binding: checked
@@ -1044,11 +1044,11 @@ check: machine
 id: SPEC-0048
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every interface is a surface-to-contract binding with declared caveat"
 tags: [ent-020]
 binding: checked
@@ -1061,11 +1061,11 @@ check: machine
 id: SPEC-0049
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Interface archetypes closed at four: bus, request, adapter, human"
 tags: [ent-021]
 binding: checked
@@ -1078,11 +1078,11 @@ check: machine
 id: RSTR-0010
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Role layers never reopen what lower layers sealed"
 tags: [ent-022]
 binding: checked
@@ -1097,11 +1097,11 @@ check: machine
 id: RSTR-0011
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Only adapter interfaces cross the citizenship boundary outward"
 tags: [ent-023]
 binding: checked
@@ -1116,11 +1116,11 @@ check: machine
 id: SPEC-0050
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every citizen publishes a signed self-descriptor at start and on change"
 tags: [ent-030]
 binding: checked
@@ -1133,11 +1133,11 @@ check: machine
 id: RSTR-0012
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Descriptors emitted never authored; no hand-maintained registry"
 tags: [ent-031]
 binding: checked
@@ -1152,11 +1152,11 @@ check: human
 id: SPEC-0051
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Descriptor validity tested by the citizenship conformance suite"
 tags: [ent-032]
 binding: checked
@@ -1169,11 +1169,11 @@ check: machine
 id: SPEC-0052
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Interface conformance verified via bound rules producing evidence"
 tags: [ent-040]
 binding: checked
@@ -1186,11 +1186,11 @@ check: machine
 id: SPEC-0053
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Unverified-interface query joins launch readiness"
 tags: [ent-041]
 binding: checked
@@ -1203,11 +1203,11 @@ check: machine
 id: SPEC-0054
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Runtime behavior exceeding the descriptor is gated or raised as blocker"
 tags: [ent-042]
 binding: checked
@@ -1220,11 +1220,11 @@ check: machine
 id: SPEC-0055
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Entity lifecycle transitions conform to minted/active/suspended/retired/revoked"
 tags: [ent-050]
 binding: checked
@@ -1237,11 +1237,11 @@ check: machine
 id: SPEC-0056
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Revocation walks downward only; parent revocation revokes the subtree"
 tags: [ent-051]
 binding: checked
@@ -1254,11 +1254,11 @@ check: machine
 id: SPEC-0057
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every entity transition recorded to provenance with acting identity"
 tags: [ent-052]
 binding: checked
@@ -1271,11 +1271,11 @@ check: machine
 id: SPEC-0058
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Each persona represented by a citizen-class custodian"
 tags: [ent-070]
 binding: checked
@@ -1288,11 +1288,11 @@ check: machine
 id: RSTR-0013
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Persona key never enters the custodian; custodian holds only a lease"
 tags: [ent-071]
 binding: checked
@@ -1307,11 +1307,11 @@ check: machine
 id: SPEC-0059
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Every verifier checks lease TTL at every chain walk"
 tags: [ent-072]
 binding: checked
@@ -1324,11 +1324,11 @@ check: machine
 id: SPEC-0060
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Lease renewal requires hardware token presence ceremony"
 tags: [ent-073]
 binding: checked
@@ -1341,11 +1341,11 @@ check: machine
 id: SPEC-0061
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Lease decay ladder attenuates custodian authority by age thresholds"
 tags: [ent-074]
 binding: checked
@@ -1358,11 +1358,11 @@ check: machine
 id: RSTR-0014
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Custodian never originates authority; authority acts need per-act human proof"
 tags: [ent-075]
 binding: checked
@@ -1377,11 +1377,11 @@ check: machine
 id: SPEC-0062
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Leaf minting requires custodian lease plus fresh device assertion"
 tags: [ent-076]
 binding: checked
@@ -1394,11 +1394,11 @@ check: machine
 id: SPEC-0063
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Break-glass revocation credential co-signed at each renewal"
 tags: [ent-077]
 binding: checked
@@ -1411,11 +1411,11 @@ check: machine
 id: SPEC-0064
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Enrollment ceremony: cold root to token to custodian to devices"
 tags: [ent-078]
 binding: checked
@@ -1428,11 +1428,11 @@ check: human
 id: SPEC-0065
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Unsigned input is draft; force requires a signed adopting act"
 tags: [ent-079]
 binding: checked
@@ -1445,11 +1445,11 @@ check: machine
 id: SPEC-0066
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Caveats are conjunctions of guard predicates; no disjunction or else"
 tags: [ent-091]
 binding: checked
@@ -1462,11 +1462,11 @@ check: machine
 id: SPEC-0067
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Predicates draw only on the fixed five-family fact vocabulary"
 tags: [ent-092]
 binding: checked
@@ -1479,11 +1479,11 @@ check: machine
 id: SPEC-0068
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Composition is union; attenuation holds algebraically"
 tags: [ent-093]
 binding: checked
@@ -1496,11 +1496,11 @@ check: machine
 id: RSTR-0015
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Verification fails closed; unknown facts and failures deny"
 tags: [ent-094]
 binding: checked
@@ -1515,11 +1515,11 @@ check: machine
 id: RSTR-0016
 type: restriction
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "No exception constructs inside credentials"
 tags: [ent-095]
 binding: checked
@@ -1534,11 +1534,11 @@ check: machine
 id: SPEC-0069
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Caveat display renderings generated from canonical form only"
 tags: [ent-096]
 binding: checked
@@ -1551,11 +1551,11 @@ check: machine
 id: SPEC-0070
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "Grammar carrier-independent; carrier implements without loss"
 tags: [ent-097]
 binding: checked
