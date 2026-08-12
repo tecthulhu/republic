@@ -5,11 +5,11 @@
 id: CTRL-0001
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
-author: consul-extraction-pass
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0003
 title: "atom-lint"
 tags: [enforcement-plane]
 target: codebase
@@ -23,11 +23,11 @@ Parses ONT-070a boundaries and frontmatter, validates schemas, ids, references, 
 id: CTRL-0002
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
-author: consul-extraction-pass
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0003
 title: "grammar property suite"
 tags: [enforcement-plane]
 target: artifact
@@ -41,11 +41,11 @@ Property tests over the caveat algebra: attenuation monotonicity, fail-closed ve
 id: CTRL-0003
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
-author: consul-extraction-pass
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0003
 title: "lifecycle transition checker"
 tags: [enforcement-plane]
 target: codebase
@@ -59,11 +59,11 @@ Validates lifecycle transitions in change history against the state machine and 
 id: CTRL-0004
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
-author: consul-extraction-pass
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0003
 title: "citizenship conformance suite"
 tags: [enforcement-plane]
 target: runtime
@@ -77,11 +77,11 @@ Runs against every derived image: hardening, identity init, descriptor, heartbea
 id: CTRL-0005
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "gate library suite"
 tags: [enforcement-plane]
 target: runtime
@@ -95,11 +95,11 @@ Tests spawn, merge, and runtime gates: story-required spawn, injection order, re
 id: CTRL-0006
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "chain verifier suite"
 tags: [enforcement-plane]
 target: runtime
@@ -113,11 +113,11 @@ Tests the identity walk: chain-to-root, lease TTL at every hop, imperium ceiling
 id: CTRL-0007
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
-author: consul-extraction-pass
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0003
 title: "embedder pipeline suite"
 tags: [enforcement-plane]
 target: artifact
@@ -131,11 +131,11 @@ Tests per-atom chunking, measurement provenance completeness, instrument digest 
 id: CTRL-0008
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T12:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:07.984886+00:00"
 author: consul-extraction-pass
-authorized_by: null
+authorized_by: DEC-0003
 title: "index and query suite"
 tags: [enforcement-plane]
 target: artifact
