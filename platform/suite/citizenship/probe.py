@@ -59,6 +59,32 @@ def write_probe():
     return results
 
 
+def minting_capability():
+    """The standing invariant from the D46 note: no citizen image may contain
+    credential-minting capability. A citizen that can mint its own credentials has no
+    attenuation to speak of (ENT-003), and minting is the spawner's job (ENT-005).
+
+    Scoped to what it can honestly assert. Keypair *generation* is not the line: a
+    citizen needs the crypto library to sign, and that library necessarily contains a
+    keygen primitive. An unchained keypair verifies nowhere. What matters is the
+    ability to produce a *parent's grant to a child* — writing a `parent_sig` — and the
+    presence of a minter module. Third-party libraries under the venv are excluded for
+    the same reason: they are the primitives, not the capability.
+    """
+    import re
+    found = []
+    for path in pathlib.Path("/l0").rglob("*.py"):
+        if "venv" in path.parts or "site-packages" in path.parts:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if re.search(r"""\[["']parent_sig["']\]\s*=|parent_sig\s*=\s*b64e""", text):
+            found.append(f"{path}: constructs a parent signature")
+        if re.search(r"^def mint\(", text, re.M):
+            found.append(f"{path}: defines mint()")
+    return {"minting_surfaces": sorted(set(found)),
+            "mint_module_present": any(pathlib.Path("/l0").rglob("mint.py"))}
+
+
 def credential_material():
     """BASE-AC-3: no readable key material in the payload's view."""
     visible = []
@@ -126,6 +152,7 @@ def main():
         "shells_found": shells_present(),
         "writes": write_probe(),
         "credentials": credential_material(),
+        "minting": minting_capability(),
         "socket_present": pathlib.Path(SOCK).exists(),
         "socket_ops": socket_ops(),
         "base_version": pathlib.Path("/l0/BASE_VERSION").read_text().strip()

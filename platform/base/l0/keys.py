@@ -28,13 +28,10 @@ def public_b64(private_key):
     return b64e(private_key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw))
 
 
-def generate():
-    """Used by the minting side (harness, suite fixtures) — never by a citizen."""
-    key = Ed25519PrivateKey.generate()
-    from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
-    seed = key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
-    return b64e(seed), public_b64(key)
-
-
+# Key generation deliberately does not live here. It is the minting side's capability
+# (harness/mint.py), and a citizen image that carries it carries the ability to
+# manufacture its own keypairs — one step from a credential factory, which is ENT-003
+# defeated at the root. The conformance suite asserts its absence, so reintroducing it
+# fails CI rather than being noticed in review.
 def verify_key(pub_b64):
     return Ed25519PublicKey.from_public_bytes(b64d(pub_b64))

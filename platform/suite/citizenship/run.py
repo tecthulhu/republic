@@ -186,6 +186,10 @@ def live_citizen(mesh, res):
            ops["ungranted_publish"].get("ok") is False
            and ops["off_taxonomy_publish"].get("ok") is False,
            {"ungranted": ops["ungranted_publish"], "off_taxonomy": ops["off_taxonomy_publish"]})
+    minting = report["minting"]
+    res.ok("BASE-AC-18 no credential-minting capability in the image",
+           not minting["minting_surfaces"] and not minting["mint_module_present"],
+           minting)
     res.record("BASE-AC-14 resolve/recall", "pass"
                if ops["resolve"].get("error") == "NOT_AVAILABLE" else "fail",
                "declared interim posture: NOT_AVAILABLE until the data-access citizen exists")

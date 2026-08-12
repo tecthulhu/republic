@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T211452-09",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T21:14:52.898201+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-18: BASE-AC-18 no credential-minting capability in the image",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-agent:0.1.0@sha256:88e55bb7102ea28270f1358849bd49554cc4bc1d7d03ee20bfe28a370d2c7c9e",
+ "verdict": "fail",
+ "checked_at": "2026-08-12T21:14:52.898201+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-18",
+ "detail": "{'minting_surfaces': ['/l0/conformance/run.py: credential minting', '/l0/venv/lib/python3.14/site-packages/cryptography/hazmat/primitives/asymmetric/ed25519.py: keypair generation', '/l0/venv/lib/python3.14/site-packages/cryptography/hazmat/primitives/asymmetric/ed448.py: keypair generation', '/l0/venv/lib/python3.14/site-packages/cryptography/hazmat/primitives/asymmetric/mldsa.py: keypair generat",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

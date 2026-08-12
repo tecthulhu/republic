@@ -263,9 +263,9 @@ id: SPEC-0086
 type: specification
 scope: story:story-0002
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-10T14:00:00Z"
-author: consul-draft
+version: 1.1.0
+instantiated_at: "2026-08-12T22:30:00Z"
+author: agent-worker-story-0002
 authorized_by: null
 title: "Versioned measurement: CLI pinned, instabilities re-verified on bump"
 tags: [acceptance-criterion, spawn-ac-pin]
@@ -280,6 +280,17 @@ stream flag remains load-bearing for uninterrupted stream capture, and
 bare/default-mode behavior does not silently drop configured hooks. A
 version bump invalidates prior evidence for this story: SPEC-0081..0085
 re-run in full against the new pin before it is adopted.
+
+v1.1.0 (D46) fixes what "pinned" means: **the hash of the executed binary**,
+not the package version. The npm package is a launcher whose real executable
+arrives as a platform-specific optionalDependency placed by a postinstall
+script, so pinning the wrapper alone leaves the binary that runs floating.
+Both packages are now pinned by integrity and verified against the registry
+at build time, the install runs with `--ignore-scripts`, the binary is placed
+explicitly, and its sha256 is measured after placement and recorded in the
+image. The re-run trigger keys on that binary hash: a republished tarball at
+the same version moves it, and a version bump that somehow did not change the
+executable does not.
 <!-- atom:end id=SPEC-0086 -->
 
 ---

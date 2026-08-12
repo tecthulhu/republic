@@ -55,7 +55,7 @@ COPY --from=build --chown=10001:10001 /stage/work /work
 # image and the suite in CI cannot drift apart.
 COPY --chmod=0755 base/l0/init.py /l0/init
 COPY base/l0/*.py /l0/
-COPY suite/citizenship/ /l0/conformance/
+COPY suite/citizenship/probe.py suite/citizenship/observe.py /l0/conformance/
 COPY base/BASE_VERSION /l0/BASE_VERSION
 
 # Read-only rootfs is a runtime pin (L0-002); bytecode writing would fight it.

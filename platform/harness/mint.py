@@ -24,7 +24,18 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "base" / "l
 sys.path.insert(0, "/l0")
 
 from canon import signing_form            # noqa: E402
-from keys import b64e, generate, signer_from_seed  # noqa: E402
+from keys import b64e, public_b64, signer_from_seed  # noqa: E402
+
+
+def generate():
+    """Mint a keypair. The spawner's capability, never the citizen's: this used to sit
+    in base/l0/keys.py and therefore inside every citizen image (D46 note / ENT-003)."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import (Encoding, NoEncryption,
+                                                              PrivateFormat)
+    key = Ed25519PrivateKey.generate()
+    seed = key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
+    return b64e(seed), public_b64(key)
 
 
 def _now():
