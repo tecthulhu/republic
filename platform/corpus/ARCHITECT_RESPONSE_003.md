@@ -82,11 +82,11 @@ measurement of the CI substrate.
 id: SPEC-0106
 type: specification
 scope: story:story-0004
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Interim Acta: evidence committed, derived stays ignored, EVID resolvable"
 tags: [acceptance-criterion, d17]
 binding: checked

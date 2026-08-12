@@ -42,11 +42,11 @@ violating fixtures.
 id: SPEC-0071
 type: specification
 scope: story:story-0001
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-draft
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "hello-citizen fixture passes BASE-AC-1 through BASE-AC-13"
 tags: [acceptance-criterion]
 binding: checked
@@ -63,11 +63,11 @@ ACs green with evidence rows against the fixture image digest.
 id: SPEC-0072
 type: specification
 scope: story:story-0001
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.3.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: agent-worker-story-0004
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Violating fixture fails BASE-AC-15 and BASE-AC-16"
 tags: [acceptance-criterion]
 binding: checked
@@ -90,11 +90,11 @@ always belonged, and SPRINT-0001's gate still runs all seventeen.
 id: SPEC-0073
 type: specification
 scope: story:story-0001
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-draft
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Conformance runs in CI gated on merge with evidence emitted per AC"
 tags: [acceptance-criterion]
 binding: checked

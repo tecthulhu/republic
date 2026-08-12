@@ -154,11 +154,11 @@ runs blocker → any). v1.0.0 remains addressable in history.
 id: SPEC-0091
 type: specification
 scope: story:story-0003
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "One canonical tree: root duplicates removed, paths corrected"
 tags: [acceptance-criterion]
 binding: checked
@@ -175,11 +175,11 @@ duplicate-ID findings; CLAUDE.md load-order paths resolve as written.
 id: SPEC-0092
 type: specification
 scope: story:story-0003
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "atom-lint fails closed on empty input and file arguments parse"
 tags: [acceptance-criterion]
 binding: checked
@@ -197,11 +197,11 @@ fixture demonstrates the previously-vacuous invocation now failing.
 id: SPEC-0093
 type: specification
 scope: story:story-0003
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
+state: deprecated
+version: 1.2.0
+instantiated_at: "2026-08-12T18:55:45.957379+00:00"
 author: consul-architect
-authorized_by: DEC-0003
+authorized_by: DEC-0004
 title: "Evidence claims in prose are environment-scoped; deps pinned"
 tags: [acceptance-criterion]
 binding: checked
