@@ -7,7 +7,15 @@
 #
 #   python3 -m venv .venv && .venv/bin/python -m pip install -r tools/requirements.txt
 #
-# atom-lint (CTRL-0001) + grammar suite (CTRL-0002)
+# The base runtime pins are included rather than restated (D32): CTRL-0002 now
+# exercises base/l0/chainverify.py, which needs cryptography and rfc8785. Pinning
+# those in two files would be two independently-mutable statements of one fact
+# awaiting divergence (ONT-016). The base file is their single authoring chain, and
+# a base dependency bump therefore re-runs CTRL-0002 — which is correct, since the
+# property suite attests the algebra as it shipped under those pins.
+-r ../base/requirements.txt
+
+# atom-lint (CTRL-0001)
 PyYAML==6.0.3
 jsonschema==4.26.0
 # embedder pipeline (ONT-085–089), B0 lexical instrument

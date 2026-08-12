@@ -65,6 +65,9 @@ ONT-016). Tool commands below run from `platform/`.
    tracker issue (D23) — the tracker is the status of record (ONT-044), so the
    transition rides the merge mechanically instead of depending on memory.
    Never merge: the merge is the owner's signing act (PA-002, ENT-079).
+   **Only when the PR truly completes the story.** GitHub's closing-keyword
+   parser ignores negation: `does not close #11` closed #11 on merge. To state
+   the negative, keep the keyword away from the number — "#11 stays open".
 6. If blocked, record the blocker plainly and stop; do not route around a
    gate, do not weaken a check to pass it, do not mark anything done that
    has not run green.

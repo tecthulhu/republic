@@ -9,7 +9,7 @@ model resolves into the same band slot at deployment without pipeline change.
 """
 import sys, json, hashlib, datetime, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-from atom_lint import parse_file, corpus_digest
+from atom_lint import parse_file, corpus_digest, expand_inputs
 
 BAND_REGISTRY = {  # band -> (instrument name, resolver) — resolved at run, digest-pinned below
     "B0": "tfidf-local-lexical",
@@ -51,18 +51,23 @@ def atom_text(a, block_prose=""):
 def build(corpus_dirs, band="B0"):
     instrument, digest, vec, manifest = resolve_instrument(band)
     rows, texts, all_atoms = [], [], {}
-    for d in corpus_dirs:
-        for p in sorted(pathlib.Path(d).rglob("*.md")):
-            atoms, errs, _ = parse_file(p)
-            for a, src, body in atoms:
-                if "id" not in a: continue
-                all_atoms[a["id"]] = (a, src, body)
-                rows.append({"atom_id": a["id"], "version": str(a.get("version","")),
-                             "instantiated_at": str(a.get("instantiated_at","")),
-                             "embedding_model_band": band, "embedding_model_digest": digest,
-                             "embedded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                             "type": a.get("type"), "state": a.get("state"), "title": a.get("title","")})
-                texts.append(atom_text(a))
+    # SPEC-0109 / D25: the discovery set spans acta/ as well as the governed
+    # documents. ONT-085 exempts no type, and evidence rows are atoms — searchable
+    # provenance ("what has failed before like this") is half the value of having a
+    # semantic substrate at all. expand_inputs is shared with atom-lint so the two
+    # controls can never disagree about what the corpus contains.
+    files, _ = expand_inputs(corpus_dirs)
+    for p in files:
+        atoms, errs, _ = parse_file(p)
+        for a, src, body in atoms:
+            if "id" not in a: continue
+            all_atoms[a["id"]] = (a, src, body)
+            rows.append({"atom_id": a["id"], "version": str(a.get("version","")),
+                         "instantiated_at": str(a.get("instantiated_at","")),
+                         "embedding_model_band": band, "embedding_model_digest": digest,
+                         "embedded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                         "type": a.get("type"), "state": a.get("state"), "title": a.get("title","")})
+            texts.append(atom_text(a))
     M = vec.fit_transform(texts)
     for i, r in enumerate(rows): r["vector"] = [round(float(x),5) for x in M[i].toarray()[0]]
     idx = {"model_generation": digest, "instrument_manifest": manifest,
@@ -78,11 +83,13 @@ def build(corpus_dirs, band="B0"):
 def queries(corpus_dirs, idx):
     """Standing queries per ONT-080/089 + ENT-041 (computable subset)."""
     atoms = {}
-    for d in corpus_dirs:
-        for p in sorted(pathlib.Path(d).rglob("*.md")):
-            parsed, _, _ = parse_file(p)
-            for a, src, _body in parsed:
-                if "id" in a: atoms[a["id"]] = a
+    # Same discovery set as build() and atom-lint (SPEC-0109): coverage can only be
+    # a meaningful target-zero number if the query counts what the pipeline embeds.
+    files, _ = expand_inputs(corpus_dirs)
+    for p in files:
+        parsed, _, _ = parse_file(p)
+        for a, src, _body in parsed:
+            if "id" in a: atoms[a["id"]] = a
     def rid(x): return x if isinstance(x,str) else (x or {}).get("id")
     # SPEC-0097: two questions, two names. ONT-031 defines the dangling query over
     # *active* claims bound by *active* rules; the all-states line is the
