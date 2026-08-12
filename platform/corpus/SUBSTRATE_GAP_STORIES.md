@@ -157,19 +157,23 @@ id: STORY-0012
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-12T21:00:00Z"
+version: 1.1.0
+instantiated_at: "2026-08-12T22:00:00Z"
 author: agent-worker-story-0009
 authorized_by: null
 title: "Provenance consistency: a new version must carry a new authoring act"
 tags: [gate, follow-on]
 tracker_ref: "gh:tecthulhu/republic#21"
-acceptance: [SPEC-0119]
+acceptance: [SPEC-0119, SPEC-0121]
 ```
 Caught as a near-miss while amending DOC-0000 for DEC-0004: a no-op'd replacement
 left the reconciliation's `author` and `instantiated_at` on an amended instance, so
 the atom would have claimed authorship by the reconciler at the reconciler's
 timestamp. Lint passed. Provenance can currently lie through this gate.
+
+v1.1.0 (D44) adds SPEC-0121: the repository-tree check. Both gates open atom_lint
+for the same reason — a governed fact that no control scans — so they land in one
+PR rather than two.
 <!-- atom:end id=STORY-0012 -->
 
 <!-- atom:begin id=SPEC-0119 -->
@@ -250,3 +254,73 @@ relations:
   - { rel: binds, target: ENF-0001 }
 ```
 <!-- atom:end id=RULE-0081 -->
+
+---
+
+## The posture pattern, generalized
+
+<!-- atom:begin id=PRIN-0005 -->
+```yaml
+id: PRIN-0005
+type: principle
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-12T22:00:00Z"
+author: agent-worker-story-0012
+authorized_by: null
+title: "An interim posture names a checkable condition, not a promise to revisit"
+tags: [interim-posture, mechanism-over-discipline]
+binding: injected
+```
+Every posture atom SHOULD name a condition that is itself checked, such that the
+condition becoming false *fails a control* and forces the posture's supersession
+(D42). A posture that promises to be revisited depends on someone remembering; a
+posture whose enabling condition is a checked claim cannot outlive its own truth.
+
+SPEC-0120 is the worked example: CTRL-0002 asserts that the chain verifier exposes no
+revocation surface, so the first commit that implements revocation turns the suite
+red, and the only way to green is to supersede the posture. The story that closes the
+gap cannot pretend to be done while the hedge about it still stands.
+
+This is mechanism-over-discipline applied to the corpus's own hedges, which is where
+it is easiest to skip: an interim posture is precisely the kind of atom whose author
+intends to come back, and intent is not a gate. Postures written before this
+principle are not retroactively invalid — SPEC-0074 and SPEC-0115 name retirement
+conditions in prose — but the pattern to reach for is the checked one.
+<!-- atom:end id=PRIN-0005 -->
+
+<!-- atom:begin id=SPEC-0121 -->
+```yaml
+id: SPEC-0121
+type: specification
+scope: story:story-0012
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-12T22:00:00Z"
+author: agent-worker-story-0012
+authorized_by: null
+title: "Every markdown file is governed, allowlisted, or a gate failure"
+tags: [acceptance-criterion, d44]
+binding: checked
+check: machine
+story_ref: STORY-0012
+```
+CTRL-0001 classifies every `*.md` file in the repository as one of: inside
+`platform/corpus/**` and therefore governed, parsed and validated; an enumerated
+root allowlist (CLAUDE.md, README.md, LICENSE); or a violation. A governed-looking
+document outside `platform/corpus/**` — one carrying atom markers, or named in the
+`DOC-`/`DEC-`/`ARCHITECT_RESPONSE_` family — fails the gate.
+
+This closes SPEC-0091's canonical-tree clause, which has had no enforcing control
+since it was written and has been violated twice with every gate green. The reason
+it stayed invisible is worth stating: a prose-only document changes no atom digest,
+so the corpus looks byte-identical whether the document is admitted or abandoned at
+the root. A rule with no binding control is precisely the dangling claim the meters
+exist to surface, except this one dangled in the tree-shape dimension no control
+scanned.
+
+Fixtures demonstrate an atom-bearing file at the root caught, an
+`ARCHITECT_RESPONSE_`-named prose file at the root caught, an allowlisted root file
+passing, and the real repository passing.
+<!-- atom:end id=SPEC-0121 -->

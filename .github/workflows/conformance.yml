@@ -38,9 +38,12 @@ jobs:
       - name: Install pinned tool dependencies
         working-directory: platform
         run: python -m pip install -r tools/requirements.txt
+      # --tree is SPEC-0121: every *.md is governed, allowlisted, or a violation.
       - name: CTRL-0001 — atom-lint over the whole tree
         working-directory: platform
-        run: python tools/atom_lint.py ..
+        # No path argument: the corpus default plus --tree covers every governed
+        # atom and the whole repository's shape, without a cwd-relative `..`.
+        run: python tools/atom_lint.py --tree
       - name: atom-lint fixture suite (SPEC-0092/0095/0096)
         working-directory: platform
         run: python tools/test_atom_lint.py
@@ -68,6 +71,9 @@ jobs:
       - name: SPEC-0114 — path resolution suite
         working-directory: platform
         run: python tools/test_paths.py
+      - name: SPEC-0119/0121 — provenance and tree-shape suite
+        working-directory: platform
+        run: python tools/test_provenance.py
 
       # SPEC-0113 applied to this change: no atom may have been edited in place
       # relative to the base branch. ONT-012/015 enforced rather than reviewed.
