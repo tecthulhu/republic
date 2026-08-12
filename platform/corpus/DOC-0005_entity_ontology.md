@@ -3,10 +3,10 @@ id: DOC-0005
 type: document
 title: Entity Interface Ontology
 scope: platform
-state: ratified
-version: 1.0.0
-instantiated_at: "2026-08-11T19:06:00Z"
-author: consul-draft
+state: active
+version: 1.1.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0001
 relations:
   - { rel: contains, target: "ENT-*" }

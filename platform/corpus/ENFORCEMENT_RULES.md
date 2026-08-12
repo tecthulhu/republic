@@ -5,10 +5,10 @@
 id: ENF-0001
 type: enforcement
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Block merge"
 tags: [ladder]
@@ -21,10 +21,10 @@ on_fail: block-merge
 id: ENF-0002
 type: enforcement
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Refuse spawn"
 tags: [ladder]
@@ -37,10 +37,10 @@ on_fail: refuse-spawn
 id: ENF-0003
 type: enforcement
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Suspend and escalate"
 tags: [ladder]
@@ -54,10 +54,10 @@ escalation_target: tribune-veto-queue
 id: ENF-0004
 type: enforcement
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Advisory"
 tags: [ladder]
@@ -70,10 +70,10 @@ on_fail: advisory
 id: RULE-0001
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0002 via CTRL-0001"
 tags: [binding]
@@ -92,10 +92,10 @@ relations:
 id: RULE-0002
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0004 via CTRL-0001"
 tags: [binding]
@@ -114,10 +114,10 @@ relations:
 id: RULE-0003
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0005 via CTRL-0001"
 tags: [binding]
@@ -136,10 +136,10 @@ relations:
 id: RULE-0004
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0006 via CTRL-0001"
 tags: [binding]
@@ -158,10 +158,10 @@ relations:
 id: RULE-0005
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0007 via CTRL-0001"
 tags: [binding]
@@ -180,10 +180,10 @@ relations:
 id: RULE-0006
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0008 via CTRL-0001"
 tags: [binding]
@@ -202,10 +202,10 @@ relations:
 id: RULE-0007
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0009 via CTRL-0008"
 tags: [binding]
@@ -224,10 +224,10 @@ relations:
 id: RULE-0008
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0001 via CTRL-0001"
 tags: [binding]
@@ -246,10 +246,10 @@ relations:
 id: RULE-0009
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0011 via CTRL-0001"
 tags: [binding]
@@ -268,10 +268,10 @@ relations:
 id: RULE-0010
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0012 via CTRL-0008"
 tags: [binding]
@@ -290,10 +290,10 @@ relations:
 id: RULE-0011
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0013 via CTRL-0001"
 tags: [binding]
@@ -312,10 +312,10 @@ relations:
 id: RULE-0012
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0014 via CTRL-0001"
 tags: [binding]
@@ -334,10 +334,10 @@ relations:
 id: RULE-0013
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0015 via CTRL-0001"
 tags: [binding]
@@ -356,10 +356,10 @@ relations:
 id: RULE-0014
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0016 via CTRL-0001"
 tags: [binding]
@@ -378,10 +378,10 @@ relations:
 id: RULE-0015
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0017 via CTRL-0003"
 tags: [binding]
@@ -400,10 +400,10 @@ relations:
 id: RULE-0016
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0003 via CTRL-0001"
 tags: [binding]
@@ -422,10 +422,10 @@ relations:
 id: RULE-0017
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0018 via CTRL-0006"
 tags: [binding]
@@ -444,10 +444,10 @@ relations:
 id: RULE-0018
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0019 via CTRL-0005"
 tags: [binding]
@@ -466,10 +466,10 @@ relations:
 id: RULE-0019
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0020 via CTRL-0001"
 tags: [binding]
@@ -488,10 +488,10 @@ relations:
 id: RULE-0020
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0021 via CTRL-0001"
 tags: [binding]
@@ -510,10 +510,10 @@ relations:
 id: RULE-0021
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0022 via CTRL-0001"
 tags: [binding]
@@ -532,10 +532,10 @@ relations:
 id: RULE-0022
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0023 via CTRL-0008"
 tags: [binding]
@@ -554,10 +554,10 @@ relations:
 id: RULE-0023
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0024 via CTRL-0001"
 tags: [binding]
@@ -576,10 +576,10 @@ relations:
 id: RULE-0024
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0025 via CTRL-0008"
 tags: [binding]
@@ -598,10 +598,10 @@ relations:
 id: RULE-0025
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0026 via CTRL-0001"
 tags: [binding]
@@ -620,10 +620,10 @@ relations:
 id: RULE-0026
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0027 via CTRL-0001"
 tags: [binding]
@@ -642,10 +642,10 @@ relations:
 id: RULE-0027
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0028 via CTRL-0001"
 tags: [binding]
@@ -664,10 +664,10 @@ relations:
 id: RULE-0028
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0005 via CTRL-0002"
 tags: [binding]
@@ -686,10 +686,10 @@ relations:
 id: RULE-0029
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0029 via CTRL-0001"
 tags: [binding]
@@ -708,10 +708,10 @@ relations:
 id: RULE-0030
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0030 via CTRL-0003"
 tags: [binding]
@@ -730,10 +730,10 @@ relations:
 id: RULE-0031
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0031 via CTRL-0003"
 tags: [binding]
@@ -752,10 +752,10 @@ relations:
 id: RULE-0032
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0033 via CTRL-0001"
 tags: [binding]
@@ -774,10 +774,10 @@ relations:
 id: RULE-0033
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0034 via CTRL-0001"
 tags: [binding]
@@ -796,10 +796,10 @@ relations:
 id: RULE-0034
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0035 via CTRL-0001"
 tags: [binding]
@@ -818,10 +818,10 @@ relations:
 id: RULE-0035
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0036 via CTRL-0001"
 tags: [binding]
@@ -840,10 +840,10 @@ relations:
 id: RULE-0036
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0037 via CTRL-0008"
 tags: [binding]
@@ -862,10 +862,10 @@ relations:
 id: RULE-0037
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0038 via CTRL-0007"
 tags: [binding]
@@ -884,10 +884,10 @@ relations:
 id: RULE-0038
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0006 via CTRL-0001"
 tags: [binding]
@@ -906,10 +906,10 @@ relations:
 id: RULE-0039
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0039 via CTRL-0007"
 tags: [binding]
@@ -928,10 +928,10 @@ relations:
 id: RULE-0040
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0040 via CTRL-0007"
 tags: [binding]
@@ -950,10 +950,10 @@ relations:
 id: RULE-0041
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0041 via CTRL-0008"
 tags: [binding]
@@ -972,10 +972,10 @@ relations:
 id: RULE-0042
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0043 via CTRL-0006"
 tags: [binding]
@@ -994,10 +994,10 @@ relations:
 id: RULE-0043
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0007 via CTRL-0002"
 tags: [binding]
@@ -1016,10 +1016,10 @@ relations:
 id: RULE-0044
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0008 via CTRL-0006"
 tags: [binding]
@@ -1038,10 +1038,10 @@ relations:
 id: RULE-0045
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0044 via CTRL-0006"
 tags: [binding]
@@ -1060,10 +1060,10 @@ relations:
 id: RULE-0046
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0045 via CTRL-0001"
 tags: [binding]
@@ -1082,10 +1082,10 @@ relations:
 id: RULE-0047
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0046 via CTRL-0004"
 tags: [binding]
@@ -1104,10 +1104,10 @@ relations:
 id: RULE-0048
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0047 via CTRL-0003"
 tags: [binding]
@@ -1126,10 +1126,10 @@ relations:
 id: RULE-0049
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0048 via CTRL-0004"
 tags: [binding]
@@ -1148,10 +1148,10 @@ relations:
 id: RULE-0050
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0049 via CTRL-0001"
 tags: [binding]
@@ -1170,10 +1170,10 @@ relations:
 id: RULE-0051
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0010 via CTRL-0004"
 tags: [binding]
@@ -1192,10 +1192,10 @@ relations:
 id: RULE-0052
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0011 via CTRL-0004"
 tags: [binding]
@@ -1214,10 +1214,10 @@ relations:
 id: RULE-0053
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0050 via CTRL-0004"
 tags: [binding]
@@ -1236,10 +1236,10 @@ relations:
 id: RULE-0054
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0051 via CTRL-0004"
 tags: [binding]
@@ -1258,10 +1258,10 @@ relations:
 id: RULE-0055
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0052 via CTRL-0004"
 tags: [binding]
@@ -1280,10 +1280,10 @@ relations:
 id: RULE-0056
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0053 via CTRL-0008"
 tags: [binding]
@@ -1302,10 +1302,10 @@ relations:
 id: RULE-0057
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0054 via CTRL-0005"
 tags: [binding]
@@ -1324,10 +1324,10 @@ relations:
 id: RULE-0058
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0055 via CTRL-0006"
 tags: [binding]
@@ -1346,10 +1346,10 @@ relations:
 id: RULE-0059
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0056 via CTRL-0002"
 tags: [binding]
@@ -1368,10 +1368,10 @@ relations:
 id: RULE-0060
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0057 via CTRL-0008"
 tags: [binding]
@@ -1390,10 +1390,10 @@ relations:
 id: RULE-0061
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0058 via CTRL-0004"
 tags: [binding]
@@ -1412,10 +1412,10 @@ relations:
 id: RULE-0062
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0013 via CTRL-0006"
 tags: [binding]
@@ -1434,10 +1434,10 @@ relations:
 id: RULE-0063
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0059 via CTRL-0006"
 tags: [binding]
@@ -1456,10 +1456,10 @@ relations:
 id: RULE-0064
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0060 via CTRL-0006"
 tags: [binding]
@@ -1478,10 +1478,10 @@ relations:
 id: RULE-0065
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0061 via CTRL-0002"
 tags: [binding]
@@ -1500,10 +1500,10 @@ relations:
 id: RULE-0066
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0014 via CTRL-0005"
 tags: [binding]
@@ -1522,10 +1522,10 @@ relations:
 id: RULE-0067
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0062 via CTRL-0006"
 tags: [binding]
@@ -1544,10 +1544,10 @@ relations:
 id: RULE-0068
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0063 via CTRL-0006"
 tags: [binding]
@@ -1566,10 +1566,10 @@ relations:
 id: RULE-0069
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0065 via CTRL-0005"
 tags: [binding]
@@ -1588,10 +1588,10 @@ relations:
 id: RULE-0070
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0066 via CTRL-0002"
 tags: [binding]
@@ -1610,10 +1610,10 @@ relations:
 id: RULE-0071
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0067 via CTRL-0002"
 tags: [binding]
@@ -1632,10 +1632,10 @@ relations:
 id: RULE-0072
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0068 via CTRL-0002"
 tags: [binding]
@@ -1654,10 +1654,10 @@ relations:
 id: RULE-0073
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0015 via CTRL-0002"
 tags: [binding]
@@ -1676,10 +1676,10 @@ relations:
 id: RULE-0074
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind RSTR-0016 via CTRL-0002"
 tags: [binding]
@@ -1698,10 +1698,10 @@ relations:
 id: RULE-0075
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-12T18:38:23.725032+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "Bind SPEC-0069 via CTRL-0007"
 tags: [binding]
