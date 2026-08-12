@@ -80,8 +80,16 @@ def activation_eligible(atom, atoms, active_rule_claims):
     return True, "ratification implies activation for this type"
 
 
-def plan(decision_id, atoms, now):
-    """What the ceremony would do. Pure: computes, changes nothing."""
+def effects_plan(decision_id, atoms, now):
+    """What a signature attests: exactly the decision's enumerated effects (D34).
+
+    Activation is deliberately absent. ONT-060's ratified -> active trigger is
+    binding-completeness, a computed property of the corpus — no decision's effects
+    list contains "activate" and no signature confers it. Folding activation into a
+    ceremony would record, under someone's signature, lifecycle movements the law
+    caused rather than the signer. A licence signature must never read as having
+    moved the ontology's lifecycle.
+    """
     dec = atoms.get(decision_id)
     if dec is None:
         raise SystemExit(f"{decision_id} not found in the corpus")
@@ -90,14 +98,12 @@ def plan(decision_id, atoms, now):
         raise SystemExit(f"{decision_id} is a {dec.get('type')}, not a decision")
 
     steps = []
-    targets = {}
     for eff in dec.get("effects") or []:
         tid, transition = ref_id(eff.get("target")), eff.get("transition")
         if tid not in atoms:
             steps.append({"id": tid, "action": "error",
                           "reason": f"effect target {tid} not in corpus"})
             continue
-        targets[tid] = transition
         a = atoms[tid][0]
         here, want = STATE_ORDER.get(a.get("state")), STATE_ORDER.get(transition)
         if here is not None and want is not None and here >= want:
@@ -108,37 +114,38 @@ def plan(decision_id, atoms, now):
                       "version": bump(str(a.get("version", "1.0.0")),
                                       transition == "ratified"),
                       "authorized_by": decision_id})
+    return {"mode": "effects", "decision": decision_id, "steps": steps, "at": now}
 
-    # Activation is computed against the state the effects will produce.
-    projected = {aid: dict(a[0]) for aid, a in atoms.items()}
-    for s in steps:
-        if s["action"] == "transition":
-            projected[s["id"]]["state"] = s["to"]
-            projected[s["id"]]["version"] = s["version"]
 
-    active_rule_claims = {ref_id(a.get("claim")) for a in projected.values()
-                          if a.get("type") == "rule" and a.get("state") == "active"}
-    # A rule that is about to be ratified activates in this same pass, so its claim
-    # is bound by an active rule by the end of the ceremony — resolve that together
-    # rather than requiring two ceremonies to reach a stable state.
-    pending_rule_claims = {ref_id(a.get("claim")) for a in projected.values()
-                           if a.get("type") == "rule" and a.get("state") == "ratified"}
-    active_rule_claims |= pending_rule_claims
+def reconcile_plan(atoms, now):
+    """The law operating, not an act anyone signs (D34).
+
+    Computes ONT-060 eligibility corpus-wide and proposes ratified -> active for
+    every eligible atom. Needs no fresh decision: DEC-0001's ratification of ONT-060
+    is the standing authorization, and each run is that ratified law operating, on
+    the record. Forward-only — demotion has no trigger in the table, and
+    reconciliation must not invent one.
+    """
+    current = {aid: dict(a[0]) for aid, a in atoms.items()}
+    # A rule reaching `ratified` in the same pass will be active by the end of it, so
+    # its claim counts as bound; otherwise reaching a stable state would take two runs.
+    active_rule_claims = {ref_id(a.get("claim")) for a in current.values()
+                          if a.get("type") == "rule"
+                          and a.get("state") in ("active", "ratified")}
 
     activations, blocked = [], []
-    for aid, a in sorted(projected.items()):
+    for aid, a in sorted(current.items()):
         if a.get("state") != "ratified":
             continue
-        eligible, reason = activation_eligible(a, projected, active_rule_claims)
+        eligible, reason = activation_eligible(a, current, active_rule_claims)
         record = {"id": aid, "type": a.get("type"), "reason": reason,
                   "version": bump(str(a.get("version", "1.0.0")), False)}
         (activations if eligible else blocked).append(record)
-
-    return {"decision": decision_id, "steps": steps, "activations": activations,
+    return {"mode": "reconcile", "steps": [], "activations": activations,
             "blocked": blocked, "at": now}
 
 
-def rewrite(atom_id, new_state, new_version, authorized_by, now, atoms):
+def rewrite(atom_id, new_state, new_version, authorized_by, now, atoms, author=None):
     """Edit the atom's serialized record in place in its host file.
 
     In-place *file* editing, not in-place *instance* editing: the prior instance
@@ -171,6 +178,8 @@ def rewrite(atom_id, new_state, new_version, authorized_by, now, atoms):
     new = set_field(new, "instantiated_at", f'"{now}"')
     if authorized_by:
         new = set_field(new, "authorized_by", authorized_by)
+    if author:
+        new = set_field(new, "author", author)
 
     if rest is not None:
         path.write_text(new + rest)
@@ -179,86 +188,126 @@ def rewrite(atom_id, new_state, new_version, authorized_by, now, atoms):
 
 
 def report(p, verbose=True):
-    lines = [f"ceremony plan for {p['decision']} at {p['at']}", ""]
-    lines.append(f"  effects: {len(p['steps'])}")
-    for s in p["steps"]:
-        if s["action"] == "transition":
-            lines.append(f"    {s['id']}  {s['from']} -> {s['to']}  v{s['version']}")
-        else:
-            lines.append(f"    {s['id']}  ({s['action']}: {s.get('reason', s.get('state'))})")
+    if p["mode"] == "effects":
+        lines = [f"ceremony plan for {p['decision']} at {p['at']}",
+                 "  (effects only — activation is reconciliation's job, D34)", ""]
+        lines.append(f"  effects: {len(p['steps'])}")
+        for s in p["steps"]:
+            if s["action"] == "transition":
+                lines.append(f"    {s['id']}  {s['from']} -> {s['to']}  v{s['version']}")
+            else:
+                lines.append(f"    {s['id']}  ({s['action']}: "
+                             f"{s.get('reason', s.get('state'))})")
+        return "\n".join(lines)
+
+    lines = [f"reconciliation plan at {p['at']}",
+             "  (authorized by ONT-060 via DEC-0001; no fresh decision needed)", ""]
     lines.append(f"  activations: {len(p['activations'])}")
     if verbose:
         for a in p["activations"][:8]:
             lines.append(f"    {a['id']} ({a['type']}) — {a['reason']}")
         if len(p["activations"]) > 8:
             lines.append(f"    … and {len(p['activations']) - 8} more")
-    lines.append(f"  ratified but not activated: {len(p['blocked'])}")
-    for b in p["blocked"]:
+    lines.append(f"  ratified but not eligible: {len(p['blocked'])}")
+    for b in p["blocked"][:12]:
         lines.append(f"    {b['id']} ({b['type']}) — {b['reason']}")
+    if len(p["blocked"]) > 12:
+        lines.append(f"    … and {len(p['blocked']) - 12} more")
     return "\n".join(lines)
 
 
 def emit_evidence(p, applied, digest):
     now = p["at"]
-    evid = {"id": f"EVID-enact-{now[:19].replace(':', '')}", "type": "evidence",
-            "scope": "platform", "state": "active", "version": "1.0.0",
-            "instantiated_at": now, "author": "enact-ceremony", "authorized_by": None,
-            "title": f"{p['decision']} ceremony: {len(p['steps'])} effects, "
-                     f"{len(p['activations'])} activations, {len(p['blocked'])} held ratified"
-                     f"{'' if applied else ' (dry run)'}",
-            "control_ref": "CTRL-0003", "subject": f"corpus@{digest}",
-            "verdict": "pass", "checked_at": now, "checker": "enact-ceremony",
-            "applied": applied,
-            "activated": [a["id"] for a in p["activations"]],
-            "held_ratified": [{"id": b["id"], "reason": b["reason"]} for b in p["blocked"]]}
+    if p["mode"] == "effects":
+        title = (f"{p['decision']} ceremony: {len(p['steps'])} effects applied"
+                 f"{'' if applied else ' (dry run)'}")
+        extra = {"decision": p["decision"],
+                 "transitions": [s["id"] for s in p["steps"] if s["action"] == "transition"]}
+        eid = f"EVID-enact-{now[:19].replace(':', '')}"
+    else:
+        title = (f"reconciliation: {len(p['activations'])} activated, "
+                 f"{len(p['blocked'])} held ratified"
+                 f"{'' if applied else ' (dry run)'}")
+        # The authorization is the ratified lifecycle law, not a signature. Recorded
+        # here so the ledger shows the law as the cause (D34).
+        extra = {"authorization": "ONT-060 (ratified by DEC-0001)",
+                 "activated": [a["id"] for a in p["activations"]],
+                 "held_ratified": [{"id": b["id"], "reason": b["reason"]}
+                                   for b in p["blocked"]]}
+        eid = f"EVID-reconcile-{now[:19].replace(':', '')}"
+    evid = {"id": eid, "type": "evidence", "scope": "platform", "state": "active",
+            "version": "1.0.0", "instantiated_at": now,
+            "author": "ont-060-reconciliation" if p["mode"] == "reconcile" else "enact-ceremony",
+            "authorized_by": None, "title": title, "control_ref": "CTRL-0003",
+            "subject": f"corpus@{digest}", "verdict": "pass", "checked_at": now,
+            "checker": "enact-reconcile" if p["mode"] == "reconcile" else "enact-ceremony",
+            "applied": applied, **extra}
     ACTA.mkdir(exist_ok=True)
     (ACTA / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     return evid
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--decision", required=True)
+    ap = argparse.ArgumentParser(
+        description="enact.py — decision ceremonies and lifecycle reconciliation")
+    ap.add_argument("--decision", default=None,
+                    help="apply this decision's enumerated effects (scoped, D34)")
+    ap.add_argument("--reconcile", action="store_true",
+                    help="compute ONT-060 eligibility corpus-wide and activate "
+                         "eligible atoms; authorized by the ratified law, not by a "
+                         "signature")
     ap.add_argument("--apply", action="store_true",
                     help="write the working tree (still never commits)")
     ap.add_argument("--dry-run", action="store_true", help="report only (default)")
     ap.add_argument("--no-evidence", action="store_true")
     ap.add_argument("--corpus", default=None,
-                    help="corpus directory to operate on (default: the platform corpus). "
-                         "Exists so the ceremony can be exercised against fixtures.")
+                    help="corpus directory to operate on (default: the platform "
+                         "corpus). Exists so the ceremony can be exercised against "
+                         "fixtures.")
     a = ap.parse_args()
+
+    if bool(a.decision) == bool(a.reconcile):
+        print("choose exactly one: --decision <ID> (a signed act) or --reconcile "
+              "(the law operating). They are separate commits with separate "
+              "attributions — see D34.")
+        return 2
 
     dirs = [a.corpus] if a.corpus else None
     atoms, errors = load(dirs)
     if errors:
-        print(f"refusing to run a ceremony over a red corpus: {len(errors)} finding(s)")
+        print(f"refusing to run over a red corpus: {len(errors)} finding(s)")
         for e in errors[:5]:
             print("  •", e)
         return 1
 
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    p = plan(a.decision, atoms, now)
+    p = (effects_plan(a.decision, atoms, now) if a.decision
+         else reconcile_plan(atoms, now))
     print(report(p))
 
-    bad = [s for s in p["steps"] if s["action"] == "error"]
-    if bad:
+    if [s for s in p["steps"] if s.get("action") == "error"]:
         print("\nrefusing: unresolvable effect targets")
         return 1
 
+    from atom_lint import corpus_digest
     if not a.apply:
         print("\ndry run — nothing written. Re-run with --apply to write the tree.")
         if not a.no_evidence:
-            from atom_lint import corpus_digest
             emit_evidence(p, False, corpus_digest(atoms))
         return 0
 
-    for s in p["steps"]:
-        if s["action"] == "transition":
-            rewrite(s["id"], s["to"], s["version"], s["authorized_by"], now, atoms)
-    # Reload: the activation pass must read the file state the effects just produced.
-    atoms, _ = load(dirs)
-    for act in p["activations"]:
-        rewrite(act["id"], "active", act["version"], None, now, atoms)
+    if p["mode"] == "effects":
+        for s in p["steps"]:
+            if s["action"] == "transition":
+                rewrite(s["id"], s["to"], s["version"], s["authorized_by"], now,
+                        atoms, author=None)
+    else:
+        for act in p["activations"]:
+            # author moves to the reconciler: this instance is the law's record of a
+            # transition it caused, not a re-authoring of the atom's content. The
+            # ratifying decision stays in authorized_by, untouched.
+            rewrite(act["id"], "active", act["version"], None, now, atoms,
+                    author="ont-060-reconciliation")
 
     atoms, errors = load(dirs)
     if errors:
@@ -267,13 +316,13 @@ def main():
             print("  •", e)
         return 1
 
-    from atom_lint import corpus_digest
     digest = corpus_digest(atoms)
     if not a.no_evidence:
         ev = emit_evidence(p, True, digest)
         print(f"\nevidence {ev['id']}")
     print(f"\nPASS — tree written and lints green: corpus@{digest}")
-    print("staged nothing and committed nothing: the merge is the signature.")
+    print("committed nothing: the merge is the signature." if p["mode"] == "effects"
+          else "committed nothing: commit this separately from any signed act (D34).")
     return 0
 
 

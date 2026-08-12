@@ -144,9 +144,9 @@ id: SPEC-0112
 type: specification
 scope: story:story-0009
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-12T16:00:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-12T18:15:00Z"
+author: agent-worker-story-0009
 authorized_by: null
 title: "DEC-0003 generated, owner-ratified, activation executed; meters live"
 tags: [acceptance-criterion]
@@ -160,6 +160,14 @@ the owner ratifies through the PR-merge signature; post-merge the
 standing report shows nonzero active_claims, live dangling and
 unevidenced counts, and the ratified-but-inactive lines; the run's
 evidence rows are committed to acta/.
+
+v1.1.0 (D34) fixes the shape to one PR carrying two commits with two
+attributions: the first applies DEC-0003's enumerated effects and is what
+the merge signs; the second is the reconciliation pass, attributed to
+ONT-060 rather than to the signer, because activation is caused by
+binding-completeness and not by anyone's signature. The acceptance meaning
+is unchanged — meters live post-merge — but the ledger now shows who caused
+what: the human ratified, the law activated.
 <!-- atom:end id=SPEC-0112 -->
 
 <!-- atom:begin id=SPEC-0113 -->

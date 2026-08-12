@@ -18,7 +18,7 @@ import tempfile
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from enact import load, plan, report  # noqa: E402
+from enact import effects_plan, load, reconcile_plan, report  # noqa: E402
 from paths import PLATFORM  # noqa: E402
 
 failures = []
@@ -78,13 +78,13 @@ with tempfile.TemporaryDirectory() as td:
     atoms, errors = load([str(corpus)])
     check("fixture corpus lints clean", not errors, str(errors[:3]))
 
-    p = plan("DEC-9001", atoms, "2026-01-02T00:00:00Z")
+    p = effects_plan("DEC-9001", atoms, "2026-01-02T00:00:00Z")
     steps = {s["id"]: s for s in p["steps"]}
-    acts = {a["id"]: a for a in p["activations"]}
-    held = {b["id"]: b for b in p["blocked"]}
 
-    # Effects
+    # Effects: exactly the decision's enumerated targets, and nothing else (D34).
     check("every effect target becomes a transition step", len(steps) == 6, str(sorted(steps)))
+    check("the effects plan proposes no activations", "activations" not in p,
+          "a signed act must not carry activations")
     check("proposed -> ratified recorded with authorized_by",
           steps["SPEC-9001"]["to"] == "ratified"
           and steps["SPEC-9001"]["authorized_by"] == "DEC-9001", json.dumps(steps["SPEC-9001"]))
@@ -94,17 +94,25 @@ with tempfile.TemporaryDirectory() as td:
     check("first ratification of a 1.x atom takes a minor bump",
           steps["SPEC-9002"]["version"] == "1.1.0", steps["SPEC-9002"]["version"])
 
-    # Activation eligibility — the heart of D31.
-    check("a claim bound by a rule activates", "SPEC-9001" in acts,
+    # Eligibility, computed by the reconciler against the post-effects corpus.
+    projected = {aid: (dict(a[0]), a[1], a[2]) for aid, a in atoms.items()}
+    for s in p["steps"]:
+        if s["action"] == "transition":
+            projected[s["id"]][0]["state"] = s["to"]
+    rp = reconcile_plan(projected, "2026-01-02T00:00:00Z")
+    acts = {a["id"]: a for a in rp["activations"]}
+    held = {b["id"]: b for b in rp["blocked"]}
+
+    check("a claim bound by a rule is eligible", "SPEC-9001" in acts,
           f"activations={sorted(acts)} held={sorted(held)}")
     check("a claim nothing binds is held ratified", "SPEC-9002" in held
           and "ONT-031" in held["SPEC-9002"]["reason"], json.dumps(held.get("SPEC-9002")))
-    check("a control whose implementation resolves activates", "CTRL-9001" in acts,
+    check("a control whose implementation resolves is eligible", "CTRL-9001" in acts,
           json.dumps(acts.get("CTRL-9001")))
     check("a control whose implementation does not resolve is held ratified",
           "CTRL-9002" in held and "ONT-033" in held["CTRL-9002"]["reason"],
           json.dumps(held.get("CTRL-9002")))
-    check("rules and enforcements activate on ratification",
+    check("rules and enforcements are eligible on ratification",
           "RULE-9001" in acts and "ENF-9001" in acts, f"acts={sorted(acts)}")
 
     # A dry run must leave the tree byte-identical.
@@ -116,7 +124,7 @@ with tempfile.TemporaryDirectory() as td:
     check("dry run writes nothing", (corpus / "fixture.md").read_text() == before,
           "the fixture file changed during a dry run")
 
-    # Apply, then verify the written tree.
+    # Apply the effects. Nothing should activate: a signature ratifies, and only that.
     r = subprocess.run([sys.executable, str(PLATFORM / "tools" / "enact.py"),
                         "--decision", "DEC-9001", "--corpus", str(corpus),
                         "--apply", "--no-evidence"], capture_output=True, text=True)
@@ -127,26 +135,51 @@ with tempfile.TemporaryDirectory() as td:
     check("written tree lints clean", not errors_after, str(errors_after[:3]))
     states = {aid: (after[aid][0]["state"], after[aid][0]["version"]) for aid in
               ("SPEC-9001", "SPEC-9002", "CTRL-9001", "CTRL-9002", "RULE-9001", "ENF-9001")}
-    check("SPEC-9001 is active", states["SPEC-9001"][0] == "active", str(states["SPEC-9001"]))
-    check("SPEC-9002 remains ratified", states["SPEC-9002"][0] == "ratified",
-          str(states["SPEC-9002"]))
-    check("CTRL-9001 is active", states["CTRL-9001"][0] == "active", str(states["CTRL-9001"]))
-    check("CTRL-9002 remains ratified", states["CTRL-9002"][0] == "ratified",
-          str(states["CTRL-9002"]))
+    check("the ceremony ratifies and activates nothing (D34)",
+          all(s == "ratified" for s, _v in states.values()), json.dumps(states))
     check("authorized_by is set on ratified atoms",
           after["SPEC-9002"][0].get("authorized_by") == "DEC-9001",
           str(after["SPEC-9002"][0].get("authorized_by")))
-    check("versions moved on every transition",
-          all(v != "1.0.0" or aid == "SPEC-9001" for aid, (s, v) in states.items()),
-          json.dumps(states))
-    # Re-running must converge rather than bumping versions forever.
-    r2 = subprocess.run([sys.executable, str(PLATFORM / "tools" / "enact.py"),
-                         "--decision", "DEC-9001", "--corpus", str(corpus),
-                         "--apply", "--no-evidence"], capture_output=True, text=True)
+    check("first ratification of the 0.x atom wrote 1.0.0",
+          states["SPEC-9001"][1] == "1.0.0", str(states["SPEC-9001"]))
+
+    # Reconcile: the law operating, separately attributed.
+    r = subprocess.run([sys.executable, str(PLATFORM / "tools" / "enact.py"),
+                        "--reconcile", "--corpus", str(corpus),
+                        "--apply", "--no-evidence"], capture_output=True, text=True)
+    check("reconcile exits clean and lints green", r.returncode == 0 and "PASS" in r.stdout,
+          r.stdout[-400:] + r.stderr[-400:])
+    rec, rec_errors = load([str(corpus)])
+    check("reconciled tree lints clean", not rec_errors, str(rec_errors[:3]))
+    check("SPEC-9001 is now active", rec["SPEC-9001"][0]["state"] == "active",
+          str(rec["SPEC-9001"][0]["state"]))
+    check("SPEC-9002 remains ratified", rec["SPEC-9002"][0]["state"] == "ratified",
+          str(rec["SPEC-9002"][0]["state"]))
+    check("CTRL-9001 is now active", rec["CTRL-9001"][0]["state"] == "active",
+          str(rec["CTRL-9001"][0]["state"]))
+    check("CTRL-9002 remains ratified — ONT-033 holds it",
+          rec["CTRL-9002"][0]["state"] == "ratified", str(rec["CTRL-9002"][0]["state"]))
+    check("activation is attributed to the law, not to the signer",
+          rec["SPEC-9001"][0]["author"] == "ont-060-reconciliation",
+          str(rec["SPEC-9001"][0]["author"]))
+    check("the ratifying decision survives in authorized_by",
+          rec["SPEC-9001"][0]["authorized_by"] == "DEC-9001",
+          str(rec["SPEC-9001"][0].get("authorized_by")))
+
+    # Both modes at once is a refusal, not a guess about which was meant.
+    r = subprocess.run([sys.executable, str(PLATFORM / "tools" / "enact.py"),
+                        "--decision", "DEC-9001", "--reconcile", "--corpus", str(corpus),
+                        "--dry-run"], capture_output=True, text=True)
+    check("asking for both modes is refused", r.returncode == 2, f"exit={r.returncode}")
+
+    # Re-running either mode must converge rather than bumping versions forever.
+    v_before = rec["SPEC-9001"][0]["version"]
+    subprocess.run([sys.executable, str(PLATFORM / "tools" / "enact.py"),
+                    "--reconcile", "--corpus", str(corpus), "--apply", "--no-evidence"],
+                   capture_output=True, text=True)
     again, _ = load([str(corpus)])
-    check("re-running the ceremony is idempotent for already-active atoms",
-          again["SPEC-9001"][0]["version"] == after["SPEC-9001"][0]["version"],
-          f"{after['SPEC-9001'][0]['version']} -> {again['SPEC-9001'][0]['version']}")
+    check("re-reconciling is idempotent", again["SPEC-9001"][0]["version"] == v_before,
+          f"{v_before} -> {again['SPEC-9001'][0]['version']}")
 
 print(f"\n{'PASS' if not failures else 'FAIL'} — SPEC-0111 ceremony suite"
       f"{'' if not failures else ': ' + ', '.join(failures)}")
