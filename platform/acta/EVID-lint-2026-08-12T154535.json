@@ -1,0 +1,16 @@
+{
+ "id": "EVID-lint-2026-08-12T154535",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T15:45:35.186283+00:00",
+ "author": "ctrl-0001-atom-lint",
+ "authorized_by": null,
+ "title": "atom-lint run over 334 atoms",
+ "control_ref": "CTRL-0001",
+ "subject": "corpus@0ded4b45f0b0e716#atoms=240",
+ "verdict": "fail",
+ "checked_at": "2026-08-12T15:45:35.186283+00:00",
+ "checker": "ctrl-0001-atom-lint"
+}

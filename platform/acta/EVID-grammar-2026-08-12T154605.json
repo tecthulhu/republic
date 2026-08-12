@@ -1,0 +1,16 @@
+{
+ "id": "EVID-grammar-2026-08-12T154605",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T15:46:05.683258+00:00",
+ "author": "ctrl-0002",
+ "authorized_by": null,
+ "title": "grammar property suite over the citizen algebra (chainverify@c047d0324fc56f25)",
+ "control_ref": "CTRL-0002",
+ "subject": "caveat-algebra@ENT-091..095#chainverify:c047d0324fc56f25",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T15:46:05.683258+00:00",
+ "checker": "ctrl-0002-grammar-suite"
+}

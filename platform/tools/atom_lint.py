@@ -12,7 +12,8 @@ Emits an evidence record (EVID-) per run.
 import sys, re, json, hashlib, datetime, pathlib
 import yaml, jsonschema
 
-from paths import ACTA, SCHEMA as SCHEMA_PATH, resolve as resolve_path
+from paths import (ACTA, CORPUS as CORPUS_DEFAULT, REPO, SCHEMA as SCHEMA_PATH,
+                   resolve as resolve_path)
 
 PREFIX = {"PRIN":"principle","SPEC":"specification","RSTR":"restriction","CTRL":"control",
           "ENF":"enforcement","RULE":"rule","DEC":"decision","MAND":"mandate","STRAT":"strategy",
@@ -147,6 +148,88 @@ def expand_inputs(inputs):
         else: errors.append(f"{i}: input path does not exist")
     return files, errors
 
+def atom_content_hash(atom, body):
+    """Canonical content of one atom instance, excluding the fields that identify
+    *which* instance it is. Two instances with the same hash say the same thing."""
+    record = {k: v for k, v in atom.items() if k not in ("version", "instantiated_at")}
+    return hashlib.sha256(json.dumps({"record": record, "body": body},
+                                     sort_keys=True, separators=(",", ":"),
+                                     default=str).encode()).hexdigest()[:16]
+
+
+def repo_of(paths):
+    """The repository that owns the corpus being linted — not necessarily the one the
+    tool lives in. Resolving the ref against the tool's own repo would compare a
+    corpus against an unrelated history and silently find nothing to complain about,
+    which is how this was first written and how the fixture caught it."""
+    import subprocess
+    for candidate in list(paths) + [str(CORPUS_DEFAULT)]:
+        q = resolve_path(candidate)
+        d = q if q.is_dir() else q.parent
+        if not d.exists():
+            continue
+        r = subprocess.run(["git", "-C", str(d), "rev-parse", "--show-toplevel"],
+                           capture_output=True, text=True)
+        if r.returncode == 0 and r.stdout.strip():
+            return pathlib.Path(r.stdout.strip())
+    return REPO
+
+
+def atoms_at(ref, repo):
+    """Parse the corpus as it stood at a git ref, via a throwaway export.
+
+    Reading the tree at a ref rather than diffing files means an atom that moved
+    between files is still recognised as the same atom — governance attaches to ids,
+    never to filenames (ONT-002).
+    """
+    import subprocess, tempfile, tarfile, io
+    r = subprocess.run(["git", "-C", str(repo), "archive", ref],
+                       capture_output=True)
+    if r.returncode:
+        return None, f"cannot read tree at {ref}: {r.stderr.decode()[:200]}"
+    out = {}
+    with tempfile.TemporaryDirectory() as td:
+        with tarfile.open(fileobj=io.BytesIO(r.stdout)) as tar:
+            tar.extractall(td, filter="data")
+        base = pathlib.Path(td)
+        for f in list(base.rglob("*.md")) + [q for q in base.rglob("*.json")
+                                             if ACTA_DIR in q.parts]:
+            parsed, _errs, _text = parse_file(f)
+            for a, _src, body in parsed:
+                if "id" in a:
+                    out[a["id"]] = (str(a.get("version", "")),
+                                    str(a.get("instantiated_at", "")),
+                                    atom_content_hash(a, body))
+    return out, None
+
+
+def immutability_findings(atoms, ref, repo):
+    """SPEC-0113: ONT-012/015 made structural.
+
+    An atom whose content changed while (version, instantiated_at) stayed put is an
+    edit to a published instance. Immutability had been a convention enforced by
+    reviewer attention; this is the same law enforced by the gate.
+    """
+    before, err = atoms_at(ref, repo)
+    if err:
+        return [err]
+    findings = []
+    for aid, (atom, src, body) in atoms.items():
+        prior = before.get(aid)
+        if prior is None:
+            continue  # new atom: nothing to compare against
+        old_v, old_t, old_hash = prior
+        new_v = str(atom.get("version", ""))
+        new_t = str(atom.get("instantiated_at", ""))
+        new_hash = atom_content_hash(atom, body)
+        if new_hash != old_hash and (new_v, new_t) == (old_v, old_t):
+            findings.append(
+                f"{src}: {aid} content changed at unchanged instance identity "
+                f"(version {new_v}, instantiated_at {new_t}) — a published instance "
+                f"was edited in place (ONT-012/015). Emit a new instance instead.")
+    return findings
+
+
 def lint(corpus_dirs, schema_path):
     schema = json.loads(pathlib.Path(schema_path).read_text())
     validators = {t: jsonschema.Draft202012Validator({**schema, "$ref": f"#/$defs/{t}"}) for t in PREFIX.values()}
@@ -202,9 +285,20 @@ def lint(corpus_dirs, schema_path):
     return all_atoms, errors
 
 def main():
-    corpus = sys.argv[1:] or ["corpus"]
+    import argparse
+    ap = argparse.ArgumentParser(description="atom-lint (CTRL-0001)")
+    ap.add_argument("paths", nargs="*", default=None,
+                    help="files or directories to lint (default: the platform corpus)")
+    ap.add_argument("--since", default=None, metavar="REF",
+                    help="also check instance immutability against a git ref "
+                         "(SPEC-0113): content may not change without a new "
+                         "(version, instantiated_at)")
+    a = ap.parse_args()
+    corpus = a.paths or ["corpus"]
     schema = str(SCHEMA_PATH)
     atoms, errors = lint(corpus, schema)
+    if a.since:
+        errors = errors + immutability_findings(atoms, a.since, repo_of(corpus))
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = corpus_digest(atoms)
     governed = sum(1 for a, _s, _b in atoms.values() if a.get("type") != "evidence")
