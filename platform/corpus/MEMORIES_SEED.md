@@ -5,19 +5,28 @@
 id: MEM-0001
 type: memory
 scope: repo:eldritch-labs/platform
-state: active
-version: 1.0.0
-instantiated_at: "2026-08-10T12:30:00Z"
-author: agent-worker-demo
+state: superseded
+version: 1.1.0
+instantiated_at: "2026-08-11T18:20:00Z"
+author: agent-worker-story-0008
 authorized_by: null
 title: "Marker recognition is column-0 anchored; indented examples are inert"
-tags: [context-control]
+tags: [context-control, superseded]
 context_class: relevant
 keywords: [encoding, markers, column-zero]
 source_refs: [DOC-0000]
 ```
 Learned during first lint run: the ONT-070a example inside the spec parsed as
 a live atom until column-0 anchoring was ruled.
+
+v1.1.0 records the lifecycle transition only (D26/D30): superseded by MEM-0003,
+which carries the same content under the scope this repository actually has.
+The content above is unchanged and remains true at its own time — what moved is
+the state, and per ONT-015 a transition is itself a change and therefore a new
+instance. v1.0.0, with `state: active` and the scope
+`repo:eldritch-labs/platform` that was never this repository, stays addressable
+in history. Note that the stale scope is preserved deliberately: correcting it
+here would edit a memory, which ONT-049a forbids — grooming emits successors.
 <!-- atom:end id=MEM-0001 -->
 
 <!-- atom:begin id=MEM-0002 -->

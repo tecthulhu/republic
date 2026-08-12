@@ -1,83 +1,157 @@
 #!/usr/bin/env python3
-"""CTRL-0002: grammar property suite. Reference implementation of the ENT-091–095
-caveat algebra plus randomized property tests. Emits evidence."""
-import random, json, datetime, pathlib, operator, sys
+"""CTRL-0002: grammar property suite (SPEC-0108).
 
-FACTS = {"now","mint_time","lease_age","subject","action","resource","audience","use_count","depth","parent_id","lease_id"}
-OPS = {"=":operator.eq,"!=":operator.ne,"<":operator.lt,"<=":operator.le,">":operator.gt,">=":operator.ge,
-       "in":lambda a,b: a in b, "prefix-of":lambda a,b: str(b).startswith(str(a))}
+P1–P6 over the caveat algebra of ENT-091–095. The algebra itself lives in
+`base/l0/chainverify.py` and is imported, never restated: PA-006 rules one
+implementation, and a property suite that carries its own copy proves properties
+about code no citizen executes (D24). Every verdict below comes from the citizen
+implementation — this module supplies inputs and expectations only.
 
-def check_predicate(pred, facts):
-    """ENT-094: fail closed — unknown fact, unknown op, or eval error denies."""
-    fact, op, lit = pred
-    if fact not in FACTS or op not in OPS or fact not in facts: return False
-    try: return bool(OPS[op](facts[fact], lit))
-    except Exception: return False
+Per D33, fixture construction is not implementation: the suite may *build*
+credential trees and revocation sets, because it authored them and therefore knows
+their shape. What it may not do is compute a verification result independently to
+compare against `chainverify` — a shadow oracle is a second implementation wearing
+a test's clothes.
+"""
+import datetime
+import hashlib
+import json
+import pathlib
+import random
+import sys
 
-def verify(chain, facts):
-    """ENT-093/094: union of all caveats along chain; every predicate must hold."""
-    return all(check_predicate(p, facts) for caveats in chain for p in caveats)
+# The algebra ships in the base image; locate it from this file rather than the
+# caller's cwd (the direction SPEC-0114 generalizes to every tool).
+L0 = pathlib.Path(__file__).resolve().parents[1] / "base" / "l0"
+sys.path.insert(0, str(L0))
 
-def reject_exception_construct(caveat_block):
-    """ENT-095: any given/when/then structure inside a credential is rejected."""
-    return not (isinstance(caveat_block, dict) and {"given","when","then"} & set(caveat_block))
+from chainverify import (  # noqa: E402  — the one algebra (PA-006)
+    FACTS,
+    VerificationError,
+    verify_caveats,
+    well_formed_caveats,
+)
+
+ACTA = pathlib.Path("acta")
+
+
+def holds(caveats, facts):
+    """Bool adapter over the citizen verifier. Not a second implementation: the
+    decision is `verify_caveats`', this only converts its raising into a value."""
+    try:
+        verify_caveats(caveats, facts)
+        return True
+    except VerificationError:
+        return False
+
 
 def rand_pred(r):
-    f = r.choice(sorted(FACTS - {"subject","action","resource","audience","parent_id","lease_id"}))
-    return (f, r.choice(["<","<=",">",">=","="]), r.randint(0,100))
+    f = r.choice(sorted(FACTS - {"subject", "action", "resource", "audience",
+                                 "parent_id", "lease_id"}))
+    return [f, r.choice(["<", "<=", ">", ">=", "="]), r.randint(0, 100)]
+
 
 def run():
-    r = random.Random(42); failures = []
+    r = random.Random(42)
+    failures = []
     N = 200000
+
     # P1 — attenuation monotonicity (ENT-003/093): adding caveats never grants.
-    for _ in range(N//4):
-        parent = [[rand_pred(r) for _ in range(r.randint(0,3))]]
-        child = parent + [[rand_pred(r) for _ in range(r.randint(1,3))]]
-        facts = {f: r.randint(0,100) for f in FACTS}
-        if verify(child, facts) and not verify(parent, facts):
-            failures.append(("P1-attenuation", parent, child, facts)); break
-    # P2 — fail-closed on unknown facts (ENT-094).
-    for _ in range(N//4):
-        chain = [[("unknown_fact_"+str(r.randint(0,9)), "=", 1)]]
-        if verify(chain, {f: 1 for f in FACTS}):
-            failures.append(("P2-unknown-fact", chain)); break
+    for _ in range(N // 4):
+        parent = [[rand_pred(r) for _ in range(r.randint(0, 3))]]
+        child = parent + [[rand_pred(r) for _ in range(r.randint(1, 3))]]
+        facts = {f: r.randint(0, 100) for f in FACTS}
+        if holds(child, facts) and not holds(parent, facts):
+            failures.append(("P1-attenuation", parent, child, facts))
+            break
+
+    # P2 — fail closed on unknown facts (ENT-094).
+    for _ in range(N // 4):
+        chain = [[["unknown_fact_" + str(r.randint(0, 9)), "=", 1]]]
+        if holds(chain, {f: 1 for f in FACTS}):
+            failures.append(("P2-unknown-fact", chain))
+            break
+
     # P3 — no else: a failing predicate always denies; nothing recovers it.
-    for _ in range(N//4):
-        chain = [[("lease_age","<",10)], [rand_pred(r) for _ in range(2)]]
-        facts = {f: r.randint(0,100) for f in FACTS}; facts["lease_age"] = 50
-        if verify(chain, facts):
-            failures.append(("P3-no-else", chain, facts)); break
-    # P4 — layer separation (ENT-095): exception constructs rejected in credentials.
-    for blk in [{"given":"RULE-0001","when":"x","then":"suspend"}, {"lease_age":("<",48)}, [("action","=","read")]]:
-        expect = not isinstance(blk, dict) or not ({"given","when","then"} & set(blk))
-        if reject_exception_construct(blk) != expect:
-            failures.append(("P4-layer-separation", blk))
+    for _ in range(N // 4):
+        chain = [[["lease_age", "<", 10]], [rand_pred(r) for _ in range(2)]]
+        facts = {f: r.randint(0, 100) for f in FACTS}
+        facts["lease_age"] = 50
+        if holds(chain, facts):
+            failures.append(("P3-no-else", chain, facts))
+            break
+
+    # P4 — layer separation (ENT-095/ONT-057): exception constructs are not
+    # representable in a credential. The verdict is well_formed_caveats'.
+    layer_cases = [
+        ([{"given": "RULE-0001", "when": "x", "then": "suspend"}], False),
+        ([[["given", "=", "RULE-0001"]]], False),
+        ([{"lease_age": ["<", 48]}], False),
+        ([[["action", "=", "read"]]], True),
+        ([[["lease_age", "<", 48], ["action", "in", ["read"]]]], True),
+    ]
+    for caveats, expected in layer_cases:
+        if well_formed_caveats(caveats) != expected:
+            failures.append(("P4-layer-separation", caveats, expected))
+    # A malformed caveat set must also deny outright, not merely report unwell.
+    if holds([{"given": "RULE-0001", "then": "suspend"}], {f: 1 for f in FACTS}):
+        failures.append(("P4-malformed-denies",))
+
     # P5 — downward revocation (ENT-051): revoking a node kills its subtree only.
-    tree = {"root":None,"persona":"root","lease":"persona","leafA":"lease","leafB":"lease","sibling":"persona"}
-    def alive(n, revoked):
-        while n is not None:
-            if n in revoked: return False
-            n = tree[n]
-        return True
+    #
+    # Fixture-only by D33. `chainverify` implements no revocation, so there is no
+    # citizen oracle to consult and nothing to duplicate: the tree and the
+    # expectations are both this suite's own data. Recorded honestly — this
+    # property attests a design rule, not shipped behaviour, and it converts to a
+    # real check when revocation lands in the verifier.
+    tree = {"root": None, "persona": "root", "lease": "persona",
+            "leafA": "lease", "leafB": "lease", "sibling": "persona"}
+
+    def reachable_from_revoked(node, revoked):
+        while node is not None:
+            if node in revoked:
+                return True
+            node = tree[node]
+        return False
+
     revoked = {"lease"}
-    if alive("leafA",revoked) or alive("leafB",revoked) or not alive("sibling",revoked) or not alive("persona",revoked):
-        failures.append(("P5-revocation",))
-    # P6 — decay ladder expressible in the vocabulary (ONT/ENT decay claims).
-    ladder = [[("lease_age","<",48)], [("lease_age","<",72),("action","=","read")]]
-    fresh = {**{f:0 for f in FACTS}, "lease_age":10, "action":"write"}
-    stale = {**{f:0 for f in FACTS}, "lease_age":60, "action":"read"}
-    dead  = {**{f:0 for f in FACTS}, "lease_age":80, "action":"read"}
-    if not verify([ladder[0]], fresh) or verify(ladder, fresh) or not verify([ladder[1]], stale) or verify([ladder[1]], dead):
+    expected_dead = {"leafA", "leafB", "lease"}
+    actual_dead = {n for n in tree if reachable_from_revoked(n, revoked)}
+    if actual_dead != expected_dead:
+        failures.append(("P5-revocation-fixture", sorted(actual_dead)))
+
+    # P6 — the decay ladder is expressible in the vocabulary (ENT-074).
+    ladder = [[["lease_age", "<", 48]],
+              [["lease_age", "<", 72], ["action", "=", "read"]]]
+    fresh = {**{f: 0 for f in FACTS}, "lease_age": 10, "action": "write"}
+    stale = {**{f: 0 for f in FACTS}, "lease_age": 60, "action": "read"}
+    dead = {**{f: 0 for f in FACTS}, "lease_age": 80, "action": "read"}
+    if (not holds([ladder[0]], fresh) or holds(ladder, fresh)
+            or not holds([ladder[1]], stale) or holds([ladder[1]], dead)):
         failures.append(("P6-decay",))
+
+    # SPEC-0108: the evidence subject names the algebra that was actually exercised,
+    # so a change to chainverify is visibly a change to what CTRL-0002 attested.
+    module_digest = hashlib.sha256((L0 / "chainverify.py").read_bytes()).hexdigest()[:16]
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    evid = {"id": f"EVID-grammar-{now[:19].replace(':','')}", "type":"evidence","scope":"platform",
-            "state":"active","version":"1.0.0","instantiated_at":now,"author":"ctrl-0002","authorized_by":None,
-            "title":"grammar property suite","control_ref":"CTRL-0002","subject":"caveat-algebra@ENT-091..095",
-            "verdict":"pass" if not failures else "fail","checked_at":now,"checker":"ctrl-0002-grammar-suite"}
-    pathlib.Path("acta").mkdir(exist_ok=True)
-    pathlib.Path(f"acta/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
-    print(f"properties P1–P6 over ~{N} generated cases: {'PASS' if not failures else 'FAIL'}")
-    for f in failures: print("  •", f)
+    evid = {"id": f"EVID-grammar-{now[:19].replace(':', '')}", "type": "evidence",
+            "scope": "platform", "state": "active", "version": "1.0.0",
+            "instantiated_at": now, "author": "ctrl-0002", "authorized_by": None,
+            "title": f"grammar property suite over the citizen algebra "
+                     f"(chainverify@{module_digest})",
+            "control_ref": "CTRL-0002",
+            "subject": f"caveat-algebra@ENT-091..095#chainverify:{module_digest}",
+            "verdict": "pass" if not failures else "fail", "checked_at": now,
+            "checker": "ctrl-0002-grammar-suite"}
+    ACTA.mkdir(exist_ok=True)
+    (ACTA / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+
+    print(f"properties P1–P6 over ~{N} generated cases against "
+          f"chainverify@{module_digest}: {'PASS' if not failures else 'FAIL'}")
+    for f in failures:
+        print("  •", f)
     sys.exit(1 if failures else 0)
 
-if __name__ == "__main__": run()
+
+if __name__ == "__main__":
+    run()

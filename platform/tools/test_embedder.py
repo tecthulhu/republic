@@ -41,25 +41,19 @@ check("no row carries a model literal in place of a band",
       all(r["embedding_model_band"] in ("B0", "B1", "B2", "B3") for r in rows),
       str({r["embedding_model_band"] for r in rows}))
 
-# 2 — ONT-087: the atom is the chunk.
+# 2 — ONT-087: the atom is the chunk, and every atom is one.
 #
-# Scoped to governed corpus atoms, because that is what the embedder reads. Since
-# D17 committed evidence rows under acta/, lint parses them as atoms too, and the
-# two sets no longer coincide.
-#
-# That raises a question this story does not settle and must not pretend to:
-# ONT-085 says *every* persisted instance is embedded at persistence, with no
-# per-type opt-out, which now includes evidence records. But evidence is written
-# by control runs directly rather than through the persistence pipeline (PA-007),
-# so every run would emit a row lacking a vector and ONT-089's target-zero
-# coverage query would be permanently red through no fault of the corpus.
-# Either evidence embeds inside the emitting pipeline, or records are excluded
-# from the coverage query by ruling. Flagged, not decided here.
-governed = {aid for aid, (a, *_) in atoms.items() if a.get("type") != "evidence"}
-check("row count equals the governed atom count", len(rows) == len(governed),
-      f"{len(rows)} rows vs {len(governed)} governed atoms ({len(atoms)} parsed incl. records)")
-check("row ids are exactly the governed atom ids", {r["atom_id"] for r in rows} == governed,
-      "row id set differs from the governed set")
+# D25 settled the question SPEC-0106 opened: evidence rows are atoms, ONT-085
+# exempts no type, so records embed alongside governed documents. The assertion is
+# therefore against the whole parsed set again, records included — if the two sets
+# diverge, either discovery or the coverage query has drifted.
+check("row count equals lint's parsed atom count", len(rows) == len(atoms),
+      f"{len(rows)} rows vs {len(atoms)} atoms")
+check("row ids are exactly the parsed atom ids", {r["atom_id"] for r in rows} == set(atoms),
+      "row id set differs from lint's")
+evidence_rows = [r for r in rows if r["type"] == "evidence"]
+check("evidence records are embedded (SPEC-0109)", len(evidence_rows) > 0,
+      "no evidence atoms in the index — discovery does not span acta/")
 
 # 3 — ONT-089: coverage query behaviour
 rep = queries(["corpus"], idx)
@@ -70,6 +64,14 @@ rep_withheld = queries(["corpus"], withheld)
 check("coverage gap is non-empty when a row is withheld",
       rep_withheld["embedding_coverage_gap"] == [rows[0]["atom_id"]],
       str(rep_withheld["embedding_coverage_gap"][:5]))
+# SPEC-0109 names the acta case specifically: withholding an evidence record must
+# register as a gap, or records would be silently exempt from the meter.
+acta_id = evidence_rows[0]["atom_id"] if evidence_rows else None
+if acta_id:
+    held = dict(idx, rows=[r for r in rows if r["atom_id"] != acta_id])
+    check("withholding an acta record registers as a coverage gap",
+          queries(["corpus"], held)["embedding_coverage_gap"] == [acta_id],
+          str(queries(["corpus"], held)["embedding_coverage_gap"][:5]))
 
 # 4 — ONT-086: vectors are generated, never authored
 authored = [p for p in pathlib.Path("corpus").rglob("*.md")

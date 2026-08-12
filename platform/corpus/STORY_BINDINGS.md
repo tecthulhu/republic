@@ -1,4 +1,10 @@
-# STORY-0001 bindings and declared postures
+# Story bindings and declared postures
+
+Rule bindings and interim-posture atoms for STORY-0001 and STORY-0008. Postures
+are written as checked claims rather than comments so a deviation is something the
+suites test and the standing queries can see, never silence (PA-021).
+
+## STORY-0001
 
 STORY-0001's acceptance specifications become *enforceable* only when an active
 rule binds them (ONT-036: an unbound claim is a proposal). The three rules below
@@ -127,3 +133,58 @@ relations:
   - { rel: binds, target: ENF-0001 }
 ```
 <!-- atom:end id=RULE-0079 -->
+
+## STORY-0008
+
+<!-- atom:begin id=SPEC-0115 -->
+```yaml
+id: SPEC-0115
+type: specification
+scope: story:story-0008
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-12T17:00:00Z"
+author: agent-worker-story-0008
+authorized_by: null
+title: "Interim posture: evidence embeds in batch, with coverage-zero as the gate"
+tags: [interim-posture, d25, ont-085]
+binding: checked
+check: machine
+story_ref: STORY-0008
+```
+ONT-085 requires embedding to be a non-optional side effect of persistence. In
+bootstrap there is no streaming persistence pipeline: controls write their own
+evidence rows into `acta/` directly, so a synchronous embed-at-persistence is not
+available to honor. The posture, stated rather than left implicit: embedding runs
+in batch, and **a non-empty coverage gap is a red condition** — the standing-query
+report is the meter, satisfied by running the embedder before the report. ONT-085's
+non-optionality is carried by the gate instead of by the write path.
+
+The consequence is honest and bounded: between a control run and the next embedder
+run, the newest evidence rows have no vector, so coverage is momentarily nonzero by
+construction rather than by neglect. This atom is superseded — not edited — when the
+data-access citizen's durable consumer (PA-007) makes persistence synchronous, at
+which point embed-at-persistence holds literally and the gate becomes redundant.
+<!-- atom:end id=SPEC-0115 -->
+
+<!-- atom:begin id=RULE-0080 -->
+```yaml
+id: RULE-0080
+type: rule
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-12T17:00:00Z"
+author: agent-worker-story-0008
+authorized_by: null
+title: "Bind SPEC-0115 via CTRL-0007"
+tags: [binding, interim-posture]
+claim: SPEC-0115
+control: CTRL-0007
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0115 }
+  - { rel: binds, target: CTRL-0007 }
+  - { rel: binds, target: ENF-0001 }
+```
+<!-- atom:end id=RULE-0080 -->

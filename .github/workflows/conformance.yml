@@ -40,7 +40,13 @@ jobs:
       - name: atom-lint fixture suite (SPEC-0092/0095/0096)
         working-directory: platform
         run: python tools/test_atom_lint.py
-      - name: CTRL-0002 — grammar property suite
+      # SPEC-0108: the algebra is singular. Static check first — if a second
+      # implementation has appeared, the property suite's pass means less than it
+      # looks like, so the structural claim is gated ahead of the behavioural one.
+      - name: SPEC-0108 — one-algebra static check
+        working-directory: platform
+        run: python tools/test_one_algebra.py
+      - name: CTRL-0002 — grammar property suite (against the citizen algebra)
         working-directory: platform
         run: python tools/test_grammar.py
       - name: CTRL-0007 — embedder pipeline suite
