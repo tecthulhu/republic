@@ -12,6 +12,8 @@ Emits an evidence record (EVID-) per run.
 import sys, re, json, hashlib, datetime, pathlib
 import yaml, jsonschema
 
+from paths import ACTA, SCHEMA as SCHEMA_PATH, resolve as resolve_path
+
 PREFIX = {"PRIN":"principle","SPEC":"specification","RSTR":"restriction","CTRL":"control",
           "ENF":"enforcement","RULE":"rule","DEC":"decision","MAND":"mandate","STRAT":"strategy",
           "SPRINT":"sprint","STORY":"story","EVID":"evidence","WVR":"waiver","BLK":"blocker",
@@ -127,7 +129,7 @@ def expand_inputs(inputs):
             files.append(q)
 
     for i in inputs:
-        p = pathlib.Path(i)
+        p = resolve_path(i)
         if p.is_dir():
             for q in sorted(p.rglob("*.md")):
                 add(q)
@@ -201,7 +203,7 @@ def lint(corpus_dirs, schema_path):
 
 def main():
     corpus = sys.argv[1:] or ["corpus"]
-    schema = "schemas/atoms-1.0.0.json"
+    schema = str(SCHEMA_PATH)
     atoms, errors = lint(corpus, schema)
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = corpus_digest(atoms)
@@ -218,8 +220,8 @@ def main():
             "subject": f"corpus@{digest}#atoms={governed}", "verdict": verdict,
             "checked_at": now, "checker": "ctrl-0001-atom-lint"}
     if not atoms: evid["reason"] = "empty-input"
-    pathlib.Path(ACTA_DIR).mkdir(exist_ok=True)
-    pathlib.Path(f"{ACTA_DIR}/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+    ACTA.mkdir(exist_ok=True)
+    (ACTA / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     print(f"atoms parsed: {len(atoms)}")
     by_type = {}
     for aid,(a,_src,_body) in atoms.items(): by_type[a.get('type','?')] = by_type.get(a.get('type','?'),0)+1

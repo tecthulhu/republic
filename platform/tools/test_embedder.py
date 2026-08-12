@@ -19,7 +19,8 @@ import datetime
 from atom_lint import lint
 from embedder import build, queries, instrument_manifest, manifest_digest, resolve_instrument, PROVENANCE_FIELDS
 
-SCHEMA = "schemas/atoms-1.0.0.json"
+from paths import ACTA, PLATFORM, SCHEMA as SCHEMA_PATH  # noqa: E402
+SCHEMA = str(SCHEMA_PATH)
 failures = []
 
 
@@ -28,8 +29,9 @@ def check(name, ok, detail=""):
     if not ok: failures.append(name)
 
 
-idx, vec, M, rows = build(["corpus"])
-atoms, lint_errors = lint(["corpus"], SCHEMA)
+CORPUS_DIR = str(PLATFORM / "corpus")
+idx, vec, M, rows = build([CORPUS_DIR])
+atoms, lint_errors = lint([CORPUS_DIR], SCHEMA)
 
 # 1 — ONT-088: full measurement provenance on every row
 missing = [(r["atom_id"], f) for r in rows for f in PROVENANCE_FIELDS if not r.get(f)]
@@ -56,11 +58,11 @@ check("evidence records are embedded (SPEC-0109)", len(evidence_rows) > 0,
       "no evidence atoms in the index — discovery does not span acta/")
 
 # 3 — ONT-089: coverage query behaviour
-rep = queries(["corpus"], idx)
+rep = queries([CORPUS_DIR], idx)
 check("coverage gap is empty on a fresh build", rep["embedding_coverage_gap"] == [],
       str(rep["embedding_coverage_gap"][:5]))
 withheld = dict(idx, rows=[r for r in rows if r["atom_id"] != rows[0]["atom_id"]])
-rep_withheld = queries(["corpus"], withheld)
+rep_withheld = queries([CORPUS_DIR], withheld)
 check("coverage gap is non-empty when a row is withheld",
       rep_withheld["embedding_coverage_gap"] == [rows[0]["atom_id"]],
       str(rep_withheld["embedding_coverage_gap"][:5]))
@@ -70,11 +72,11 @@ acta_id = evidence_rows[0]["atom_id"] if evidence_rows else None
 if acta_id:
     held = dict(idx, rows=[r for r in rows if r["atom_id"] != acta_id])
     check("withholding an acta record registers as a coverage gap",
-          queries(["corpus"], held)["embedding_coverage_gap"] == [acta_id],
-          str(queries(["corpus"], held)["embedding_coverage_gap"][:5]))
+          queries([CORPUS_DIR], held)["embedding_coverage_gap"] == [acta_id],
+          str(queries([CORPUS_DIR], held)["embedding_coverage_gap"][:5]))
 
 # 4 — ONT-086: vectors are generated, never authored
-authored = [p for p in pathlib.Path("corpus").rglob("*.md")
+authored = [p for p in (PLATFORM / "corpus").rglob("*.md")
             if any(k in p.read_text() for k in ("\nvector:", "\nembedding:"))]
 check("no vectors in authored corpus files", not authored, str(authored))
 check("vectors exist in the generated index", all(isinstance(r.get("vector"), list) for r in rows),
@@ -92,14 +94,19 @@ check("the manifest names class, params and library version",
       all(k in base for k in ("class", "params", "library")), json.dumps(base))
 
 with tempfile.TemporaryDirectory() as td:
-    for f in ("atom_lint.py", "embedder.py"):
-        shutil.copy(pathlib.Path("tools", f), pathlib.Path(td, f))
+    # paths.py travels with them: since SPEC-0114 the embedder imports it at module
+    # level, so a copy without it cannot be imported at all. Caught by running this
+    # suite from an unrelated directory, which is the failure mode SPEC-0114 exists
+    # to close — the fixture had inherited the same cwd assumption it now tests for.
+    for f in ("atom_lint.py", "embedder.py", "paths.py"):
+        shutil.copy(PLATFORM / "tools" / f, pathlib.Path(td, f))
     refactored = pathlib.Path(td, "embedder.py")
     refactored.write_text(refactored.read_text() + "\n\n# whitespace refactor, no instrument change\n")
     probe = ("import sys; sys.path.insert(0, %r)\n"
              "from embedder import resolve_instrument\n"
              "print(resolve_instrument('B0')[1])\n" % td)
-    r = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, cwd=".")
+    r = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True,
+                       cwd=str(PLATFORM))
     check("a whitespace refactor leaves the generation unchanged",
           r.returncode == 0 and r.stdout.strip() == resolve_instrument("B0")[1],
           f"exit={r.returncode} out={r.stdout.strip()!r} err={r.stderr.strip()[:200]}")
@@ -112,8 +119,8 @@ evid = {"id": f"EVID-ctrl0007-{now[:19].replace(':','')}", "type": "evidence", "
         "control_ref": "CTRL-0007",
         "subject": f"corpus@{idx['corpus_digest']}#atoms={len(rows)}@{idx['model_generation']}",
         "verdict": "pass" if not failures else "fail", "checked_at": now, "checker": "ctrl-0007-embedder-suite"}
-pathlib.Path("acta").mkdir(exist_ok=True)
-pathlib.Path(f"acta/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+ACTA.mkdir(exist_ok=True)
+(ACTA / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
 
 print(f"\n{'PASS' if not failures else 'FAIL'} — CTRL-0007 embedder pipeline suite"
       f"{'' if not failures else ': ' + ', '.join(failures)}")

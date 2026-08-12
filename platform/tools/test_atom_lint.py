@@ -13,9 +13,12 @@ import json, re, shutil, subprocess, sys, tempfile, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from atom_lint import lint, corpus_digest
 
-SCHEMA = "schemas/atoms-1.0.0.json"
-VACUOUS = "tools/fixtures/vacuous.md"
-SINGLE = "corpus/MEMORIES_SEED.md"
+from paths import ACTA, PLATFORM, SCHEMA as SCHEMA_PATH  # noqa: E402
+SCHEMA = str(SCHEMA_PATH)
+VACUOUS = str(PLATFORM / "tools" / "fixtures" / "vacuous.md")
+SINGLE = str(PLATFORM / "corpus" / "MEMORIES_SEED.md")
+CORPUS_DIR = str(PLATFORM / "corpus")
+LINT = str(PLATFORM / "tools" / "atom_lint.py")
 failures = []
 
 
@@ -43,9 +46,9 @@ check("zero atoms raises empty-input", any("empty-input" in e for e in errors), 
 # so a run landing in the same second as a previous one reuses its filename. That
 # collision is a real defect against ONT-046 (evidence is append-only) and is
 # reported, not worked around — this test simply must not depend on it.
-r = subprocess.run([sys.executable, "tools/atom_lint.py", VACUOUS], capture_output=True, text=True)
+r = subprocess.run([sys.executable, LINT, VACUOUS], capture_output=True, text=True)
 check("vacuous invocation exits non-zero", r.returncode != 0, f"exit={r.returncode}\n{r.stdout}")
-rows = sorted(pathlib.Path("acta").glob("EVID-lint-*.json"), key=lambda p: p.stat().st_mtime)
+rows = sorted(ACTA.glob("EVID-lint-*.json"), key=lambda p: p.stat().st_mtime)
 if not rows:
     check("vacuous invocation emits an evidence row", False, "no EVID- row in index/")
 else:
@@ -56,13 +59,13 @@ else:
           row.get("subject", ""))
 
 # D — the corpus itself still lints clean through the changed code path
-atoms, errors = lint(["corpus"], SCHEMA)
+atoms, errors = lint([CORPUS_DIR], SCHEMA)
 check("corpus still parses and passes", len(atoms) > 100 and not errors,
       f"{len(atoms)} atoms, {len(errors)} findings: {errors[:3]}")
 
 # E — SPEC-0095: no field/relation name collision on `blocks`
 FIELD_DECL = re.compile(r"^\s*blocks:\s", re.M)
-offenders = [str(p) for p in pathlib.Path("corpus").rglob("*.md") if FIELD_DECL.search(p.read_text())]
+offenders = [str(p) for p in (PLATFORM / "corpus").rglob("*.md") if FIELD_DECL.search(p.read_text())]
 check("no governed text declares a blocker field named `blocks`", not offenders, str(offenders))
 blk = [a for a, *_ in [(v[0],) for v in atoms.values()] if a.get("type") == "blocker"]
 check("blocker atoms carry blocks_refs", blk and all("blocks_refs" in a and "blocks" not in a for a in blk),
@@ -79,7 +82,7 @@ with tempfile.TemporaryDirectory() as td:
 
 # F — SPEC-0096: the evidence subject is content-addressed
 with tempfile.TemporaryDirectory() as td:
-    shutil.copytree("corpus", pathlib.Path(td, "corpus"))
+    shutil.copytree(CORPUS_DIR, pathlib.Path(td, "corpus"))
     a1, e1 = lint([f"{td}/corpus"], SCHEMA)
     before = corpus_digest(a1)
     seed = pathlib.Path(td, "corpus", "MEMORIES_SEED.md")
@@ -92,9 +95,9 @@ with tempfile.TemporaryDirectory() as td:
     check("identical content yields a stable digest", corpus_digest(a2) == after, "digest is unstable")
 
 # G — SPEC-0106: committed evidence rows are resolvable references
-acta_rows = sorted(pathlib.Path("acta").glob("EVID-*.json")) if pathlib.Path("acta").is_dir() else []
+acta_rows = sorted(ACTA.glob("EVID-*.json")) if ACTA.is_dir() else []
 check("acta/ holds committed evidence rows", bool(acta_rows), "no EVID- rows under acta/")
-atoms, errors = lint(["corpus", "acta"], SCHEMA)
+atoms, errors = lint([CORPUS_DIR, str(ACTA)], SCHEMA)
 evid_atoms = [a for a, *_ in ((v[0],) for v in atoms.values()) if a.get("type") == "evidence"]
 check("evidence rows load as atoms and validate", bool(evid_atoms) and not errors,
       f"{len(evid_atoms)} evidence atoms, {len(errors)} findings: {errors[:3]}")
@@ -107,8 +110,8 @@ if acta_rows:
            'title: "resolved_by fixture"\nraised_by: fixture\nblocks_refs: [DEC-0001]\n'
            "escalation: platform-owner\nresolved_by: %s\n```\n<!-- atom:end id=BLK-9998 -->\n")
     with tempfile.TemporaryDirectory() as td:
-        shutil.copytree("corpus", pathlib.Path(td, "corpus"))
-        shutil.copytree("acta", pathlib.Path(td, "acta"))
+        shutil.copytree(CORPUS_DIR, pathlib.Path(td, "corpus"))
+        shutil.copytree(str(ACTA), pathlib.Path(td, "acta"))
         pathlib.Path(td, "corpus", "blk_fixture.md").write_text(blk % real_evid)
         _, errs = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
         check("blocker resolved_by a committed EVID row lints green",
@@ -121,8 +124,8 @@ if acta_rows:
 # Evidence must not drift the subject digest: a record of a check is not the thing
 # checked. Adding a row leaves the corpus subject exactly where it was.
 with tempfile.TemporaryDirectory() as td:
-    shutil.copytree("corpus", pathlib.Path(td, "corpus"))
-    shutil.copytree("acta", pathlib.Path(td, "acta"))
+    shutil.copytree(CORPUS_DIR, pathlib.Path(td, "corpus"))
+    shutil.copytree(str(ACTA), pathlib.Path(td, "acta"))
     a1, _ = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
     d1 = corpus_digest(a1)
     pathlib.Path(td, "acta", "EVID-fixture-9999.json").write_text(json.dumps({
