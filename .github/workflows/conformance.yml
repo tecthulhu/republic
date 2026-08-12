@@ -28,6 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # SPEC-0113 compares against the merge base, so the default shallow
+          # clone is not enough history to compare with.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -52,6 +56,25 @@ jobs:
       - name: CTRL-0007 — embedder pipeline suite
         working-directory: platform
         run: python tools/test_embedder.py
+
+      # SPEC-0111/0113/0114: the ceremony tool, instance immutability, and path
+      # resolution. Fixture suites, so they run everywhere the corpus controls do.
+      - name: SPEC-0111 — ceremony tool suite
+        working-directory: platform
+        run: python tools/test_enact.py
+      - name: SPEC-0113 — instance immutability suite
+        working-directory: platform
+        run: python tools/test_immutability.py
+      - name: SPEC-0114 — path resolution suite
+        working-directory: platform
+        run: python tools/test_paths.py
+
+      # SPEC-0113 applied to this change: no atom may have been edited in place
+      # relative to the base branch. ONT-012/015 enforced rather than reviewed.
+      - name: Instance immutability against the base branch
+        if: github.event_name == 'pull_request'
+        working-directory: platform
+        run: python tools/atom_lint.py .. --since origin/${{ github.base_ref }}
 
   citizenship:
     name: citizenship-conformance

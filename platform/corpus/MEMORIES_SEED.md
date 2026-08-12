@@ -54,3 +54,31 @@ harness must mint per start, and anything that retries a spawn must re-mint
 rather than re-run. Learned in STORY-0001 when the conformance suite's second
 citizen start failed and the failure turned out to be the shredding working.
 <!-- atom:end id=MEM-0002 -->
+
+<!-- atom:begin id=MEM-0004 -->
+```yaml
+id: MEM-0004
+type: memory
+scope: platform
+state: active
+version: 1.0.0
+instantiated_at: "2026-08-12T18:15:00Z"
+author: agent-worker-story-0009
+authorized_by: null
+title: "A monitor must verify its target exists; usage-text-and-exit-0 is not observation"
+tags: [tooling, doc-truth]
+context_class: relevant
+keywords: [watcher, exit-zero, verify-target]
+source_refs: [SPEC-0092]
+```
+A background CI watcher was launched with a command-substituted run id that
+resolved to empty, because the run did not exist yet. The CLI printed its usage
+text and exited 0, and the zero was read as "watching" — a completion was reported
+on the strength of a monitor that had never attached to anything.
+
+Same defect family as the vacuous lint pass (SPEC-0092): a check whose null case
+reports success. The rule generalizes past this tool — a monitor must confirm its
+watched resource exists before its exit status means anything, and any wrapper built
+for CI watching fails closed on a missing target. Practically: resolve the id first,
+assert it is non-empty, then watch.
+<!-- atom:end id=MEM-0004 -->

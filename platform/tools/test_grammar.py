@@ -32,7 +32,7 @@ from chainverify import (  # noqa: E402  — the one algebra (PA-006)
     well_formed_caveats,
 )
 
-ACTA = pathlib.Path("acta")
+from paths import ACTA  # noqa: E402 — repo-root resolution (SPEC-0114)
 
 
 def holds(caveats, facts):

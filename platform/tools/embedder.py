@@ -10,6 +10,7 @@ model resolves into the same band slot at deployment without pipeline change.
 import sys, json, hashlib, datetime, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from atom_lint import parse_file, corpus_digest, expand_inputs
+from paths import ACTA, CORPUS, index_dir
 
 BAND_REGISTRY = {  # band -> (instrument name, resolver) — resolved at run, digest-pinned below
     "B0": "tfidf-local-lexical",
@@ -76,8 +77,7 @@ def build(corpus_dirs, band="B0"):
     # index/ is git-ignored, so on a clean checkout it does not exist. It used to be
     # created as a side effect of evidence emission; since records moved to acta/
     # (SPEC-0106), nothing else creates it and this write has to.
-    pathlib.Path("index").mkdir(exist_ok=True)
-    pathlib.Path("index/embeddings.json").write_text(json.dumps(idx))
+    (index_dir() / "embeddings.json").write_text(json.dumps(idx))
     return idx, vec, M, rows
 
 def queries(corpus_dirs, idx):
@@ -103,7 +103,7 @@ def queries(corpus_dirs, idx):
     dangling = sorted(i for i in active_claims if i not in bound_active)
     dangling_all = sorted(i for i in claims if i not in bound_any)
     evidenced = {rid(json.loads(f.read_text()).get("control_ref"))
-                 for f in pathlib.Path("acta").glob("EVID-*.json")
+                 for f in ACTA.glob("EVID-*.json")
                  if json.loads(f.read_text()).get("verdict")=="pass"}
     rules_unevidenced = sorted(i for i,a in atoms.items() if a.get("type")=="rule"
                                and rid(a.get("control")) not in evidenced)
@@ -146,19 +146,19 @@ def emit_evidence(idx, rows, rep, corpus_digest):
             "assertions_run": ["ONT-088-provenance-completeness", "ONT-089-coverage"],
             "assertions_not_run": ["ONT-087-chunk-boundary", "ONT-086-generated-rendering"]}
     if incomplete: evid["incomplete_provenance"] = incomplete[:20]
-    pathlib.Path("acta").mkdir(exist_ok=True)
-    pathlib.Path(f"acta/{evid['id']}.json").write_text(json.dumps(evid, indent=1))
+    ACTA.mkdir(exist_ok=True)
+    (ACTA / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
     return evid
 
 if __name__ == "__main__":
-    dirs = ["corpus"]
+    dirs = [str(CORPUS)]
     idx, vec, M, rows = build(dirs)
     print(f"embedded {len(rows)} instances under generation {idx['model_generation']} (band B0)")
     rep = queries(dirs, idx)
     ev = emit_evidence(idx, rows, rep, idx["corpus_digest"])
     print(f"evidence {ev['id']}: {ev['verdict']} (subject {ev['subject']})")
     print(json.dumps({k:(v if not isinstance(v,list) or len(v)<8 else f"{len(v)} items") for k,v in rep.items()}, indent=1))
-    pathlib.Path("index/standing_queries.json").write_text(json.dumps(rep, indent=1))
+    (index_dir() / "standing_queries.json").write_text(json.dumps(rep, indent=1))
     for q in ["restrictions about credentials and authority escalation",
               "story required before any agent work begins",
               "embedding provenance and model pinning"]:
