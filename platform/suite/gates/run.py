@@ -442,6 +442,170 @@ def merge_gate_checks(chain, res):
                            str(e)[:120])
 
 
+# ------------------------------------------------------------- SPEC-0082
+# A surrogate session, not the CLI. It emits the same stream-json frame shapes the CLI
+# emits in session mode, so the wire, the renderer and the consumer are exercised
+# end to end without a model credential and without spending a token. What it does not
+# and cannot prove is SPEC-0085: that the harness can interrupt, inject into and
+# terminate a *live* session. That needs the real CLI and is deliberately out of scope
+# here — a surrogate that claimed it would be the exact overclaim SPEC-0085 forbids.
+SURROGATE_SESSION = """
+import json, sys, time
+
+FRAMES = [
+    {"type": "system", "subtype": "init", "session_id": "surrogate-0001",
+     "tools": ["Read", "Edit", "Bash"]},
+    {"type": "assistant", "message": {"role": "assistant", "content": [
+        {"type": "text", "text": "Reading the acceptance criterion."}]}},
+    {"type": "assistant", "message": {"role": "assistant", "content": [
+        {"type": "tool_use", "name": "Read", "input": {"file_path": "SPEC-0082"}}]}},
+    {"type": "user", "message": {"role": "user", "content": [
+        {"type": "tool_result", "content": "stream-json captured by the harness"}]}},
+    {"type": "assistant", "message": {"role": "assistant", "content": [
+        {"type": "text", "text": "Publishing each frame as an ES-010 envelope."}]}},
+    {"type": "result", "subtype": "success", "num_turns": 3, "is_error": False},
+]
+
+for frame in FRAMES:
+    print(json.dumps(frame), flush=True)
+    time.sleep(0.4)
+print("SESSION_COMPLETE", flush=True)
+"""
+
+RENDERER = """
+import asyncio, json, sys, nats
+
+async def main():
+    subject = sys.argv[1]
+    seen = []
+    nc = await nats.connect("nats://nats:4222", connect_timeout=5)
+
+    async def on_frame(msg):
+        env = json.loads(msg.data)
+        payload = env.get("payload")
+        line = payload.get("line") if isinstance(payload, dict) else str(payload)
+        try:
+            frame = json.loads(line)
+            kind = frame.get("type", "?")
+            if kind == "assistant":
+                for block in frame["message"]["content"]:
+                    if block.get("type") == "text":
+                        print("  [render] assistant: " + block["text"], flush=True)
+                    elif block.get("type") == "tool_use":
+                        print("  [render] tool_use: " + block["name"], flush=True)
+            elif kind == "result":
+                print("  [render] result: " + frame.get("subtype", ""), flush=True)
+            else:
+                print("  [render] " + kind, flush=True)
+            seen.append(kind)
+        except (ValueError, TypeError, KeyError):
+            print("  [render] raw: " + str(line)[:60], flush=True)
+
+    await nc.subscribe(subject, cb=on_frame)
+    await asyncio.sleep(float(sys.argv[2]))
+    await nc.drain()
+    print("RENDERED " + json.dumps(seen), flush=True)
+
+asyncio.run(main())
+"""
+
+CONSUMER = """
+import asyncio, json, sys, nats
+
+async def main():
+    subject, seconds = sys.argv[1], float(sys.argv[2])
+    # ES-031: the raw envelope verbatim, so a signature can be re-verified forever. A
+    # consumer that stored a parsed projection would keep the meaning and lose the proof.
+    stored = []
+    nc = await nats.connect("nats://nats:4222", connect_timeout=5)
+
+    # A coroutine, not a lambda: nats-py awaits the callback, and a plain function is
+    # silently never invoked — the first version of this consumer persisted nothing and
+    # reported success at doing so.
+    async def store(msg):
+        stored.append(msg.data.decode())
+
+    await nc.subscribe(subject, cb=store)
+    await asyncio.sleep(seconds)
+    await nc.drain()
+    print("PERSISTED " + json.dumps(stored), flush=True)
+
+asyncio.run(main())
+"""
+
+
+def io_path_checks(mesh, image, res):
+    """SPEC-0082: the session's stream reaches the bus, is rendered live, and is
+    persisted verbatim — and no other path out of the container exists."""
+    subject = f"acta.{CITIZEN}.{STORY}.output"
+
+    renderer = mesh.track(f"render-{mesh.tag}")
+    sh("docker", "run", "-d", "--name", renderer, "--network", mesh.net,
+       "--entrypoint", "/l0/venv/bin/python", image, "-c", RENDERER, subject, "18",
+       check=True)
+    consumer = mesh.track(f"acta-{mesh.tag}")
+    sh("docker", "run", "-d", "--name", consumer, "--network", mesh.net,
+       "--entrypoint", "/l0/venv/bin/python", image, "-c", CONSUMER, subject, "18",
+       check=True)
+    time.sleep(2)  # let both attach before the session starts talking
+
+    result = gate.spawn({"story_ref": STORY, "citizen": CITIZEN, "image": image},
+                        network=mesh.net, handoff_volume=mesh.vol,
+                        argv=["/l0/venv/bin/python", "-c", SURROGATE_SESSION],
+                        detach=True)
+    mesh.track(result["name"])
+    session_log = wait_and_logs(result["name"], timeout=240)
+    render_log = wait_and_logs(renderer, timeout=120)
+    consumer_log = wait_and_logs(consumer, timeout=120)
+    chain = result["minted"]["chain"]["chain"]
+
+    res.ok("SPEC-0082 the session emits stream-json frames",
+           "SESSION_COMPLETE" in session_log and '"type": "assistant"' in session_log,
+           session_log[-200:])
+
+    rendered = json.loads(render_log.split("RENDERED ", 1)[1].splitlines()[0]) \
+        if "RENDERED " in render_log else []
+    res.ok("SPEC-0082 a subscriber renders the session live",
+           "assistant" in rendered and "result" in rendered, f"frames rendered: {rendered}")
+    res.ok("the renderer saw the frames while the session ran, not after",
+           "[render] assistant:" in render_log, render_log[-300:])
+
+    persisted = json.loads(consumer_log.split("PERSISTED ", 1)[1].splitlines()[0]) \
+        if "PERSISTED " in consumer_log else []
+    res.ok("SPEC-0082 the Acta consumer persists the same subject (ES-031)",
+           len(persisted) >= 5, f"{len(persisted)} envelopes persisted")
+
+    # The persisted bytes must still verify: that is the whole reason ES-031 says
+    # verbatim. A store that kept a summary would keep the meaning and lose the proof.
+    reverified, failures = 0, []
+    for raw in persisted:
+        try:
+            verify_envelope(json.loads(raw), chain,
+                            {"action": "publish", "audience": STORY})
+            reverified += 1
+        except VerificationError as e:
+            failures.append(str(e))
+    res.ok("persisted envelopes re-verify from storage, signatures intact",
+           reverified == len(persisted) and reverified > 0,
+           f"{reverified}/{len(persisted)} re-verified; {failures[:1]}")
+
+    # No output path except the bus (L0-002's egress pin, now actually enforced).
+    egress = sh("docker", "run", "--rm", "--network", mesh.net, "--user", "10001:10001",
+                "--entrypoint", "/l0/venv/bin/python", image, "-c",
+                "import socket\n"
+                "for h,p in (('1.1.1.1',53),('registry.npmjs.org',443)):\n"
+                "    try:\n"
+                "        socket.create_connection((h,p),timeout=4).close(); print('REACHED',h)\n"
+                "    except Exception as e: print('blocked',h,type(e).__name__)\n")
+    res.ok("SPEC-0082 no egress exists except the bus (L0-002)",
+           "REACHED" not in egress.stdout, egress.stdout.strip()[:200])
+
+    ports = sh("docker", "inspect", result["name"], "--format",
+               "{{json .NetworkSettings.Ports}}|{{json .HostConfig.PortBindings}}").stdout
+    res.ok("the container publishes no ports — no ingress at L0",
+           ports.strip() in ("{}|{}", "{}|null", "null|{}", "null|null"), ports.strip())
+
+
 def emit_evidence(res, image, bus_image, cli_pin, out_dir):
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     out = pathlib.Path(out_dir)
@@ -499,6 +663,7 @@ def main():
         live_spawn_checks(mesh, a.image, res)
         isolation_checks(mesh, a.image, res)
         attribution_checks(mesh, a.image, res)
+        io_path_checks(mesh, a.image, res)
         bus_image = mesh.bus_image
 
     rows = emit_evidence(res, a.image, bus_image, cli_pin, a.evidence_dir)

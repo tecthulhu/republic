@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-13T144856-16",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-13T14:48:56.626152+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-15: BASE-AC-15 image re-adding shell/root/caps fails the suite",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-hello:dev@sha256:41e64f589e99a0902149f3ee0a84f7c23832546632b83b335568a8248e1d739d",
+ "verdict": "pass",
+ "checked_at": "2026-08-13T14:48:56.626152+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-15",
+ "detail": "{'user': '10001:10001', 'shell_probe': '[stdout] SHELLS []'}",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

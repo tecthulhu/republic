@@ -54,7 +54,14 @@ class Mesh:
         self.bus_image = None
 
     def __enter__(self):
-        sh("docker", "network", "create", self.net, check=True)
+        # --internal: L0-002 pins egress to the bus, and nothing was enforcing it. Every
+        # citizen spawned before this could open a socket to anywhere on the internet;
+        # the filesystem isolation was verified and the network side simply was not
+        # checked. An internal network has no route off the host, so the bus is the only
+        # thing a citizen can reach. Adapter egress (a model provider, a git remote)
+        # becomes an explicit, caveat-gated addition rather than an accident of the
+        # default bridge — which is what D47's `adapter:` capability describes.
+        sh("docker", "network", "create", "--internal", self.net, check=True)
         self.created.append(("network", self.net))
         image = NATS_IMAGE if sh("docker", "pull", NATS_IMAGE).returncode == 0 else NATS_FALLBACK
         if image == NATS_FALLBACK:
