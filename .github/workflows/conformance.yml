@@ -91,6 +91,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      # The suites mint on the host now (ENT-003: no credential factory inside a
+      # citizen image), so this job needs the pinned crypto dependencies too.
+      - name: Install pinned tool dependencies
+        working-directory: platform
+        run: python -m pip install -r tools/requirements.txt
+
       - name: Build the L0 gold base
         working-directory: platform
         run: docker build -f base/Dockerfile -t l0-base:BASE-v1 .

@@ -1,8 +1,14 @@
-"""Minting helper for the conformance suite.
+"""Identity minting — the spawner's capability (ENT-005, L0-011).
 
-This is the *spawner's* job in the real system (the harness, STORY-0002). Here it
-exists only so the suite can produce valid and deliberately-invalid handoffs.
-It is not a citizen capability and never ships in a role layer.
+Agent leaves are minted by their spawner at container start. This is the single
+minting implementation and it lives on the *harness* side of the boundary: it never
+ships inside a citizen image, because a citizen that can mint its own credentials has
+no attenuation to speak of (ENT-003/004).
+
+It previously sat in the conformance suite and was copied into the base image, which
+meant every citizen carried a minter it must never be able to use. That is now fixed:
+the harness mints on the host and delivers the three handoff files (L0-011); nothing
+in the image can produce a credential.
 
 Chain shape per ENT-002/071:
     root (cold)  ->  persona  ->  custodian lease (TTL)  ->  leaf
@@ -12,11 +18,24 @@ import json
 import pathlib
 import sys
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "base" / "l0"))
+# The algebra and key handling ship in the base image; the harness imports the same
+# modules rather than reimplementing them (PA-006, SPEC-0108).
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "base" / "l0"))
 sys.path.insert(0, "/l0")
 
 from canon import signing_form            # noqa: E402
-from keys import b64e, generate, signer_from_seed  # noqa: E402
+from keys import b64e, public_b64, signer_from_seed  # noqa: E402
+
+
+def generate():
+    """Mint a keypair. The spawner's capability, never the citizen's: this used to sit
+    in base/l0/keys.py and therefore inside every citizen image (D46 note / ENT-003)."""
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import (Encoding, NoEncryption,
+                                                              PrivateFormat)
+    key = Ed25519PrivateKey.generate()
+    seed = key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
+    return b64e(seed), public_b64(key)
 
 
 def _now():
@@ -106,6 +125,33 @@ def write_handoff(target_dir, minted, owner=None):
             os.chown(d / f, uid, gid)
             os.chmod(d / f, 0o400)
     return d
+
+
+def transport_grant(citizen, context):
+    """ES-003: the transport grant is the minting parent's projection of the act grant.
+
+    Enumerated here, never widened by the citizen at runtime. An agent leaf for story S
+    gets publish on its own output and event subjects and its presence subjects, and
+    nothing else — no `work.*`, no other citizen's `acta.*`.
+    """
+    return [
+        f"mesh.descriptor.{citizen}",
+        f"mesh.heartbeat.{citizen}",
+        f"acta.{citizen}.{context}.output",
+        f"acta.{citizen}.{context}.event",
+    ]
+
+
+def caveat_families(caveats):
+    """The fact families a caveat set draws on — what a ceiling is measured against."""
+    return sorted({pred[0] for block in caveats for pred in block
+                   if isinstance(pred, (list, tuple)) and pred})
+
+
+def within_ceiling(caveats, ceiling):
+    """BASE-AC-17 / ENT-022: a leaf may not be granted a caveat family outside its role
+    layer's declared ceiling. Returns the families that exceed it."""
+    return sorted(set(caveat_families(caveats)) - set(ceiling))
 
 
 if __name__ == "__main__":

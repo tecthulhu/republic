@@ -1,0 +1,17 @@
+{
+ "id": "EVID-ctrl0006-2026-08-12T235108",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T23:51:08.065150+00:00",
+ "author": "ctrl-0006",
+ "authorized_by": null,
+ "title": "chain verifier suite: golden set verified, rogue set refused (0 failing)",
+ "control_ref": "CTRL-0006",
+ "subject": "chain-verifier@chainverify:3902a021212b7757",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T23:51:08.065150+00:00",
+ "checker": "ctrl-0006-chain-suite",
+ "posture": "use_count supplied by the suite; the replay ledger awaits the data-access citizen (ES-023, PA-030 step 7)"
+}

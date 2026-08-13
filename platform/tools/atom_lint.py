@@ -224,7 +224,11 @@ def atoms_at(ref, repo):
 ROOT_ALLOWLIST = {"CLAUDE.md", "README.md", "LICENSE", "LICENSE.md",
                   "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"}
 GOVERNED_NAME = re.compile(r"^(DOC|DEC|SPEC|RSTR|CTRL|ENF|RULE|MAND|STRAT|SPRINT|"
-                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^ARCHITECT_RESPONSE_")
+                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^ARCHITECT_")
+# ARCHITECT_ rather than ARCHITECT_RESPONSE_: the first version of this pattern
+# named only responses, and an ARCHITECT_NOTE_ file sat untracked at the root with
+# the gate passing — the hole was exactly the shape of the thing it was built to
+# catch. Correspondence is correspondence whatever the delivery calls it.
 
 
 def tree_findings(repo):

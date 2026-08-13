@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T211641-15",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T21:16:41.526712+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-16: BASE-AC-16 l0.base_version label present and supported",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-agent:0.1.0@sha256:a6dde41fd4ff60c7939a7941be04ab4cd4dc18db26a4df2e6cfdc5be0c74f1cb",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T21:16:41.526712+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-16",
+ "detail": "{'dev.chainguard.image.title': 'python', 'dev.chainguard.package.main': '', 'l0.base_version': 'BASE-v1', 'l0.caveat_ceiling': '[\"audience\",\"action\",\"lease_age\",\"subject\",\"resource\",\"use_count\",\"depth\",\"parent_id\",\"lease_id\",\"now\",\"mint_time\"]', 'l0.cli_version': '2.1.228', 'l0.role_layer': 'agent@0.1.0', 'org.opencontainers.image.authors': 'Chainguard Team https://www.chainguard.dev/', 'org.openc",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

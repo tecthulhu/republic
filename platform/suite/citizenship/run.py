@@ -13,9 +13,13 @@ Usage:
     python3 suite/citizenship/run.py --image l0-hello:dev
     python3 suite/citizenship/run.py --image l0-violating:dev --expect-fail
 
-The only host requirement is docker: the bus, the observer, the minting helper
-and the citizen all run as containers. Nothing is installed on the host and no
-host path is bound into the citizen.
+Host requirements: docker, plus the pinned tool dependencies (tools/requirements.txt).
+The second one is new and deliberate — minting moved to the harness, so the host signs
+the handoff and only the resulting files cross into a container. Before that, every
+citizen image carried a credential factory it must never be able to use (ENT-003).
+
+The bus, the observer and the citizen still run as containers, nothing is installed
+into an image, and no host path is bound into a citizen.
 """
 import argparse
 import datetime
@@ -26,22 +30,20 @@ import subprocess
 import sys
 import uuid
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "harness"))
+
+import mint as minting  # noqa: E402  — the single minter lives with the spawner
+from mesh import (NATS_FALLBACK, NATS_IMAGE, Mesh as BaseMesh,  # noqa: E402
+                  image_digest, observed, sh, wait_and_logs)
+
 # The bus is adopted infrastructure, admitted by digest-pinned allowlist (PA-013).
 # Resolved 2026-08-11 from nats:2.10-alpine; a versioned measurement like any other
 # pin. If this digest cannot be pulled the suite says so in its output and records
 # what it actually used in every evidence row — it never silently substitutes.
-NATS_IMAGE = "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
-NATS_FALLBACK = "nats:2.10-alpine"
 CITIZEN = "hello-citizen"
 CONTEXT = "story-0001"
 HEARTBEAT_S = 2
-
-
-def sh(*args, check=False, timeout=180):
-    r = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
-    if check and r.returncode:
-        raise RuntimeError(f"{' '.join(args)}\n{r.stdout}\n{r.stderr}")
-    return r
 
 
 class Results:
@@ -62,66 +64,35 @@ class Results:
         return [r for r in self.rows if r["verdict"] == "fail"]
 
 
-class Mesh:
-    """Ephemeral docker network + bus for one suite run."""
+class Mesh(BaseMesh):
+    """The citizenship suite's mesh: the shared one plus a citizen spawn and a handoff
+    minted on the host, since the minter no longer ships inside the image (ENT-003)."""
 
-    def __init__(self, image):
-        self.image = image
-        self.tag = uuid.uuid4().hex[:8]
-        self.net = f"mesh-{self.tag}"
-        self.bus = f"nats-{self.tag}"
-        self.vol = f"handoff-{self.tag}"
-        self.created = []
+    def mint(self, break_chain=False, expired_lease=False):
+        """Deliver L0-011's three files into the handoff volume.
 
-    def __enter__(self):
-        sh("docker", "network", "create", self.net, check=True)
-        self.created.append(("network", self.net))
-        image = NATS_IMAGE if sh("docker", "pull", NATS_IMAGE).returncode == 0 else NATS_FALLBACK
-        if image == NATS_FALLBACK:
-            sh("docker", "pull", NATS_FALLBACK, check=True, timeout=300)
-            print(f"  note: pinned bus digest unavailable, using {NATS_FALLBACK} "
-                  f"(digest recorded in evidence)")
-        self.bus_image = image
-        sh("docker", "run", "-d", "--name", self.bus, "--network", self.net,
-           "--network-alias", "nats", image, "-js", check=True)
-        self.created.append(("container", self.bus))
-        sh("docker", "volume", "create", self.vol, check=True)
-        self.created.append(("volume", self.vol))
-        return self
-
-    def __exit__(self, *exc):
-        for kind, name in reversed(self.created):
-            if kind == "container":
-                sh("docker", "rm", "-f", name)
-            elif kind == "network":
-                sh("docker", "network", "rm", name)
-            elif kind == "volume":
-                sh("docker", "volume", "rm", "-f", name)
-
-    def track(self, name):
-        self.created.append(("container", name))
-        return name
-
-    # -- helpers ---------------------------------------------------------
-    def mint(self, *extra):
-        """Populate the handoff volume via a privileged short-lived helper. The
-        helper is not a citizen; the citizen never runs privileged."""
+        Previously a helper container ran a minter copied into the image, which meant
+        every citizen carried a credential factory it must never be able to use. The
+        harness mints on the host now and only the resulting files cross the boundary.
+        """
+        m = minting.mint(CITIZEN, CONTEXT,
+                         lease_age_hours=72 if expired_lease else 0,
+                         lease_ttl_hours=48)
+        if break_chain:
+            sig = m["token"]["parent_sig"]
+            m["token"]["parent_sig"] = ("A" if sig[0] != "A" else "B") + sig[1:]
+        payload = json.dumps({"leaf.cred": m["cred"], "leaf.token": m["token"],
+                              "chain.pub": m["chain"]})
+        writer = ("import json,os,sys,pathlib\n"
+                  "d=pathlib.Path('/handoff'); d.mkdir(parents=True,exist_ok=True)\n"
+                  "for name,content in json.loads(sys.argv[1]).items():\n"
+                  "    p=d/name; p.write_text(json.dumps(content))\n"
+                  "    os.chown(p,10001,10001); os.chmod(p,0o400)\n"
+                  "os.chown(d,10001,10001)\n")
         name = self.track(f"mint-{self.tag}-{uuid.uuid4().hex[:4]}")
-        r = sh("docker", "run", "--name", name, "--user", "0",
-               "-v", f"{self.vol}:/handoff", "--entrypoint", "/l0/venv/bin/python",
-               self.image, "/l0/conformance/mint.py",
-               "--citizen", CITIZEN, "--context", CONTEXT, "--out", "/handoff", *extra)
-        return r
-
-    def observe(self, seconds, publish_after=None):
-        name = self.track(f"obs-{self.tag}-{uuid.uuid4().hex[:4]}")
-        args = ["docker", "run", "-d", "--name", name, "--network", self.net,
-                "--entrypoint", "/l0/venv/bin/python", self.image,
-                "/l0/conformance/observe.py", "--seconds", str(seconds)]
-        if publish_after:
-            args += ["--publish-after", json.dumps(publish_after)]
-        sh(*args, check=True)
-        return name
+        return sh("docker", "run", "--name", name, "--user", "0",
+                  "-v", f"{self.vol}:/handoff", "--entrypoint", "/l0/venv/bin/python",
+                  self.image, "-c", writer, payload)
 
     def run_citizen(self, argv, handoff=True, extra_env=None, detach=True):
         """The spawn spec the harness will one day produce. Note what is absent:
@@ -146,26 +117,9 @@ class Mesh:
         r = sh(*args, timeout=240)
         return name, r
 
-
-def image_digest(image):
-    r = sh("docker", "image", "inspect", image, "--format", "{{.Id}}")
-    return r.stdout.strip() or "sha256:unknown"
-
-
-def logs(name, timeout=180):
-    sh("docker", "wait", name, timeout=timeout)
-    r = sh("docker", "logs", name)
-    return r.stdout + r.stderr
-
-
 def probe_report(text):
     m = re.search(r"PROBE_REPORT (\{.*\})", text)
     return json.loads(m.group(1)) if m else None
-
-
-def observed(text):
-    m = re.search(r"OBSERVED (\[.*\])", text)
-    return json.loads(m.group(1)) if m else []
 
 
 # ---------------------------------------------------------------- the checks
@@ -178,11 +132,11 @@ def identity_and_handoff(mesh, res):
            r.returncode != 0 and "PROBE_REPORT" not in (r.stdout + r.stderr),
            f"exit={r.returncode}")
 
-    mesh.mint("--break-chain")
+    mesh.mint(break_chain=True)
     _, r = mesh.run_citizen(["/l0/venv/bin/python", "/l0/conformance/probe.py"], detach=False)
     broken_ok = r.returncode != 0 and "PROBE_REPORT" not in (r.stdout + r.stderr)
 
-    mesh.mint("--expired-lease")
+    mesh.mint(expired_lease=True)
     _, r2 = mesh.run_citizen(["/l0/venv/bin/python", "/l0/conformance/probe.py"], detach=False)
     expired_ok = r2.returncode != 0 and "PROBE_REPORT" not in (r2.stdout + r2.stderr)
 
@@ -202,8 +156,8 @@ def live_citizen(mesh, res):
     obs = mesh.observe(seconds=14, publish_after=rogue)
     name, _ = mesh.run_citizen(["/l0/venv/bin/python", "/l0/conformance/probe.py"],
                                extra_env={"L0_PROBE_DELAY_S": "6"})
-    citizen_log = logs(name, timeout=240)
-    wire = observed(logs(obs, timeout=240))
+    citizen_log = wait_and_logs(name, timeout=240)
+    wire = observed(wait_and_logs(obs, timeout=240))
     report = probe_report(citizen_log)
 
     if not report:
@@ -232,6 +186,10 @@ def live_citizen(mesh, res):
            ops["ungranted_publish"].get("ok") is False
            and ops["off_taxonomy_publish"].get("ok") is False,
            {"ungranted": ops["ungranted_publish"], "off_taxonomy": ops["off_taxonomy_publish"]})
+    minting = report["minting"]
+    res.ok("BASE-AC-18 no credential-minting capability in the image",
+           not minting["minting_surfaces"] and not minting["mint_module_present"],
+           minting)
     res.record("BASE-AC-14 resolve/recall", "pass"
                if ops["resolve"].get("error") == "NOT_AVAILABLE" else "fail",
                "declared interim posture: NOT_AVAILABLE until the data-access citizen exists")

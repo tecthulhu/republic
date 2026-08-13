@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T204844-10",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T20:48:44.948831+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-10: BASE-AC-10 signed schema-conformant descriptor observed",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-agent:0.1.0@sha256:84f8b702f1d64ed2c49305c8007ccedeb324c5aac79b754e1b094649d282f61d",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T20:48:44.948831+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-10",
+ "detail": "{'env_version': 1, 'subject': 'mesh.descriptor.hello-citizen', 'sender': {'leaf': 'ZcQuB-ME--uDnoq96ymW_DxPzBPPA3ItyFkpDm8IZzk', 'chain': 'lease'}, 'sent_at': '2026-08-12T20:48:28.639762+00:00', 'seq': 1, 'act_token': {'tok_version': 1, 'leaf': 'ZcQuB-ME--uDnoq96ymW_DxPzBPPA3ItyFkpDm8IZzk', 'parent': 'lease', 'chain_ref': 'lease-suite-0001', 'minted_at': '2026-08-12T20:48:27.796595+00:00', 'caveat",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

@@ -135,9 +135,18 @@ def walk(chain, token, facts, now=None):
         raise VerificationError("empty chain (ENT-002: every entity is a node in a chain)")
 
     by_id = {n["id"]: n for n in chain}
-    root = [n for n in chain if n.get("parent") in (None, "root", "")]
+    # A root is a node with no parent — not a node *claiming* a parent named "root".
+    # Accepting the sentinel string as a terminator meant a chain with its root node
+    # deleted still verified: the claim of a root stood in for the root itself.
+    root = [n for n in chain if n.get("parent") is None]
     if not root:
-        raise VerificationError("chain does not terminate at a root (ENT-002)")
+        raise VerificationError("chain does not terminate at a root node (ENT-002)")
+    for node in chain:
+        parent = node.get("parent")
+        if parent is not None and parent not in by_id:
+            raise VerificationError(
+                f"chain is broken: {node['id']} names parent {parent!r}, absent from the "
+                f"chain (ENT-002)")
 
     facts = dict(facts)
     facts["depth"] = len(chain)
@@ -176,7 +185,7 @@ def walk(chain, token, facts, now=None):
             if up is not None:
                 verify_detached(up["pub"], node["token"], "parent_sig")
         nxt = node.get("parent")
-        node = by_id.get(nxt) if nxt not in (None, "root", "") else None
+        node = by_id.get(nxt) if nxt is not None else None
 
     return facts
 

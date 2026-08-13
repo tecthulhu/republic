@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T204824-04",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T20:48:24.889168+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-6: BASE-AC-6 uid/gid 10001, caps empty, no-new-privileges",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-violating:dev@sha256:7ad8381b938b8508bf44ef99706c4ac0bfa39d9ff2040ee74b016f9626b9c051",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T20:48:24.889168+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-6",
+ "detail": "{'cap_eff': '0000000000000000', 'cap_prm': '0000000000000000', 'no_new_privs': '1', 'uid': 10001}",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

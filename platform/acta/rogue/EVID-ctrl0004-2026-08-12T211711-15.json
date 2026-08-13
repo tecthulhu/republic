@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T211711-15",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T21:17:11.468392+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-16: BASE-AC-16 l0.base_version label present and supported",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-rogue-minter:dev@sha256:3be7e7489b3e23bbb2203a04c024ac0cc07c00f99ba5230de49a28e8a078634a",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T21:17:11.468392+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-16",
+ "detail": "{'dev.chainguard.image.title': 'python', 'dev.chainguard.package.main': '', 'l0.base_version': 'BASE-v1', 'l0.caveat_ceiling': '[\"audience\"]', 'l0.role_layer': 'rogue-minter@0.0.0', 'org.opencontainers.image.authors': 'Chainguard Team https://www.chainguard.dev/', 'org.opencontainers.image.created': '2026-08-09T04:38:19Z', 'org.opencontainers.image.source': 'https://github.com/chainguard-images/im",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}

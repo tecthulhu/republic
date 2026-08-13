@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-12T211711-07",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-12T21:17:11.468392+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-4: BASE-AC-4 socket publish produces a verifiable envelope",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-rogue-minter:dev@sha256:3be7e7489b3e23bbb2203a04c024ac0cc07c00f99ba5230de49a28e8a078634a",
+ "verdict": "pass",
+ "checked_at": "2026-08-12T21:17:11.468392+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-4",
+ "detail": "{'ok': True, 'seq': 6, 'subject': 'acta.hello-citizen.story-0001.output'}",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}
