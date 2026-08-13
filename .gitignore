@@ -22,7 +22,10 @@ standing_queries.json
 # copy inside it is un-committable rather than merely discouraged.
 *_token
 *_developer_token
+*_api_key
+*api_key*
 .tecthulhu_*
+.republic_*
 .env
 .env.*
 !.env.example
