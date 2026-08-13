@@ -17,9 +17,11 @@ Usage:
 """
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 import time
@@ -30,6 +32,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "harness"))
 import merge_gate  # noqa: E402
 import mint as minting  # noqa: E402
 import spawn as gate  # noqa: E402
+from supervise import Session, cli_session_args  # noqa: E402
 from mesh import Mesh, image_digest, observed, sh, wait_and_logs  # noqa: E402
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "base" / "l0"))
@@ -606,7 +609,166 @@ def io_path_checks(mesh, image, res):
            ports.strip() in ("{}|{}", "{}|null", "null|{}", "null|null"), ports.strip())
 
 
-def emit_evidence(res, image, bus_image, cli_pin, out_dir):
+# ------------------------------------------------------------- SPEC-0085
+# Providers the supervision path can run against. The acceptance evidence is produced
+# against the pinned Anthropic configuration (SPEC-0086); the identical code path is
+# re-run against another provider as a portability check. Every evidence row names
+# which, because "supervision works" is a different claim from "supervision works
+# against the provider this platform pins".
+PROVIDERS = {
+    "anthropic": {"key_file": "~/tecthulhu/.republic_anthropic_api_key",
+                  "upstream": "https://api.anthropic.com", "auth_style": "x-api-key",
+                  "model": "claude-haiku-4-5-20251001", "band": "B1",
+                  "role": "acceptance"},
+    "deepseek": {"key_file": "~/tecthulhu/.republic_deepseek_api_key",
+                 "upstream": "https://api.deepseek.com/anthropic", "auth_style": "bearer",
+                 "model": "deepseek-chat", "band": "B1", "role": "portability"},
+}
+
+
+def model_measurement(cfg):
+    """What an evidence row may say about the model: the band it resolved from and a
+    digest of the identifier it resolved to. Never the identifier itself (ONT-039)."""
+    return {"model_band": cfg["band"],
+            "model_digest": hashlib.sha256(cfg["model"].encode()).hexdigest()[:16]}
+
+
+def start_adapter(mesh, image, provider):
+    """The credential boundary (D47): the proxy holds the key on an egress-capable
+    network, the agent stays internal and keyless."""
+    cfg = PROVIDERS[provider]
+    key_src = pathlib.Path(cfg["key_file"]).expanduser()
+    if not key_src.is_file():
+        return None, f"no credential at {cfg['key_file']}"
+
+    vol = mesh.track_volume(f"adapterkey-{mesh.tag}-{provider}")
+    sh("docker", "volume", "create", vol, check=True)
+    sh("docker", "run", "--rm", "--user", "0", "-v", f"{vol}:/adapter",
+       "-v", f"{key_src}:/src:ro", "--entrypoint", "/l0/venv/bin/python", image, "-c",
+       "import pathlib,os;d=pathlib.Path('/adapter');d.mkdir(exist_ok=True);"
+       "k=d/'provider.key';k.write_text(pathlib.Path('/src').read_text().strip());"
+       "os.chown(k,10001,10001);os.chmod(k,0o400)", check=True)
+
+    egress = f"egress-{mesh.tag}"
+    sh("docker", "network", "create", egress, check=True)
+    mesh.created.append(("network", egress))
+    name = mesh.track(f"adapter-{mesh.tag}")
+    sh("docker", "run", "-d", "--name", name, "--network", mesh.net, "--user", "10001:10001",
+       "-v", f"{vol}:/run/l0/adapter:ro",
+       "-v", f"{pathlib.Path(__file__).resolve().parents[2] / 'harness' / 'adapter_proxy.py'}:"
+             f"/adapter_proxy.py:ro",
+       "--entrypoint", "/l0/venv/bin/python", image, "/adapter_proxy.py", "--port", "8080",
+       "--key-file", "/run/l0/adapter/provider.key",
+       "--upstream", cfg["upstream"], "--auth-style", cfg["auth_style"], check=True)
+    sh("docker", "network", "connect", egress, name, check=True)
+    time.sleep(2)
+    return name, None
+
+
+def supervision_checks(mesh, image, res, provider):
+    """SPEC-0085: interrupt in flight, inject mid-session, terminate cleanly.
+
+    The session runs behind init like any other citizen — gated, minted, chain-verified,
+    telemetry flowing — with the harness holding its stdin. A supervised session is not
+    a side door into the mesh.
+    """
+    cfg = PROVIDERS[provider]
+    tag = f"[{provider}/{cfg['role']}]"
+    adapter, err = start_adapter(mesh, image, provider)
+    if err:
+        res.record(f"SPEC-0085 {tag} adapter credential available", "fail", err)
+        return None
+
+    plan = gate.prepare(
+        {"story_ref": STORY, "citizen": CITIZEN, "image": image},
+        network=mesh.net, handoff_volume=mesh.track_volume(f"sup-{mesh.tag}-{provider}"),
+        name=f"session-{mesh.tag}-{provider}",
+        extra_env={"ANTHROPIC_BASE_URL": f"http://{adapter}:8080",
+                   "ANTHROPIC_API_KEY": "held-by-the-adapter",
+                   "HOME": "/work", "CLAUDE_CONFIG_DIR": "/work/.claude"})
+    mesh.track(plan["name"])
+
+    docker_args = ["docker", "run", "-i"] + plan["args"][2:] + [plan["image"]]
+    cli = cli_session_args(None, cfg["model"], extra=["--include-partial-messages"])[1:]
+
+    state = {"fired": False, "at_delta": None, "results_then": None}
+
+    def on_frame(f):
+        if state["fired"] or f.get("type") != "stream_event":
+            return
+        n = sum(1 for x in session.frames if x.get("type") == "stream_event")
+        if n < 12:
+            return
+        state.update(fired=True, at_delta=n,
+                     results_then=sum(1 for x in session.frames if x.get("type") == "result"))
+        session.interrupt()
+
+    observer = mesh.observe(seconds=150, subjects=[f"acta.{CITIZEN}.{STORY}.event"])
+    session = Session(docker_args, ["/cli/bin/claude"] + cli, on_frame=on_frame).start()
+    TARGET = 400
+    session.send_user(f"Count from 1 to {TARGET}, one number per line, each with a "
+                      f"one-sentence remark. Do not stop early.")
+    result = session.wait_for(lambda f: f.get("type") == "result", 240)
+
+    # init logs to stderr; the CLI's frames come back on stdout. Looking for the
+    # identity line among the frames was looking down the wrong pipe.
+    res.ok(f"SPEC-0085 {tag} the session comes up behind init with identity verified",
+           "identity verified" in session.stderr,
+           session.stderr[:200] or "nothing on stderr")
+
+    # (a) Interrupt. Both halves are asserted: that generation was still running when the
+    # interrupt was sent, and that the output was actually truncated. Either alone is
+    # satisfiable by a proxy that buffers instead of streaming, which is exactly how a
+    # non-streaming adapter made this criterion look testable while it was not.
+    reached = 0
+    nums = re.findall(r"(?:^|\n)\s*(\d+)[.):\s]", session.assistant_text())
+    if nums:
+        reached = max(int(n) for n in nums)
+    control = [f for f in session.frames if "control" in str(f.get("type", ""))]
+    res.ok(f"SPEC-0085 {tag} (a) generation was in flight when interrupted",
+           state["fired"] and state["results_then"] == 0,
+           f"fired at delta {state['at_delta']}, results present {state['results_then']}")
+    res.ok(f"SPEC-0085 {tag} (a) the interrupt truncated generation",
+           0 <= reached < TARGET,
+           f"reached {reached} of {TARGET}; deltas="
+           f"{sum(1 for f in session.frames if f.get('type') == 'stream_event')}")
+    res.ok(f"SPEC-0085 {tag} (a) the CLI acknowledged the interrupt",
+           any(f.get("type") == "control_response" for f in control),
+           f"control frames: {[f.get('type') for f in control][:3]}")
+
+    # (b) Injection: the session survives and the next turn observably changes course.
+    n = len(session.frames)
+    session.send_user("Reply with exactly one word: PIVOT")
+    session.wait_for(lambda f: f.get("type") == "result" and session.frames.index(f) > n, 180)
+    after = " ".join(session.text_of(f) for f in session.frames[n:]
+                     if f.get("type") == "assistant").strip()
+    res.ok(f"SPEC-0085 {tag} (b) injection mid-session observably alters behaviour",
+           "PIVOT" in after.upper() and reached < TARGET, f"next turn produced {after[:60]!r}")
+
+    # (c) Clean termination, with the exit status captured and init's final event emitted.
+    term = session.terminate(timeout=120)
+    res.ok(f"SPEC-0085 {tag} (c) clean termination with exit status captured",
+           term["clean"] and term["exit_status"] == 0, json.dumps(term))
+    # The final event is published to the bus by init, not printed — so it is read off
+    # the wire, which is also the only place a third party could ever see it (PA-014).
+    events = observed(wait_and_logs(observer, timeout=180))
+    exit_events = [e for e in events
+                   if (e["envelope"].get("payload") or {}).get("kind") == "payload.exit"]
+    res.ok(f"SPEC-0085 {tag} (c) init emitted a final telemetry event on the bus",
+           bool(exit_events),
+           json.dumps(exit_events[0]["envelope"]["payload"]) if exit_events
+           else f"{len(events)} events seen, none payload.exit")
+
+    measurement = model_measurement(cfg)
+    res.record(f"SPEC-0085 {tag} provider recorded in evidence", "pass",
+               f"provider={provider} upstream={cfg['upstream']} "
+               f"band={measurement['model_band']} role={cfg['role']}")
+    return {"provider": provider, **measurement, "upstream": cfg["upstream"],
+            "role": cfg["role"], "frames": len(session.frames),
+            "reached": reached, "target": TARGET, "terminate": term}
+
+
+def emit_evidence(res, image, bus_image, cli_pin, out_dir, sessions=()):
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     out = pathlib.Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -625,7 +787,11 @@ def emit_evidence(res, image, bus_image, cli_pin, out_dir):
                 "detail": str(row["detail"])[:400],
                 # SPEC-0086: the pin rides every row this story emits, and it is the
                 # executed binary's hash, not the package version (D46).
-                "cli_pin": cli_pin, "bus_image": bus_image}
+                "cli_pin": cli_pin, "bus_image": bus_image,
+                # SPEC-0085's evidence is only meaningful with the provider named: the
+                # acceptance run is against the pinned Anthropic configuration, and a
+                # portability run against another provider is a different claim.
+                "supervision": sessions}
         (out / f"{evid['id']}.json").write_text(json.dumps(evid, indent=1))
         written.append(evid["id"])
     return written
@@ -646,6 +812,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--image", default="l0-agent:0.1.0")
     ap.add_argument("--evidence-dir", default="acta")
+    ap.add_argument("--supervise", nargs="*", default=["anthropic"],
+                    choices=sorted(PROVIDERS) + [],
+                    help="providers to run SPEC-0085 against; anthropic is the "
+                         "acceptance configuration, others are portability checks")
+    ap.add_argument("--no-supervise", action="store_true",
+                    help="skip SPEC-0085 (the only criterion that spends a credential)")
     a = ap.parse_args()
 
     print(f"CTRL-0005 gate library suite against {a.image}")
@@ -654,6 +826,7 @@ def main():
     print(f"  cli pin: {cli_pin.get('version')} binary "
           f"{str(cli_pin.get('binary_sha256'))[:16]}…")
     res = Results()
+    sessions = []
 
     # Refusals and injection need no infrastructure at all.
     refusal_checks(a.image, res)
@@ -664,9 +837,16 @@ def main():
         isolation_checks(mesh, a.image, res)
         attribution_checks(mesh, a.image, res)
         io_path_checks(mesh, a.image, res)
+        if a.no_supervise:
+            res.record("SPEC-0085 supervision", "skip",
+                       "--no-supervise: the credential-spending criterion was not run")
+        else:
+            for provider in a.supervise:
+                sessions.append(supervision_checks(mesh, a.image, res, provider))
         bus_image = mesh.bus_image
 
-    rows = emit_evidence(res, a.image, bus_image, cli_pin, a.evidence_dir)
+    rows = emit_evidence(res, a.image, bus_image, cli_pin, a.evidence_dir,
+                         [s for s in sessions if s])
     failed = res.failed
     print(f"\n{len(res.rows)} criteria checked, {len(failed)} failing; "
           f"{len(rows)} EVID- rows written to {a.evidence_dir}/")

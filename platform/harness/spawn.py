@@ -170,9 +170,16 @@ def injection_set(story_ref, citizen, strategy_id="STRAT-0001", mandate_id=None)
 
 
 # ------------------------------------------------------------- the spawn
-def spawn(request, network=None, handoff_volume=None, argv=None, detach=True,
-          extra_env=None):
-    """Mint, deliver the handoff, and start the container. Never called before check()."""
+def prepare(request, network=None, handoff_volume=None, argv=None, extra_env=None,
+            name=None):
+    """Gate, mint, deliver the handoff, and build the run command — without running it.
+
+    Split out from spawn() because a supervised session needs the container's stdin
+    (SPEC-0085), which means the caller has to own the process. Everything that makes a
+    citizen a citizen still happens here, so a supervised session is not a side door:
+    it is gated, minted and injected exactly like a detached one, and it comes up behind
+    init with identity verified and telemetry flowing.
+    """
     ctx = check(request)
     story, citizen, image = ctx["story_ref"], ctx["citizen"], ctx["image"]
 
@@ -186,8 +193,8 @@ def spawn(request, network=None, handoff_volume=None, argv=None, detach=True,
     sh("docker", "volume", "create", volume, check=True)
     _deliver_handoff(volume, minted, image)
 
-    name = request.get("name") or f"agent-{citizen}-{tag}"
-    args = ["docker", "run", "--name", name,
+    container = name or request.get("name") or f"agent-{citizen}-{tag}"
+    args = ["docker", "run", "--name", container,
             "--read-only", "--cap-drop", "ALL",
             "--security-opt", "no-new-privileges",
             "--user", "10001:10001",
@@ -202,14 +209,22 @@ def spawn(request, network=None, handoff_volume=None, argv=None, detach=True,
         args += ["--network", network, "-e", "L0_BUS_URL=nats://nats:4222"]
     for k, v in (extra_env or {}).items():
         args += ["-e", f"{k}={v}"]
+    return {"name": container, "volume": volume, "minted": minted,
+            "injection": injection, "context": ctx, "args": args,
+            "image": image, "argv": list(argv or [])}
+
+
+def spawn(request, network=None, handoff_volume=None, argv=None, detach=True,
+          extra_env=None):
+    """Mint, deliver the handoff, and start the container. Never called before check()."""
+    plan = prepare(request, network, handoff_volume, argv, extra_env)
+    args = list(plan["args"])
     if detach:
         args.append("-d")
-    args.append(image)
-    args += list(argv or [])
-
+    args.append(plan["image"])
+    args += plan["argv"]
     r = sh(*args, timeout=240)
-    return {"name": name, "volume": volume, "minted": minted, "injection": injection,
-            "context": ctx, "run": r}
+    return {**plan, "run": r}
 
 
 def _digest(image):

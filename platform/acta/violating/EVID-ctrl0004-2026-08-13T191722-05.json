@@ -1,0 +1,19 @@
+{
+ "id": "EVID-ctrl0004-2026-08-13T191722-05",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-13T19:17:22.893724+00:00",
+ "author": "ctrl-0004",
+ "authorized_by": null,
+ "title": "BASE-AC-7: BASE-AC-7 read-only rootfs, /work and /tmp writable",
+ "control_ref": "CTRL-0004",
+ "subject": "l0-violating:dev@sha256:a2fd3c4eb4eebd8497df7555481105dfe51d77a578b2c4f3e7ea7b8b25f0cfb5",
+ "verdict": "pass",
+ "checked_at": "2026-08-13T19:17:22.893724+00:00",
+ "checker": "ctrl-0004-citizenship-suite",
+ "acceptance_criterion": "BASE-AC-7",
+ "detail": "{'/work/.probe': 'writable', '/tmp/.probe': 'writable', '/etc/.probe': 'refused: OSError', '/l0/.probe': 'refused: OSError', '/.probe': 'refused: OSError'}",
+ "bus_image": "nats@sha256:b83efabe3e7def1e0a4a31ec6e078999bb17c80363f881df35edc70fcb6bb927"
+}
