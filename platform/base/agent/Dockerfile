@@ -18,6 +18,7 @@
 ARG BASE=l0-base:BASE-v1
 ARG NODE_DEV=cgr.dev/chainguard/node@sha256:07c193f0b7c9b7a5cc0070da7384efe9f88ae92ef45a458c065a4a8dbc251fe1
 ARG NODE_RUNTIME=cgr.dev/chainguard/node@sha256:71102c411350b53ff67f83c6679070a6c839306d84f9033146f8b93b0d730c78
+ARG GIT_IMAGE=cgr.dev/chainguard/git@sha256:b48c8ecae911af6c02515d3da34154ea85168ee969afb5e91e6398c075217ff8
 
 # CLI pin (SPEC-0086). Resolved 2026-08-12 from the npm registry.
 #
@@ -30,6 +31,12 @@ ARG CLI_VERSION=2.1.228
 ARG CLI_INTEGRITY=sha512-S3Iy+c6ZuFjswQOekbVgXA+RxAuU8H2ae2nxFynqmvR5r3Gm9oyFV19XgiuatYRFKKjxP0K3i5vvvelPDgx12g==
 ARG CLI_PLATFORM_PKG=@anthropic-ai/claude-code-linux-x64
 ARG CLI_PLATFORM_INTEGRITY=sha512-LMrLUYW5FY3r8wsQk/U5HWacHmxlEWKxaOgNzmDn1f5FhgKsSAPpioqf2JE5AusRRKXyWvhYM1crOE/CKIqoNQ==
+
+# ------------------------------------------------------------------ git source
+# A digest-pinned image that already has git installed with its dependencies, rather
+# than an apk install into a bare root — which needs repositories and keys wired into
+# the new root and buys nothing over pinning an image.
+FROM ${GIT_IMAGE} AS gitsrc
 
 # ------------------------------------------------------------------ CLI stage
 # npm and a shell exist here and nowhere downstream: only the installed tree and the
@@ -66,6 +73,22 @@ RUN set -eu; \
     install -m 0755 "${binary}" /cli/bin/claude; \
     /cli/bin/claude --version
 
+# git is part of the agent role delta, not an afterthought: PA-010 names git push as
+# one of the three sanctioned durable effects, and SPEC-0084 requires the session to
+# produce attributable commits. An agent that cannot run git cannot produce the effects
+# the architecture says it produces.
+#
+# Staged here so git-shell can be deleted before anything crosses into the final image:
+# it is a login shell, L0-003 forbids reintroducing one, and the conformance suite
+# would be right to fail an image carrying it. The final stage has no shell to delete
+# it with, so it has to happen upstream.
+COPY --from=gitsrc /usr/bin/git /gitroot/usr/bin/git
+COPY --from=gitsrc /usr/libexec/git-core /gitroot/usr/libexec/git-core
+COPY --from=gitsrc /usr/lib /gitroot/usr/lib
+RUN set -eu; \
+    rm -f /gitroot/usr/bin/git-shell /gitroot/usr/libexec/git-core/git-shell; \
+    test ! -e /gitroot/usr/libexec/git-core/git-shell
+
 # Record what was installed, so a running container can report its own pin without the
 # harness having to know it (the descriptor is emitted, never authored — ENT-031). The
 # binary digest is measured after placement, so it describes the executable that will
@@ -81,6 +104,9 @@ FROM ${BASE} AS agent
 
 COPY --from=cli /usr/bin/node /usr/bin/node
 COPY --from=cli /cli /cli
+COPY --from=cli /gitroot/usr/bin/git /usr/bin/git
+COPY --from=cli /gitroot/usr/libexec/git-core /usr/libexec/git-core
+COPY --from=cli /gitroot/usr/lib/ /usr/lib/
 
 # /work stays the only writable path (L0-002). The CLI wants a home directory for
 # state; it gets one under /work, which is tmpfs and dies with the container.
@@ -96,7 +122,8 @@ ENV NODE_PATH=/cli/lib/node_modules \
 LABEL l0.base_version="BASE-v1" \
       l0.role_layer="agent@0.1.0" \
       l0.caveat_ceiling="[\"audience\",\"action\",\"lease_age\",\"subject\",\"resource\",\"use_count\",\"depth\",\"parent_id\",\"lease_id\",\"now\",\"mint_time\"]" \
-      l0.cli_version="2.1.228"
+      l0.cli_version="2.1.228" \
+      l0.git_version="2.55.0"
 
 # No CMD: an agent container is started by the harness with the session command it
 # supervises. A default payload would invite a spawn that nobody supervises.

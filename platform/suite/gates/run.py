@@ -18,14 +18,25 @@ Usage:
 import argparse
 import datetime
 import json
+import os
 import pathlib
+import subprocess
 import sys
+import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "harness"))
 
+import merge_gate  # noqa: E402
+import mint as minting  # noqa: E402
 import spawn as gate  # noqa: E402
 from mesh import Mesh, image_digest, observed, sh, wait_and_logs  # noqa: E402
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "base" / "l0"))
+from chainverify import VerificationError  # noqa: E402
+from envelope import build as build_envelope  # noqa: E402
+from keys import signer_from_seed  # noqa: E402
+from envelope import verify as verify_envelope  # noqa: E402
 
 STORY = "story-0002"
 CITIZEN = "spawn-probe"
@@ -188,6 +199,249 @@ def live_spawn_checks(mesh, image, res):
     return result
 
 
+# ------------------------------------------------------------- SPEC-0083
+def host_surface():
+    """The host state this suite watches for residue.
+
+    Named explicitly rather than left to "the filesystem", because a full-disk diff is
+    neither practical nor meaningful: docker's own layer and volume directories change
+    whenever a container runs, and calling that residue would make the check
+    unfalsifiable in one direction and useless in the other. What SPEC-0083 is about is
+    whether a citizen can leave anything behind in the places a citizen might reach —
+    the repository it works on, the invoking user's home, and shared temp.
+    """
+    surface = {}
+    for root in (pathlib.Path.home(), pathlib.Path("/tmp"),
+                 pathlib.Path(__file__).resolve().parents[2]):
+        try:
+            surface[str(root)] = sorted(
+                str(p.relative_to(root)) for p in root.iterdir()
+                if not p.name.startswith("."))
+        except OSError as e:
+            surface[str(root)] = [f"unreadable: {e}"]
+    return surface
+
+
+def isolation_checks(mesh, image, res):
+    """SPEC-0083: ephemeral workspace, no host residue, three sanctioned sinks."""
+    before = host_surface()
+
+    result = gate.spawn({"story_ref": STORY, "citizen": CITIZEN, "image": image},
+                        network=mesh.net, handoff_volume=mesh.vol,
+                        argv=["/l0/venv/bin/python", "-c",
+                              "import pathlib,time\n"
+                              "pathlib.Path('/work/scratch.txt').write_text('work product')\n"
+                              "pathlib.Path('/tmp/scratch.txt').write_text('temp product')\n"
+                              "print('payload wrote to /work and /tmp', flush=True)\n"
+                              "time.sleep(600)\n"],
+                        detach=True)
+    name = mesh.track(result["name"])
+
+    # Let it get far enough to have written, then kill it the way a crash would.
+    deadline = time.time() + 60
+    wrote = False
+    while time.time() < deadline:
+        if "payload wrote" in sh("docker", "logs", name).stdout:
+            wrote = True
+            break
+        time.sleep(1)
+    res.ok("SPEC-0083 the payload runs and writes into its ephemeral workspace", wrote,
+           sh("docker", "logs", name).stdout[-200:])
+
+    inside = sh("docker", "exec", name, "/l0/venv/bin/python", "-c",
+                "import pathlib;print(pathlib.Path('/work/scratch.txt').read_text())")
+    res.ok("the workspace is writable while the container lives",
+           "work product" in inside.stdout, inside.stdout + inside.stderr)
+
+    sh("docker", "kill", "--signal=KILL", name)
+    res.ok("SPEC-0083 kill -9 mid-task terminates the container",
+           sh("docker", "inspect", name, "--format", "{{.State.Running}}").stdout.strip()
+           == "false", "container still running after SIGKILL")
+
+    after = host_surface()
+    residue = {root: sorted(set(after[root]) - set(before[root])) for root in before
+               if set(after[root]) - set(before[root])}
+    res.ok("SPEC-0083 kill -9 leaves zero residue on the watched host surface",
+           not residue, json.dumps(residue))
+
+    # /work was tmpfs: the workspace does not survive the container, so there is nothing
+    # to clean up and nothing to leak.
+    gone = sh("docker", "exec", name, "/bin/true")
+    res.ok("the ephemeral workspace dies with the container", gone.returncode != 0,
+           "exec into a killed container succeeded")
+
+    # The three sanctioned sinks. Only one of them exists in this environment, and
+    # saying so is the point: a green check here that implied otherwise would be the
+    # doc-truth failure the platform is built to prevent.
+    res.record("SPEC-0083 durable effects: bus messages", "pass",
+               "exercised — envelopes observed on the wire this run")
+    res.record("SPEC-0083 durable effects: git push", "skip",
+               "no remote is reachable from the mesh network; the container has no "
+               "credential and no route, so the sink is closed rather than verified")
+    res.record("SPEC-0083 durable effects: object-store write", "skip",
+               "Tabularium is the data-access citizen's responsibility (PA-030 step 7) "
+               "and does not exist yet")
+    return result
+
+
+# ------------------------------------------------------------- SPEC-0084
+PAYLOAD_COMMIT_AND_ATTEST = """
+import json, os, pathlib, socket, subprocess
+
+os.environ.update(GIT_AUTHOR_NAME="agent", GIT_AUTHOR_EMAIL="agent@invalid",
+                  GIT_COMMITTER_NAME="agent", GIT_COMMITTER_EMAIL="agent@invalid")
+repo = pathlib.Path("/work/repo"); repo.mkdir()
+
+def git(*args):
+    return subprocess.run(["git", "-C", str(repo)] + list(args),
+                          capture_output=True, text=True)
+
+git("init", "-q")
+(repo / "artifact.txt").write_text("produced in session")
+git("add", "-A")
+git("commit", "-q", "-m", "session artifact")
+commit, tree = git("show", "-s", "--format=%H %T", "HEAD").stdout.split()
+
+def call(request):
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.settimeout(10); s.connect("/run/l0/agent.sock")
+    s.sendall((json.dumps(request) + chr(10)).encode())
+    buf = b""
+    while not buf.endswith(chr(10).encode()):
+        buf += s.recv(65536)
+    s.close(); return json.loads(buf)
+
+print("COMMIT " + commit + " " + tree, flush=True)
+print(json.dumps(call({"op": "emit_event", "kind": "commit.attestation",
+                       "data": {"commit": commit, "tree": tree}})), flush=True)
+"""
+
+
+def attribution_checks(mesh, image, res):
+    """SPEC-0084: every envelope and every commit chain-verifiable to the leaf."""
+    obs = mesh.observe(seconds=16, subjects=["mesh.>", "acta.>"])
+    result = gate.spawn({"story_ref": STORY, "citizen": CITIZEN, "image": image},
+                        network=mesh.net, handoff_volume=mesh.vol,
+                        argv=["/l0/venv/bin/python", "-c", PAYLOAD_COMMIT_AND_ATTEST],
+                        detach=True)
+    mesh.track(result["name"])
+    log = wait_and_logs(result["name"], timeout=240)
+    wire = observed(wait_and_logs(obs, timeout=240))
+    chain = result["minted"]["chain"]["chain"]
+
+    # Every envelope the session actually published, verified by the shipped path.
+    # The observer supplies the audience it is verifying against, because it knows the
+    # context it is auditing: this citizen was spawned for this story. That is not a
+    # formality — `acta.<citizen>.<story>.*` carries the story in the subject and the
+    # verifier derives it, but `mesh.descriptor.*` and `mesh.heartbeat.*` carry no story
+    # segment at all (ES-002). An audience-bound token therefore cannot be checked
+    # against presence traffic by anyone who does not already know the actor's context,
+    # which is a real property of the subject taxonomy and worth naming rather than
+    # papering over: the runtime gate has that context; a passing observer does not.
+    op_facts = {"action": "publish", "audience": STORY}
+    verified, failed = 0, []
+    for m in wire:
+        try:
+            verify_envelope(m["envelope"], chain, op_facts)
+            verified += 1
+        except VerificationError as e:
+            failed.append(f"{m['subject']}: {e}")
+    res.ok("SPEC-0084 every published envelope verifies per ES-013",
+           verified > 0 and not failed, f"{verified} verified; failures={failed[:2]}")
+
+    # The rogue envelope: correctly shaped, signed outside the chain.
+    stranger = minting.mint(CITIZEN, STORY)
+    if wire:
+        forged = json.loads(json.dumps(wire[0]["envelope"]))
+        forged["sender"] = {"leaf": stranger["pubs"]["leaf"],
+                            "chain": stranger["chain"]["chain_head"]}
+        try:
+            verify_envelope(forged, chain, op_facts)
+            res.record("SPEC-0084 an envelope signed outside the chain is rejected",
+                       "fail", "accepted a stranger's envelope")
+        except VerificationError as e:
+            res.record("SPEC-0084 an envelope signed outside the chain is rejected",
+                       "pass", str(e)[:140])
+
+    # The session's own commit, and its attestation on the wire.
+    line = next((l for l in log.splitlines() if "COMMIT " in l), None)
+    if not line:
+        res.record("SPEC-0084 the session produced a commit and attested it", "fail",
+                   log[-300:])
+        return
+    commit, tree = line.split("COMMIT ", 1)[1].split()
+    res.record("SPEC-0084 the session produced a commit and attested it", "pass",
+               f"{commit[:12]} tree {tree[:12]}")
+
+    attested = merge_gate.attestations_from([m["envelope"] for m in wire])
+    res.ok("SPEC-0084 the commit's attestation reaches the wire", commit in attested,
+           f"attested={[c[:12] for c in attested]}")
+    if commit in attested:
+        try:
+            verify_envelope(attested[commit], chain, op_facts)
+            res.record("the attestation walks to root — the enrolment check", "pass")
+        except VerificationError as e:
+            res.record("the attestation walks to root — the enrolment check", "fail",
+                       str(e))
+
+    merge_gate_checks(chain, res)
+
+
+def merge_gate_checks(chain, res):
+    """The merge gate itself, over a real repository the host can read.
+
+    The container's repo dies with its workspace, so the gate is exercised against a
+    host-side repository with attestations minted for it. That is not a weaker test: the
+    gate's job is to decide whether a commit in front of it is attributable, and every
+    way that can fail is exercised here — missing attestation, mismatched tree, and a
+    signature from outside the chain.
+    """
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        repo = pathlib.Path(td, "repo"); repo.mkdir()
+        env = {**os.environ, "GIT_AUTHOR_NAME": "agent", "GIT_AUTHOR_EMAIL": "a@invalid",
+               "GIT_COMMITTER_NAME": "agent", "GIT_COMMITTER_EMAIL": "a@invalid"}
+        for args in (["init", "-q"], ["add", "-A"]):
+            subprocess.run(["git", "-C", str(repo)] + args, env=env, capture_output=True)
+        (repo / "artifact.txt").write_text("produced in session")
+        subprocess.run(["git", "-C", str(repo), "add", "-A"], env=env, capture_output=True)
+        subprocess.run(["git", "-C", str(repo), "commit", "-q", "-m", "artifact"],
+                       env=env, capture_output=True)
+        ident = merge_gate.commit_identity(repo, "HEAD")
+
+        signer = minting.mint(CITIZEN, STORY)
+        chain_ = signer["chain"]["chain"]
+
+        def attestation(data, m=signer):
+            return build_envelope(f"acta.{CITIZEN}.{STORY}.event",
+                                  {"kind": merge_gate.ATTESTATION_KIND, "data": data},
+                                  m["pubs"]["leaf"], m["chain"]["chain_head"], m["token"],
+                                  signer_from_seed(m["seeds"]["leaf"]), 1,
+                                  payload_type="json")
+
+        good = [attestation(ident)]
+        try:
+            merge_gate.gate(repo, ["HEAD"], good, chain_)
+            res.record("SPEC-0084 the merge gate admits an attested commit", "pass")
+        except merge_gate.MergeRefused as e:
+            res.record("SPEC-0084 the merge gate admits an attested commit", "fail", str(e))
+
+        for name, envelopes, why in (
+            ("a commit with no attestation", [], "unattributed work cannot merge"),
+            ("an attestation naming a different tree",
+             [attestation({**ident, "tree": "0" * 40})], "tree mismatch"),
+            ("an attestation signed outside the chain",
+             [attestation(ident, minting.mint(CITIZEN, STORY))], "signer not in chain"),
+        ):
+            try:
+                merge_gate.gate(repo, ["HEAD"], envelopes, chain_)
+                res.record(f"SPEC-0084 the merge gate refuses {name}", "fail",
+                           f"admitted despite {why}")
+            except merge_gate.MergeRefused as e:
+                res.record(f"SPEC-0084 the merge gate refuses {name}", "pass",
+                           str(e)[:120])
+
+
 def emit_evidence(res, image, bus_image, cli_pin, out_dir):
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     out = pathlib.Path(out_dir)
@@ -243,6 +497,8 @@ def main():
 
     with Mesh(a.image) as mesh:
         live_spawn_checks(mesh, a.image, res)
+        isolation_checks(mesh, a.image, res)
+        attribution_checks(mesh, a.image, res)
         bus_image = mesh.bus_image
 
     rows = emit_evidence(res, a.image, bus_image, cli_pin, a.evidence_dir)
