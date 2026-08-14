@@ -51,11 +51,11 @@ is not a gate.
 id: SPEC-0131
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "The instruction staging tree has one state per instruction and a declared type"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -107,11 +107,11 @@ purpose.
 id: RULE-0096
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Bind SPEC-0131 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
 claim: SPEC-0131
@@ -138,11 +138,11 @@ preventing it. It becomes ENF-0001 when the tree is somewhere CI can read.
 id: SPEC-0132
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Interim posture: no instruction reaches the mesh except through atomic_ingest"
 tags: [declared-posture, interim-posture, instruction-layer, d42]
 binding: checked
@@ -179,11 +179,11 @@ measurement that decides when that is.
 id: RULE-0097
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Bind SPEC-0132 via CTRL-0010"
 tags: [binding, declared-posture, interim]
 claim: SPEC-0132
@@ -205,11 +205,11 @@ relations:
 id: SPEC-0133
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "An instruction's folder must agree with the state of the work it references"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -257,11 +257,11 @@ while passing in the earlier states.
 id: RULE-0098
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Bind SPEC-0133 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
 claim: SPEC-0133
@@ -283,11 +283,11 @@ relations:
 id: STRAT-0002
 type: strategy
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Ingest atomization and the courier: retiring the instruction interim"
 tags: [instruction-layer, destination, gated]
 horizon: "after the interim proves the workflow and measured friction justifies the build"
@@ -324,11 +324,11 @@ produced the two meters, and the reason DEC-0004 exists.
 id: STORY-0018
 type: story
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:17.502423+00:00"
 author: agent-worker-story-0018
-authorized_by: null
+authorized_by: DEC-0006
 title: "Ingest governance bootstrap: the instruction layer gets a lifecycle and a check"
 tags: [instruction-layer, interim, bootstrap, ingest]
 tracker_ref: "gh:tecthulhu/republic#34"
