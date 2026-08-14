@@ -169,3 +169,26 @@ The only control whose subject is the hosting platform rather than this reposito
 own content. That is deliberate: every other control checks something the corpus can
 see, and enforcement is the one load-bearing fact that lives outside it.
 <!-- atom:end id=CTRL-0009 -->
+
+<!-- atom:begin id=CTRL-0010 -->
+```yaml
+id: CTRL-0010
+type: control
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-14T19:45:00Z"
+author: agent-worker-story-0018
+authorized_by: null
+title: "ingest structure lint"
+tags: [enforcement-plane, instruction-layer, interim]
+target: artifact
+implementation: tools/ingest_lint.py
+```
+Validates the instruction staging tree: one instruction in one lifecycle state, a
+declared type marker agreeing with its folder, no unclassified file, and — where a
+file names the work it directs — a folder state agreeing with that work's real state.
+
+The only control whose subject is outside the repository, and therefore the only one
+no CI gate can run. It is invoked, and it says so on every evidence row (SPEC-0131).
+<!-- atom:end id=CTRL-0010 -->
