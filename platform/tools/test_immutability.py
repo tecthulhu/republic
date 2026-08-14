@@ -120,10 +120,85 @@ with tempfile.TemporaryDirectory() as td:
     check("a newly added atom is not flagged", r.returncode == 0,
           r.stdout[-400:] + r.stderr[-300:])
 
-    # An unreadable ref is a finding, not a silent pass.
+    # An unreadable ref is a finding, not a silent pass. The comparison now walks the
+    # commits between the ref and HEAD, so the refusal comes from enumerating them
+    # rather than from reading a tree — the property under test is that an
+    # unresolvable ref fails closed, and it must not depend on which step notices.
     r = lint_since(repo, ref="no-such-ref")
     check("an unresolvable ref fails rather than passing quietly",
-          r.returncode != 0 and "cannot read tree" in r.stdout, r.stdout[-300:])
+          r.returncode != 0 and "no-such-ref" in r.stdout
+          and ("cannot read tree" in r.stdout or "cannot enumerate commits" in r.stdout),
+          r.stdout[-300:])
+
+
+# Per-hop, not endpoint-to-endpoint. A branch may carry several acts on one atom, and
+# the endpoint delta hides what happened between them. Two shapes are checked here;
+# DEC-0005's ceremony PR is what exposed the second.
+with tempfile.TemporaryDirectory() as td:
+    repo = scaffold(td)
+    target = repo / "platform" / "corpus" / "fixture.md"
+    base = git("rev-parse", "HEAD", cwd=repo).stdout.strip()
+
+    amended = (ATOM.replace("version: 1.0.0", "version: 1.1.0")
+                   .replace('instantiated_at: "2026-01-01T00:00:00Z"',
+                            'instantiated_at: "2026-02-01T00:00:00Z"')
+                   .replace("The original body, as published.",
+                            "A legitimately amended body."))
+    target.write_text(amended)
+    git("commit", "-q", "-am", "legitimate new instance", cwd=repo)
+    r = lint_since(repo, ref=base)
+    check("a legitimate hop alone passes", r.returncode == 0,
+          r.stdout[-400:] + r.stderr[-300:])
+
+    # The new instance is then edited in place. Endpoint-to-endpoint this nets out to
+    # one amendment — version moved from the base, so nothing looks wrong — and the
+    # forbidden second hop disappears into the first.
+    target.write_text(amended.replace("A legitimately amended body.",
+                                      "Quietly rewritten after publication."))
+    r = lint_since(repo, ref=base)
+    check("an in-place edit hidden behind an earlier legitimate hop is caught",
+          r.returncode != 0 and "edited in place" in r.stdout, r.stdout[-500:])
+
+# The DEC-0005 shape: a decision ratifies (setting authorized_by, under its own
+# author), then reconciliation activates (setting state only, under the reconciler).
+# Both hops are legitimate; the endpoint delta attributes authorized_by to the
+# reconciler, which never sets it, and reported a misattribution that never happened.
+with tempfile.TemporaryDirectory() as td:
+    repo = scaffold(td)
+    target = repo / "platform" / "corpus" / "fixture.md"
+    base = git("rev-parse", "HEAD", cwd=repo).stdout.strip()
+
+    ratified = (ATOM.replace("state: proposed", "state: ratified")
+                    .replace("authorized_by: null", "authorized_by: DEC-0001")
+                    .replace("version: 1.0.0", "version: 1.1.0")
+                    .replace('instantiated_at: "2026-01-01T00:00:00Z"',
+                             'instantiated_at: "2026-02-01T00:00:00Z"'))
+    target.write_text(ratified)
+    git("commit", "-q", "-am", "ceremony: ratified", cwd=repo)
+
+    target.write_text(ratified.replace("state: ratified", "state: active")
+                              .replace("version: 1.1.0", "version: 1.2.0")
+                              .replace('instantiated_at: "2026-02-01T00:00:00Z"',
+                                       'instantiated_at: "2026-03-01T00:00:00Z"')
+                              .replace("author: fixture",
+                                       "author: ont-060-reconciliation"))
+    r = lint_since(repo, ref=base)
+    check("ratify-then-reconcile in one branch is two legitimate hops, not one bad one",
+          r.returncode == 0, r.stdout[-500:] + r.stderr[-300:])
+
+    # And the reconciler still may not amend content on its own hop.
+    target.write_text(ratified.replace("state: ratified", "state: active")
+                              .replace("version: 1.1.0", "version: 1.2.0")
+                              .replace('instantiated_at: "2026-02-01T00:00:00Z"',
+                                       'instantiated_at: "2026-03-01T00:00:00Z"')
+                              .replace("author: fixture",
+                                       "author: ont-060-reconciliation")
+                              .replace("The original body, as published.",
+                                       "Reworded while activating."))
+    r = lint_since(repo, ref=base)
+    check("the reconciler amending content on its own hop is still caught",
+          r.returncode != 0 and "beyond a lifecycle transition" in r.stdout,
+          r.stdout[-500:])
 
 print(f"\n{'PASS' if not failures else 'FAIL'} — SPEC-0113 immutability suite"
       f"{'' if not failures else ': ' + ', '.join(failures)}")

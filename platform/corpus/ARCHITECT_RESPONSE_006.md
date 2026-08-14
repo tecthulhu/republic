@@ -176,9 +176,9 @@ id: SPEC-0113
 type: specification
 scope: story:story-0009
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-12T16:00:00Z"
-author: consul-architect
+version: 1.1.0
+instantiated_at: "2026-08-14T06:00:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "Diff-aware immutability: content change without instance bump fails"
 tags: [acceptance-criterion]
@@ -191,6 +191,16 @@ canonical content hash changed while (version, instantiated_at) did
 not; wired into CI; fixture demonstrates the forbidden edit-in-place
 caught and the legitimate new-instance edit passing. ONT-012/015 become
 structural, closing the gap the owner identified mid-ceremony.
+
+v1.1.0 — **the comparison is per commit, not merge-base-to-tip.** Every commit
+between the base and the working tree is a published instance, and each adjacent
+pair is checked as its own hop. Comparing the endpoints asks whether the branch's
+net delta is legitimate as a single act, which is the wrong question for a branch
+carrying more than one: a hop that bumps the version alongside a content change,
+followed by a hop editing that new instance in place, nets out to one lawful-looking
+amendment. Skipping the intermediates checks only the instances that happened to
+survive to the tip, which is not what makes history the immutability mechanism
+(PA-002). Fixtures demonstrate the hidden second hop caught.
 <!-- atom:end id=SPEC-0113 -->
 
 <!-- atom:begin id=SPEC-0114 -->

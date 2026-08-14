@@ -182,9 +182,9 @@ id: SPEC-0119
 type: specification
 scope: story:story-0012
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-12T21:00:00Z"
-author: agent-worker-story-0009
+version: 1.1.0
+instantiated_at: "2026-08-14T06:00:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "A version increment requires a fresh instantiated_at and a consistent author"
 tags: [acceptance-criterion]
@@ -199,6 +199,18 @@ the previous instance's moment is not a new instance. It further fails an atom w
 changes may not be authored by `ont-060-reconciliation`, whose only legitimate
 change is a lifecycle transition. Fixtures demonstrate the stale-timestamp case and
 the misattributed-author case caught, and a correctly-authored new instance passing.
+
+v1.1.0 — **the prior instance is the previous commit, not the merge base.** The
+author check is a claim about one authoring act, so it has to be evaluated against
+one hop. DEC-0005's ceremony exposed the difference: the decision ratified
+SPEC-0081 (setting `authorized_by`, under the decision's author) and reconciliation
+then activated it (setting `state`, under the reconciler's). Both hops lawful; the
+endpoint delta showed `authorized_by` moving under the reconciler's name, which the
+reconciler never does, and the gate reported a misattribution that had not happened.
+A check that cannot see a legitimate sequence will eventually be softened to admit
+one, and softening the claim to match the tool is the wrong direction. Fixtures
+demonstrate ratify-then-reconcile passing as two hops, and the reconciler amending
+content on its own hop still caught.
 <!-- atom:end id=SPEC-0119 -->
 
 ---
