@@ -83,6 +83,11 @@ jobs:
         working-directory: platform
         run: python tools/test_provenance.py
 
+      # SPEC-0127: the pending-floor-touch flag over in-flight criteria.
+      - name: SPEC-0127 — acceptance-edit lint fixtures
+        working-directory: platform
+        run: python tools/test_acceptance_edit.py
+
       # SPEC-0129/0126: the Class III attack, run and refused. Needs no container
       # and no network — the two-way disagreement between the pinned and the weakened
       # grade is pure logic, and it is the assertion the whole story rests on.

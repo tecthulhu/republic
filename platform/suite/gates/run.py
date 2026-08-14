@@ -308,13 +308,25 @@ def baseline_checks(res):
 
     # Fail-closed is the load-bearing half: without an anchor the grader must stop,
     # never fall back to the current corpus — that fallback is what the pin replaces.
-    try:
-        baseline.graded_acceptance("STORY-0002", corpus_atoms)
-        res.record("SPEC-0126 an unanchored story refuses grading", "fail",
-                   "graded a story with no spawn act instead of refusing")
-    except baseline.BaselineUnanchored as e:
-        res.ok("SPEC-0126 an unanchored story refuses grading rather than falling back",
-               True, str(e)[:120])
+    #
+    # The subject is found rather than named. This was pinned to STORY-0002 and went
+    # red the moment this suite's own spawns started writing acts against it — the
+    # check invalidated itself by doing its job, which is the same shape as pinning
+    # the SPEC-0122 check to one story.
+    ac = "SPEC-0126 an unanchored story refuses grading rather than falling back"
+    unanchored = next((aid for aid, (a, _s, _b) in sorted(corpus_atoms.items())
+                       if a.get("type") == "story"
+                       and not baseline.spawn_acts_for(aid)), None)
+    if unanchored is None:
+        # Not a pass: the claim is about unanchored stories and there are none to try.
+        res.record(ac, "skip", "every story in the corpus carries a spawn act")
+    else:
+        try:
+            baseline.graded_acceptance(unanchored, corpus_atoms)
+            res.record(ac, "fail",
+                       f"graded {unanchored}, which has no spawn act, instead of refusing")
+        except baseline.BaselineUnanchored as e:
+            res.ok(ac, True, f"{unanchored}: {str(e)[:100]}")
 
     res.record("acceptance criteria added after the spawn act", "pass",
                f"{base['added_since_spawn'] or 'none'} — reported, never silently graded")
