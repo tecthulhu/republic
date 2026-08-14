@@ -310,6 +310,46 @@ def authorship_posture_findings(atoms):
             f"authorship to the granted scope; do not delete this check to go green."]
 
 
+WHITEPAPER_VERSIONED = re.compile(r"^REPUBLIC_WHITEPAPER_v(\d+(?:\.\d+)*)\.md$")
+
+
+def canonical_doc_findings(repo):
+    """`docs/WHITEPAPER.md` must be byte-identical to the newest versioned instance.
+
+    The canonical path exists so public links survive a version bump: readers and
+    citations point at one stable name, and each release overwrites it. That is a
+    deliberate second copy of content whose authoring source is the versioned file —
+    and two copies of one fact with nothing comparing them is the source-of-falsehood
+    shape this corpus rules against, with the front door as the copy that goes stale.
+
+    So the copy is checked rather than trusted. Bump the versioned instance without
+    refreshing the canonical and this fails, which is the only state where the public
+    link would render a superseded paper while the record held the current one.
+
+    Silent when the directory or the canonical file is absent: this is a convention
+    about a document that may not exist, not a requirement that it does.
+    """
+    docs = pathlib.Path(repo) / "docs"
+    canonical = docs / "WHITEPAPER.md"
+    if not canonical.is_file():
+        return []
+    versioned = sorted(
+        ((tuple(int(n) for n in m.group(1).split(".")), p)
+         for p in docs.glob("*.md")
+         for m in [WHITEPAPER_VERSIONED.match(p.name)] if m))
+    if not versioned:
+        return [f"docs/WHITEPAPER.md exists with no versioned instance beside it — the "
+                f"canonical path renders content no immutable file records, so there is "
+                f"nothing for a citation to resolve to (ONT-012/015)."]
+    _v, newest = versioned[-1]
+    if canonical.read_bytes() != newest.read_bytes():
+        return [f"docs/WHITEPAPER.md does not match docs/{newest.name}, the newest "
+                f"versioned instance — the canonical path is a rendering of that "
+                f"instance and has drifted from it. Overwrite the canonical file; do "
+                f"not edit the versioned one."]
+    return []
+
+
 def provenance_findings(atoms, before, label=""):
     """SPEC-0119 / D41: a new version must carry a new authoring act.
 
@@ -513,6 +553,7 @@ def main():
         # SPEC-0121: a repository property, so it is checked when the repository is
         # the subject — whole-tree lint or a --since comparison.
         errors = errors + tree_findings(repo_of(corpus))
+        errors = errors + canonical_doc_findings(repo_of(corpus))
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     digest = corpus_digest(atoms)
     governed = sum(1 for a, _s, _b in atoms.values() if a.get("type") != "evidence")

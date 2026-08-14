@@ -1,0 +1,24 @@
+{
+ "id": "EVID-embed-2026-08-14T160456",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-14T16:04:56.225273+00:00",
+ "author": "embedder-pipeline",
+ "authorized_by": null,
+ "title": "embedder pipeline build: 1316 instances, provenance complete, coverage gap 0 (build-time observation; CTRL-0007 verdict is the suite)",
+ "control_ref": "CTRL-0007",
+ "subject": "corpus@ce02fa6714ed8a5d#atoms=1316@tfidf-local-lexical@c5d1234d471179d2",
+ "verdict": "pass",
+ "checked_at": "2026-08-14T16:04:56.225273+00:00",
+ "checker": "embedder-pipeline",
+ "assertions_run": [
+  "ONT-088-provenance-completeness",
+  "ONT-089-coverage"
+ ],
+ "assertions_not_run": [
+  "ONT-087-chunk-boundary",
+  "ONT-086-generated-rendering"
+ ]
+}

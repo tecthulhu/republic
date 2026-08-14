@@ -202,6 +202,48 @@ with tempfile.TemporaryDirectory() as td:
           r.returncode != 0 and "governed naming family" in r.stdout, r.stdout[-400:])
     (repo / "platform" / "ARCHITECT_RESPONSE_098.md").unlink()
 
+# ------------------------------------------- the canonical whitepaper rendering
+# docs/WHITEPAPER.md is a deliberate second copy: one stable public link that each
+# release overwrites. Two copies of one fact with nothing comparing them is the
+# source-of-falsehood shape, so the copy is checked.
+with tempfile.TemporaryDirectory() as td:
+    repo = scaffold(td)
+    docs = repo / "docs"
+    docs.mkdir()
+
+    check("no docs directory is not a finding", lint_tree(repo).returncode == 0, "")
+
+    (docs / "REPUBLIC_WHITEPAPER_v1.0.1.md").write_text("# the paper\n\nv1.0.1 body.\n")
+    (docs / "WHITEPAPER.md").write_text("# the paper\n\nv1.0.1 body.\n")
+    check("canonical matching the newest versioned instance passes",
+          lint_tree(repo).returncode == 0, lint_tree(repo).stdout[-400:])
+
+    # A new version lands and the canonical is not refreshed — the one state where
+    # the public link renders a superseded paper while the record holds the current.
+    (docs / "REPUBLIC_WHITEPAPER_v1.1.0.md").write_text("# the paper\n\nv1.1.0 body.\n")
+    r = lint_tree(repo)
+    check("a versioned bump without refreshing the canonical is caught",
+          r.returncode != 0 and "has drifted from it" in r.stdout, r.stdout[-400:])
+
+    (docs / "WHITEPAPER.md").write_text("# the paper\n\nv1.1.0 body.\n")
+    check("refreshing the canonical clears it", lint_tree(repo).returncode == 0,
+          lint_tree(repo).stdout[-400:])
+
+    # Ordering is by version, not filename: 1.10.0 is newer than 1.9.0.
+    (docs / "REPUBLIC_WHITEPAPER_v1.9.0.md").write_text("# the paper\n\nv1.9.0 body.\n")
+    (docs / "REPUBLIC_WHITEPAPER_v1.10.0.md").write_text("# the paper\n\nv1.10.0 body.\n")
+    (docs / "WHITEPAPER.md").write_text("# the paper\n\nv1.10.0 body.\n")
+    check("newest is chosen by version order, not lexical order",
+          lint_tree(repo).returncode == 0, lint_tree(repo).stdout[-400:])
+
+    # A canonical with nothing behind it: a citation resolves to no instance.
+    for p in docs.glob("REPUBLIC_WHITEPAPER_*.md"):
+        p.unlink()
+    r = lint_tree(repo)
+    check("a canonical with no versioned instance behind it is caught",
+          r.returncode != 0 and "no versioned instance" in r.stdout, r.stdout[-400:])
+
+
 # The real repository must pass both, or the gates are not deployable.
 r = subprocess.run([sys.executable, LINT, "--tree"], capture_output=True, text=True)
 check("the real repository passes --tree", r.returncode == 0, r.stdout[-600:])
