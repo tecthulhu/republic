@@ -40,14 +40,23 @@ mean "a human deliberately touched this", but a floor touch is a ratification ac
 human evidence is an evidence record. Two accidental mechanisms for one idea is the
 anti-pattern; STORY-0010 may unify them later if they turn out to be one thing.
 
-**There is nothing to pin to yet.** SPEC-0081–0086 — the whole of STORY-0002's
-acceptance set — are `proposed` with `authorized_by: null`. No acceptance spec in this
-corpus has ever been floor-touched, and the spawn gate persists no act record naming
-the acceptance set it spawned against. Hardening 2 therefore has a prerequisite:
-STORY-0014 must make the spawn act durable before it can pin anything to it, and a
-ratifying decision must exist before any revision can be measured against a touch.
-This is a finding, not an objection — but a pin implemented against an empty baseline
-would report green while pinning nothing.
+**There was nothing to pin to.** SPEC-0081–0086 — the whole of STORY-0002's
+acceptance set — were `proposed` with `authorized_by: null`; no acceptance spec in
+this corpus had ever been floor-touched, and the spawn gate persisted no act record
+naming the acceptance set it spawned against. A pin implemented against an empty
+baseline would have reported green while pinning nothing.
+
+Both halves are now answered, and the floor accepted the finding on each:
+
+- **DEC-0005** ratifies STORY-0002 and its six criteria — the first floor touch of
+  acceptance criteria in the corpus's history, and the event the pin anchors to for
+  initial criteria.
+- **SPEC-0129** makes the spawn act durable, and the floor ordered it *first* in
+  STORY-0014 rather than folded into the pin as this charter originally had it.
+
+What remains unanswered is narrower and worth keeping visible: STORY-0013's own
+acceptance set (SPEC-0122–0125) is equally green and equally untouched, and
+DEC-0005 deliberately does not reach it.
 
 ---
 
@@ -57,34 +66,101 @@ id: SPEC-0126
 type: specification
 scope: story:story-0014
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T04:40:00Z"
-author: agent-worker-story-0013
+version: 1.1.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "Acceptance grading resolves to the last floor-touched instance, not the current one"
 tags: [acceptance-criterion, integrity, self-dilution, class-iii]
 binding: checked
 check: machine
 story_ref: STORY-0014
+relations:
+  - { rel: derives, target: SPEC-0129 }
 ```
 The evidence-grading query resolves a story's acceptance set to the acceptance-spec
-instances **as of the last floor touch**: the instance pinned by the story's
-spawn-authorizing act for initial criteria, or the most recent instance carrying a
-floor ratification for revisions. Agent-authored revisions after spawn remain
-recordable and remain in the corpus — they are not refused — but they do not move the
-graded baseline until a floor touch moves it.
-
-The spawn act becomes durable as part of this: spawning a story is a floor or
-floor-delegated touch of its initial criteria, so the act record must name the
-acceptance-spec instances it spawned against. Without that record the initial
-baseline has no anchor and the "author the initial specs weak" variant stays open.
+instances **as of the last floor touch**: the instance named by the story's durable
+spawn-act record (SPEC-0129) for initial criteria, or the most recent instance
+carrying a floor ratification for revisions. Agent-authored revisions after spawn
+remain recordable and remain in the corpus — they are not refused — but they do not
+move the graded baseline until a floor touch moves it.
 
 Fixtures demonstrate, on an in-flight story: an agent-authored weakening graded
 against the pinned set rather than the weakened one; a merge that would pass against
 the weakened set failing against the pin; a floor-touched revision moving the
-baseline; and a story whose spawn act is missing refused rather than graded against
-whatever is current.
+baseline; and a story whose spawn-act record is missing **refused rather than graded
+against whatever is current** — a pin with no anchor must fail closed, because the
+alternative is a pin that silently degrades into grading the present.
+
+*v1.1.0 — the durable spawn-act record moved out of this criterion and into
+SPEC-0129, per floor Direction 2. It was folded in here as a clause, which read as a
+detail of the pin rather than as its prerequisite; the floor ruled it a criterion in
+its own right and ordered it first. The amendment is floor-directed and floor-touched
+by the same merge that signs DEC-0005 — a widening of the criteria, not a narrowing,
+and not one an agent made on its own authority.*
 <!-- atom:end id=SPEC-0126 -->
+
+<!-- atom:begin id=SPEC-0129 -->
+```yaml
+id: SPEC-0129
+type: specification
+scope: story:story-0014
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
+authorized_by: null
+title: "Every spawn persists a durable record of what it was authorized against"
+tags: [acceptance-criterion, integrity, self-dilution, class-iii, spawn]
+binding: checked
+check: machine
+story_ref: STORY-0014
+relations:
+  - { rel: derives, target: SPEC-0122 }
+```
+A spawn writes an immutable record naming the story instance it resolved to — id,
+version, `instantiated_at` — and a digest over the acceptance-set instances in force
+at that moment. The record is the spawn act, and it is what the baseline pin anchors
+to.
+
+**This is first because without it the pin has nothing to hold.** The gate resolves a
+story (SPEC-0122) and then forgets: it mints, injects and starts a container, and
+persists nothing about the criteria the work was authorized against. A pin built on
+top of that would compute a baseline from an empty set and grade against it, which is
+a green check standing in for a property that is not there — the buffering-proxy
+defect class, one layer up in the governance plane.
+
+The record is a record, not derived data: it is committed under `acta/` (D17) and
+addressable like any other, because a baseline recomputed at grading time from
+whatever the corpus currently says is not a baseline.
+
+Fixtures demonstrate: a spawn producing a record whose story instance and
+acceptance digest match the corpus at spawn time; the record surviving the container
+it describes; a corpus edit after spawn leaving the record unchanged; and the record
+being refused rather than written when the story resolves to nothing.
+<!-- atom:end id=SPEC-0129 -->
+
+<!-- atom:begin id=RULE-0094 -->
+```yaml
+id: RULE-0094
+type: rule
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
+authorized_by: null
+title: "Bind SPEC-0129 via CTRL-0005"
+tags: [binding, integrity]
+claim: SPEC-0129
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0129 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+<!-- atom:end id=RULE-0094 -->
 
 <!-- atom:begin id=RULE-0086 -->
 ```yaml
@@ -114,14 +190,14 @@ id: STORY-0014
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T04:40:00Z"
-author: agent-worker-story-0013
+version: 1.1.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "Acceptance-baseline pinning: grade against what the floor touched"
 tags: [integrity, self-dilution, class-iii, floor-ruled]
 tracker_ref: "gh:tecthulhu/republic#26"
-acceptance: [SPEC-0126]
+acceptance: [SPEC-0129, SPEC-0126]
 relations:
   - { rel: advances, target: SPRINT-0001 }
 ```
@@ -129,9 +205,22 @@ The load-bearing half of the mitigation. The lint (STORY-0015) makes the pending
 state visible; the pin is what actually stops the weakened set from being graded
 against.
 
+**Build order is part of the charter, not an implementation detail.** SPEC-0129
+first: the durable spawn-act record, because a pin with no anchor computes a baseline
+from an empty set and grades against it. SPEC-0126 second: the pin itself. The
+acceptance list is written in that order for the same reason.
+
 Build floor-touch **minimally** here, per the floor's cousin-primitive note: the
-spawn act pins initial criteria, an explicit floor ratification moves the baseline
-for revisions, and nothing is pre-unified with STORY-0010's human-evidence record.
+spawn-act record pins initial criteria, an explicit floor ratification moves the
+baseline for revisions, and nothing is pre-unified with STORY-0010's human-evidence
+record.
+
+*v1.1.0 — acceptance widened from one criterion to two on floor Direction 2, which
+accepted the finding that Hardening 2 had an unbuilt prerequisite. Floor-directed and
+floor-touched by the same merge that signs DEC-0005, which matters here more than
+usual: this is an amendment to the acceptance set of the very story that exists to
+stop acceptance sets moving on agent authority. It widens rather than narrows, and it
+is not an agent's own call.*
 <!-- atom:end id=STORY-0014 -->
 
 ---
@@ -280,9 +369,9 @@ id: STORY-0016
 type: story
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T04:40:00Z"
-author: agent-worker-story-0013
+version: 1.1.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "The composition posture: declare the Class III gap and its time-boxed mitigation"
 tags: [integrity, self-dilution, class-iii, declared-posture, floor-ruled]
@@ -296,9 +385,11 @@ it cannot be declared truthfully before they exist. Declaring it first would be 
 same error STORY-0013 caught in POST-0001 — an atom describing machinery that is not
 there.
 
-One reference in the floor ruling does not resolve here: "R6's interim-posture rule".
-DEC-0001's R6 ratifies the limiter grammar sections and says nothing about postures,
-so the time-boxing above is written from the ruling's own words rather than from a
-cited rule. If R6 belongs to the spine's numbering rather than this corpus, the
-citation needs redirecting before STORY-0016 builds against it.
+*v1.1.0 — the R6 citation is dropped, per floor Direction 3. DEC-0001's R6 ratifies
+the limiter grammar sections and says nothing about interim postures, so the
+time-boxing had been written from the ruling's words against a rule that does not
+support them. The floor accepted the finding and ruled that the retirement condition —
+mandate-bounded authorship going live — stands on its own as a declared self-failing
+posture and needs no citation. A borrowed citation that does not resolve is weaker
+than no citation, because it invites the reader to stop checking.*
 <!-- atom:end id=STORY-0016 -->
