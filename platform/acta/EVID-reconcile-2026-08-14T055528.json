@@ -1,0 +1,86 @@
+{
+ "id": "EVID-reconcile-2026-08-14T055528",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-14T05:55:28.534619+00:00",
+ "author": "ont-060-reconciliation",
+ "authorized_by": null,
+ "title": "reconciliation: 12 activated, 13 held ratified",
+ "control_ref": "CTRL-0003",
+ "subject": "corpus@fafe60f3e3f160bf",
+ "verdict": "pass",
+ "checked_at": "2026-08-14T05:55:28.534619+00:00",
+ "checker": "enact-reconcile",
+ "applied": true,
+ "authorization": "ONT-060 (ratified by DEC-0001)",
+ "activated": [
+  "DEC-0005",
+  "RULE-0089",
+  "RULE-0090",
+  "RULE-0091",
+  "RULE-0092",
+  "RULE-0093",
+  "SPEC-0081",
+  "SPEC-0082",
+  "SPEC-0083",
+  "SPEC-0084",
+  "SPEC-0085",
+  "STORY-0002"
+ ],
+ "held_ratified": [
+  {
+   "id": "CTRL-0008",
+   "reason": "implementation does not resolve: suite/index (ONT-033)"
+  },
+  {
+   "id": "RSTR-0002",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0004",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0009",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0012",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0001",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0003",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0010",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0032",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0042",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0064",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0070",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0086",
+   "reason": "no active rule binds this claim (ONT-031)"
+  }
+ ]
+}

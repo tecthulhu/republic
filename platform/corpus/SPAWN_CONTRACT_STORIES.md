@@ -112,10 +112,10 @@ AC emits an EVID- row on acta.evidence.ctrl-0004 against the image digest.
 id: STORY-0002
 type: story
 scope: platform
-state: ratified
-version: 1.3.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: agent-worker-story-0008
+state: active
+version: 1.4.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Spawn contract: supervised CLI-session agent in a citizen container"
 tags: [step-5, risky-hop, spawn-contract]
@@ -136,10 +136,10 @@ streaming. API-mode fleet evidence does not satisfy any criterion below.
 id: SPEC-0081
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: agent-worker-story-0004
+state: active
+version: 1.3.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Spawn gate: refusal without story, mint and inject with one, ceiling and mount refusals"
 tags: [acceptance-criterion, spawn-ac-1]
@@ -167,10 +167,10 @@ derived image requesting caveats outside its role layer's
 id: SPEC-0082
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: consul-draft
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "IO path: session stream to bus, live render, durable persistence"
 tags: [acceptance-criterion, spawn-ac-2]
@@ -191,10 +191,10 @@ content.
 id: SPEC-0083
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: consul-draft
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Isolation: ephemeral workspace, three sanctioned egress paths only"
 tags: [acceptance-criterion, spawn-ac-3]
@@ -214,10 +214,10 @@ the three sinks.
 id: SPEC-0084
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: consul-draft
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Attribution: every message and commit chain-verifiable to the leaf"
 tags: [acceptance-criterion, spawn-ac-4]
@@ -237,10 +237,10 @@ fixtures required, must fail).
 id: SPEC-0085
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: consul-draft
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Supervision: interrupt, mid-session injection, clean terminate"
 tags: [acceptance-criterion, spawn-ac-5]
