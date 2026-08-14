@@ -45,7 +45,7 @@ The whole point is that you don't have to take this document's word for it:
 - The founding enactment is tagged `dec-0001-enacted`.
 - Evidence records live under `platform/acta/`.
 - The conformance workflow and its uploaded evidence rows are in the repository's Actions history.
-- The standing queries are re-runnable from the tools directory against any commit.
+- The standing queries are re-runnable from the tools directory against any commit: `python platform/tools/embedder.py --report`.
 
 Under the system's own truth model, this README is a *rendering*. Where it and the resolved record disagree, **the record wins.**
 
@@ -53,17 +53,19 @@ Under the system's own truth model, this README is a *rendering*. Where it and t
 
 The full argument — the market thesis, the attestational-vs-structural distinction, the four falsifiable hypotheses, and the honest current-state report — is in the whitepaper:
 
-**[`docs/REPUBLIC_WHITEPAPER_v1.0.1.md`](./docs/REPUBLIC_WHITEPAPER_v1.0.1.md)** — the current instance.
+**[`docs/WHITEPAPER.md`](./docs/WHITEPAPER.md)** — always the current version (v1.0.1 today).
 
 It's written to be refutable: it states the criteria by which it could be proven wrong, and the system emits evidence of its own performance — including evidence of failure — as a side effect of operating.
 
-`docs/` holds the whitepaper and its successors, one file per version. That is the paper's own truth model applied to itself: an instance is immutable and a revision is a new instance, so versions accumulate rather than overwrite and a citation of v1.0.1 keeps resolving after v1.1 lands. This README always links the current one.
+`WHITEPAPER.md` always renders the current version; every prior version stays addressable as an immutable instance in the same directory — [`REPUBLIC_WHITEPAPER_v1.0.1.md`](./docs/REPUBLIC_WHITEPAPER_v1.0.1.md) and its successors — so a supersession happens in the open rather than as a silent replacement. That is the paper's own truth model applied to itself, and it means a citation of a version keeps resolving after the next one lands.
+
+**Releasing a new version:** add the versioned file, then overwrite `WHITEPAPER.md` with the same content. Versioned files are never edited after creation. The build gate checks that the canonical file matches the newest versioned instance, so the public link cannot quietly go stale.
 
 ## Status & license
 
 Whitepaper **v1.0.1** (2026-08-14) is the current instance. The ratification is v1.0's, taken on 2026-08-13 from rc9 without amendment; v1.0.1 is a citation supersession that resolves the paper's posture references to their landed atom IDs and leaves the ratification untouched. Both statements are in the paper's own header, and the distinction is the point — a patch that re-cited its sources is not a new ruling.
 
-The platform substrate is enacted and enforcing; the containerized agent layer is the current front. The repository's outbound license is being finalized (AGPL-family, owner-granted); until it's committed, the deliberate holding posture is **all rights reserved** — the repository is public for inspection, not yet licensed for reuse.
+The platform substrate is enacted and enforcing; the containerized agent layer is the current front. The repository's outbound license is decided but not yet enacted: `DEC-0002` names AGPL-3.0-only, granted personally by the owner, and stands at `proposed` with no LICENSE file committed. Until it is, the deliberate holding posture is **all rights reserved** — the repository is public for inspection, not yet licensed for reuse.
 
 ## Author
 
