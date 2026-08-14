@@ -296,9 +296,9 @@ id: SPEC-0121
 type: specification
 scope: story:story-0012
 state: proposed
-version: 1.1.0
-instantiated_at: "2026-08-14T04:30:00Z"
-author: agent-worker-story-0013
+version: 1.2.0
+instantiated_at: "2026-08-14T05:10:00Z"
+author: agent-worker-dec-0005
 authorized_by: null
 title: "Every markdown file is governed, allowlisted, or a gate failure"
 tags: [acceptance-criterion, d44]
@@ -308,10 +308,23 @@ story_ref: STORY-0012
 ```
 CTRL-0001 classifies every `*.md` file in the repository as one of: inside
 `platform/corpus/**` and therefore governed, parsed and validated; an enumerated
-root allowlist (CLAUDE.md, README.md, LICENSE); or a violation. A governed-looking
-document outside `platform/corpus/**` — one carrying atom markers, or named in the
-`DOC-`/`DEC-` family, or named in a correspondence family the bridge carries
-(`ARCHITECT_`, `FLOOR_`) — fails the gate.
+root allowlist (CLAUDE.md, README.md, LICENSE); or a violation.
+
+**At the repository root the allowlist is the whole rule.** Any `*.md` at the root
+that is not on it fails the gate, whatever it is called. Below the root the
+heuristic still applies — a file carrying atom markers, or named in the `DOC-`/`DEC-`
+family or a bridge correspondence family, is a violation wherever it sits — because
+under `platform/` and `suite/` an ordinary note is legitimate and a governed document
+is not, and something has to tell them apart.
+
+v1.2.0 replaces enumeration at the root with the rule. The naming pattern was widened
+three times in four days — `ARCHITECT_RESPONSE_` missed `ARCHITECT_NOTE_`,
+`ARCHITECT_` missed `FLOOR_`, both missed `BRIDGE_` — and each widening closed one
+instance while leaving the class open. Every one of those files sat at the root with
+the gate green. A rule that has to be extended once per new sender is a rule that
+protects only against senders someone has already met, and the root does not need the
+heuristic: it belongs to the repository's front matter, and governed content has
+exactly one home.
 
 This closes SPEC-0091's canonical-tree clause, which has had no enforcing control
 since it was written and has been violated twice with every gate green. The reason

@@ -224,18 +224,20 @@ def atoms_at(ref, repo):
 ROOT_ALLOWLIST = {"CLAUDE.md", "README.md", "LICENSE", "LICENSE.md",
                   "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"}
 GOVERNED_NAME = re.compile(r"^(DOC|DEC|SPEC|RSTR|CTRL|ENF|RULE|MAND|STRAT|SPRINT|"
-                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^(ARCHITECT|FLOOR)_")
-# ARCHITECT_ rather than ARCHITECT_RESPONSE_: the first version of this pattern
-# named only responses, and an ARCHITECT_NOTE_ file sat untracked at the root with
-# the gate passing — the hole was exactly the shape of the thing it was built to
-# catch. Correspondence is correspondence whatever the delivery calls it.
+                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^(ARCHITECT|FLOOR|BRIDGE)_")
+# This pattern was widened three times in four days, once per new correspondence
+# family: ARCHITECT_RESPONSE_ missed ARCHITECT_NOTE_, ARCHITECT_ missed FLOOR_, and
+# both missed BRIDGE_. Each widening closed the instance and left the class open,
+# because a pattern that enumerates the senders it has already seen catches only the
+# past — and every one of those files sat at the repository root with the gate green.
 #
-# FLOOR_ joins it for the same reason and on the same evidence: the first floor
-# ruling to arrive by bridge (FLOOR_RESPONSE_whitepaper_currency_and_dilution) would
-# have sat at the root with the gate green. A pattern that enumerates the senders it
-# has already seen catches only the past, so this one now names the two correspondence
-# families the bridge actually carries — and the next new sender is a gate change,
-# which is the point: it has to be noticed to be admitted.
+# The root no longer relies on it. Below the root the heuristic still earns its keep:
+# an atom-bearing or governed-looking file under platform/ or suite/ is a violation
+# and an ordinary note is not. At the root there is no such ambiguity — the root
+# belongs to the repository's front matter, and governed content has exactly one home
+# (SPEC-0091). So the root is allowlist-or-violation, whatever the file is called,
+# and the fourth correspondence family will be caught by the rule rather than by
+# someone noticing in time to widen a regex.
 
 
 def tree_findings(repo):
@@ -251,13 +253,19 @@ def tree_findings(repo):
         if corpus in resolved.parents:
             continue                       # governed: parsed and validated elsewhere
         rel = resolved.relative_to(repo.resolve())
-        if len(rel.parts) == 1 and rel.name in ROOT_ALLOWLIST:
+        at_root = len(rel.parts) == 1
+        if at_root and rel.name in ROOT_ALLOWLIST:
             continue                       # enumerated root allowlist
         text = p.read_text(encoding="utf-8", errors="replace")
         carries_atoms = bool(re.search(r"^<!--\s*atom:begin\s", text, re.M))
         governed_name = bool(GOVERNED_NAME.match(rel.name))
-        if carries_atoms or governed_name:
-            why = "carries atom markers" if carries_atoms else "governed naming family"
+        if at_root or carries_atoms or governed_name:
+            # Most specific reason first. "Not on the root allowlist" is true of an
+            # atom-bearing root file too, and is the least useful thing to tell someone
+            # about it.
+            why = ("carries atom markers" if carries_atoms else
+                   "governed naming family" if governed_name else
+                   "not on the root allowlist")
             findings.append(
                 f"{rel}: governed document outside platform/corpus ({why}) — "
                 f"SPEC-0091's canonical tree is the only home for governed content "
