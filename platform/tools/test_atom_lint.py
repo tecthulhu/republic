@@ -139,6 +139,57 @@ with tempfile.TemporaryDirectory() as td:
           corpus_digest(a2) == d1 and "EVID-fixture-9999" in a2,
           f"{d1} -> {corpus_digest(a2)}")
 
-print(f"\n{'PASS' if not failures else 'FAIL'} — atom-lint fixture suite (SPEC-0092/0095/0096/0106)"
+# G — SPEC-0123: the authorship posture, proven in both directions.
+#
+# The holding direction is checked against the real corpus rather than a fixture,
+# because the posture is a claim *about this corpus*: agent identities author
+# governed atoms and nothing binds that authorship to a granted scope. A fixture
+# could only show the check compiles.
+real_atoms, real_errors = lint([CORPUS_DIR], SCHEMA)
+agent_authored = sorted(aid for aid, (a, _s, _b) in real_atoms.items()
+                        if a.get("type") != "evidence"
+                        and str(a.get("author", "")).startswith("agent-"))
+authorship_mandates = [aid for aid, (a, _s, _b) in real_atoms.items()
+                       if a.get("type") == "mandate"]
+check("SPEC-0123 describes a real population: agent-authored governed atoms exist",
+      len(agent_authored) > 0, f"{len(agent_authored)} atoms: {agent_authored[:4]}")
+check("SPEC-0123 holds: no authorship mandate binds any of them",
+      not authorship_mandates and not any("SPEC-0123" in e for e in real_errors),
+      f"mandates={authorship_mandates} findings="
+      f"{[e for e in real_errors if 'SPEC-0123' in e]}")
+
+# The failing direction: a mandate carrying an authorship imperium must turn the
+# corpus red. Without this the posture would be a claim no evidence could disturb.
+with tempfile.TemporaryDirectory() as td:
+    shutil.copytree(CORPUS_DIR, pathlib.Path(td, "corpus"))
+    shutil.copytree(str(ACTA), pathlib.Path(td, "acta"))
+    pathlib.Path(td, "corpus", "mandate_fixture.md").write_text(
+        "<!-- atom:begin id=MAND-9999 -->\n```yaml\n"
+        "id: MAND-9999\ntype: mandate\nscope: platform\nstate: proposed\nversion: 1.0.0\n"
+        'instantiated_at: "2026-01-01T00:00:00Z"\nauthor: fixture\nauthorized_by: null\n'
+        'title: "authorship mandate fixture"\ncitizen: agent-worker\n'
+        "imperium: [authorship of specification atoms]\nmodel_band: B1\n"
+        "role_layer: worker\n```\n<!-- atom:end id=MAND-9999 -->\n")
+    _, errs = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+    stale = [e for e in errs if "SPEC-0123" in e]
+    check("an authorship mandate makes SPEC-0123 stale and the corpus red",
+          bool(stale), f"findings: {[e for e in errs if 'MAND-9999' in e or 'SPEC' in e][:3]}")
+
+    # And a mandate that grants something *other* than authorship must not fire it —
+    # a check that reddens on every mandate would be superstition, not a condition.
+    pathlib.Path(td, "corpus", "mandate_fixture.md").write_text(
+        "<!-- atom:begin id=MAND-9998 -->\n```yaml\n"
+        "id: MAND-9998\ntype: mandate\nscope: platform\nstate: proposed\nversion: 1.0.0\n"
+        'instantiated_at: "2026-01-01T00:00:00Z"\nauthor: fixture\nauthorized_by: null\n'
+        'title: "unrelated mandate fixture"\ncitizen: agent-worker\n'
+        "imperium: [publish to the story telemetry subject]\nmodel_band: B1\n"
+        "role_layer: worker\n```\n<!-- atom:end id=MAND-9998 -->\n")
+    _, errs = lint([f"{td}/corpus", f"{td}/acta"], SCHEMA)
+    check("a mandate granting something other than authorship does not fire it",
+          not any("SPEC-0123" in e for e in errs),
+          str([e for e in errs if "SPEC-0123" in e]))
+
+print(f"\n{'PASS' if not failures else 'FAIL'} — atom-lint fixture suite "
+      f"(SPEC-0092/0095/0096/0106/0123)"
       f"{'' if not failures else ': ' + ', '.join(failures)}")
 sys.exit(1 if failures else 0)

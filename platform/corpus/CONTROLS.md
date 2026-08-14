@@ -77,10 +77,10 @@ Runs against every derived image: hardening, identity init, descriptor, heartbea
 id: CTRL-0005
 type: control
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T04:35:36.374238+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "gate library suite"
 tags: [enforcement-plane]
@@ -95,10 +95,10 @@ Tests spawn, merge, and runtime gates: story-required spawn, injection order, re
 id: CTRL-0006
 type: control
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-12T18:38:07.984886+00:00"
-author: consul-extraction-pass
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T04:35:36.374238+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0003
 title: "chain verifier suite"
 tags: [enforcement-plane]

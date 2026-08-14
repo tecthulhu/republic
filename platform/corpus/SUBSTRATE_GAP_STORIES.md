@@ -296,9 +296,9 @@ id: SPEC-0121
 type: specification
 scope: story:story-0012
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-12T22:00:00Z"
-author: agent-worker-story-0012
+version: 1.1.0
+instantiated_at: "2026-08-14T04:30:00Z"
+author: agent-worker-story-0013
 authorized_by: null
 title: "Every markdown file is governed, allowlisted, or a gate failure"
 tags: [acceptance-criterion, d44]
@@ -310,7 +310,8 @@ CTRL-0001 classifies every `*.md` file in the repository as one of: inside
 `platform/corpus/**` and therefore governed, parsed and validated; an enumerated
 root allowlist (CLAUDE.md, README.md, LICENSE); or a violation. A governed-looking
 document outside `platform/corpus/**` — one carrying atom markers, or named in the
-`DOC-`/`DEC-`/`ARCHITECT_RESPONSE_` family — fails the gate.
+`DOC-`/`DEC-` family, or named in a correspondence family the bridge carries
+(`ARCHITECT_`, `FLOOR_`) — fails the gate.
 
 This closes SPEC-0091's canonical-tree clause, which has had no enforcing control
 since it was written and has been violated twice with every gate green. The reason

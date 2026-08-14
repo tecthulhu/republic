@@ -43,6 +43,39 @@ class SpawnRefused(Exception):
         self.criterion = criterion
 
 
+def resolve_story(story_ref):
+    """SPEC-0122: the spawn precondition is *resolvability*, not lifecycle state.
+
+    The reference may arrive as the atom id (STORY-0002) or as the kebab form the
+    subject taxonomy uses (story-0002, ES-002). Either must resolve to a real story
+    atom; neither is required to be `ratified` or `active`.
+
+    That leniency is deliberate and load-bearing. A story is necessarily `proposed`
+    while the work that produces its acceptance evidence is in flight, and ratification
+    follows green acceptance — it cannot precede it. A gate demanding ratified law
+    before spawning the work that earns ratification is circular, and nothing would
+    ever be built through it.
+
+    What is *not* lenient: the reference has to name something real. Until this
+    existed the gate accepted any non-empty string, so "no story, no spawn" was
+    enforced against the empty string and nothing else.
+
+    A red corpus is a refusal rather than a pass. There is no such thing as resolving
+    a reference against a corpus that does not parse, and the honest answer to "does
+    this name a story?" when the corpus is unreadable is *refuse*, not *assume yes*
+    (ENF-0002 fails closed).
+    """
+    atoms, errors = lint([str(CORPUS)], str(SCHEMA))
+    if errors:
+        raise SpawnRefused(f"cannot resolve a story against a red corpus: "
+                           f"{len(errors)} findings", "SPEC-0122")
+    for candidate in (story_ref, story_ref.upper()):
+        entry = atoms.get(candidate)
+        if entry and entry[0].get("type") == "story":
+            return candidate, entry[0]
+    return None, None
+
+
 def sh(*args, check=False, timeout=180):
     r = subprocess.run(args, capture_output=True, text=True, timeout=timeout)
     if check and r.returncode:
@@ -80,6 +113,15 @@ def check(request):
         # PA-020/L0-050: story-less spawn is the refusal the whole chain rests on. If an
         # agent can run without a story, nothing downstream traces to a directive.
         raise SpawnRefused("spawn request carries no story reference", "SPEC-0081")
+
+    # And the reference must name a story that exists: an unresolvable reference traces
+    # to nothing, which is the same failure as no reference at all wearing a plausible
+    # string (SPEC-0122).
+    resolved_id, story_atom = resolve_story(story)
+    if resolved_id is None:
+        raise SpawnRefused(
+            f"story reference {story!r} resolves to no story atom — a reference that "
+            f"names nothing traces to nothing (SPEC-0122)", "SPEC-0122")
 
     mounts = request.get("mounts") or []
     if mounts:
@@ -120,7 +162,8 @@ def check(request):
         raise SpawnRefused("act token would not be audience-bound (ENT-075/ES-023)",
                            "SPEC-0081")
 
-    return {"story_ref": story, "citizen": citizen, "image": image,
+    return {"story_ref": story, "resolved_story": resolved_id,
+            "story_state": story_atom.get("state"), "citizen": citizen, "image": image,
             "ceiling": ceiling, "caveats": requested, "labels": labels}
 
 
