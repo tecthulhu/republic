@@ -185,15 +185,50 @@ def evidence_locality_checks(res):
     if not files:
         res.record(ac, "skip", f"no workflow files under {wf}")
         return
+
+    # The discrimination is checked before it is used. A matcher that fires on
+    # everything and one that fires on nothing both produce a green line here, and
+    # only one of them is doing anything — so the two cases are asserted first.
+    must_fire = "          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}"
+    must_not = "          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}"
+    res.ok("SPEC-0124 the credential matcher tells a provider key from the runner's own",
+           _provider_credential(must_fire) and not _provider_credential(must_not),
+           f"provider-key line matched: {_provider_credential(must_fire)}; "
+           f"GITHUB_TOKEN line matched: {_provider_credential(must_not)}")
+
     leaked = []
     for f in files:
         for i, line in enumerate(f.read_text().splitlines(), 1):
-            if re.search(r"secrets\.|_API_KEY|ANTHROPIC_|OPENAI_|DEEPSEEK_", line):
+            if _provider_credential(line):
                 leaked.append(f"{f.name}:{i}: {line.strip()[:80]}")
     res.ok(ac, not leaked,
            "; ".join(leaked[:3]) + (" — a credential now reaches CI: supersede "
                                     "SPEC-0124, the evidence is no longer local-only"
                                     if leaked else f"{len(files)} workflow file(s) clean"))
+
+
+# Secrets that are not model-provider credentials and cannot become one. GITHUB_TOKEN
+# is minted per run by Actions, scoped by the workflow's own `permissions:` block, and
+# valid against this repository alone — it cannot buy a model token.
+#
+# The allowlist exists because the first version of this check matched `secrets.` and
+# nothing else, and went red the moment CTRL-0009 needed the runner's own token to read
+# the branch-protection state. SPEC-0124's claim was always about *provider*
+# credentials; `secrets.` was a lazy stand-in for that, and a stand-in that fires on
+# legitimate work is one that gets narrowed under pressure later, with less care.
+# Narrowed here deliberately, with both directions asserted above.
+NON_PROVIDER_SECRETS = {"GITHUB_TOKEN"}
+PROVIDER_ENV = re.compile(r"_API_KEY|ANTHROPIC_|OPENAI_|DEEPSEEK_|GEMINI_|AZURE_OPENAI")
+
+
+def _provider_credential(line):
+    """True when a workflow line puts a model-provider credential in the runner."""
+    for name in re.findall(r"secrets\.([A-Za-z0-9_]+)", line):
+        if name not in NON_PROVIDER_SECRETS:
+            return True
+    # An env name that reads as a provider key, even sourced from somewhere else — the
+    # secret store is not the only way a key reaches a runner.
+    return bool(PROVIDER_ENV.search(re.sub(r"\$\{\{[^}]*\}\}", "", line)))
 
 
 def portability_checks(res):

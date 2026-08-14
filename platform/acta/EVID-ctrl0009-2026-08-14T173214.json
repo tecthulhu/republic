@@ -1,0 +1,46 @@
+{
+ "id": "EVID-ctrl0009-2026-08-14T173214",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-14T17:32:14.994037+00:00",
+ "author": "ctrl-0009",
+ "authorized_by": null,
+ "title": "merge enforcement on tecthulhu/republic@main: configured as claimed",
+ "control_ref": "CTRL-0009",
+ "subject": "github:tecthulhu/republic@main#ruleset:bc4304cbbfb19498",
+ "verdict": "pass",
+ "checked_at": "2026-08-14T17:32:14.994037+00:00",
+ "checker": "ctrl-0009-merge-enforcement",
+ "source": [
+  "GET https://api.github.com/repos/tecthulhu/republic/rules/branches/main",
+  "GET https://api.github.com/repos/tecthulhu/republic/rulesets/20678463"
+ ],
+ "credential": "authenticated",
+ "observed": {
+  "rules": [
+   "deletion",
+   "non_fast_forward",
+   "pull_request",
+   "required_status_checks"
+  ],
+  "ruleset_ids": [
+   20678463
+  ],
+  "required_contexts": [
+   "citizenship-conformance",
+   "corpus-controls"
+  ],
+  "published_contexts": [
+   "citizenship-conformance",
+   "corpus-controls"
+  ],
+  "bypass_actors": [],
+  "bypass_unreadable": [],
+  "strict_required_status_checks_policy": false,
+  "do_not_enforce_on_create": true,
+  "required_approving_reviews": 0
+ },
+ "failing": []
+}

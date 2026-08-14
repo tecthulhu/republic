@@ -143,3 +143,29 @@ implementation: suite/index
 ```
 Tests standing queries: dangling claims, unevidenced claims, coverage, provenance walk, append-only store
 <!-- atom:end id=CTRL-0008 -->
+
+<!-- atom:begin id=CTRL-0009 -->
+```yaml
+id: CTRL-0009
+type: control
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-14T17:30:00Z"
+author: agent-worker-story-0017
+authorized_by: null
+title: "merge enforcement probe"
+tags: [enforcement-plane, meta-control]
+target: artifact
+implementation: suite/enforcement
+```
+Captures the live branch-protection state of the default branch and asserts the facts
+the "a red suite blocks merge" claim depends on: status checks required, both
+conformance contexts required by name, every required context actually published by a
+workflow job, direct push and force-push refused, and no bypass actor. Derived from
+the GitHub API on every run, never from a constant.
+
+The only control whose subject is the hosting platform rather than this repository's
+own content. That is deliberate: every other control checks something the corpus can
+see, and enforcement is the one load-bearing fact that lives outside it.
+<!-- atom:end id=CTRL-0009 -->

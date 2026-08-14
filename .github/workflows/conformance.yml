@@ -18,6 +18,12 @@ on:
 
 permissions:
   contents: read
+  # CTRL-0009 reads the branch-protection state of the default branch. The rules
+  # endpoint answers anonymously, but `bypass_actors` does not — and the probe fails
+  # closed on an unreadable bypass scope rather than recording silence, because
+  # "enforced" and "enforced except for four people" are different claims. Read-only,
+  # and the narrowest scope that answers the question.
+  administration: read
 
 jobs:
   corpus:
@@ -74,6 +80,19 @@ jobs:
       - name: SPEC-0119/0121 — provenance and tree-shape suite
         working-directory: platform
         run: python tools/test_provenance.py
+
+      # SPEC-0130: the enforcement half of "a red suite blocks merge". Fixtures first —
+      # they need no network, so a probe that cannot fail is caught before its live
+      # verdict is believed.
+      - name: SPEC-0130 — merge-enforcement fixture suite
+        working-directory: platform
+        run: python suite/enforcement/test_probe.py
+
+      - name: CTRL-0009 — capture the live merge-enforcement state
+        working-directory: platform
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python suite/enforcement/run.py --evidence-dir acta
 
       # SPEC-0113 applied to this change: no atom may have been edited in place
       # relative to the base branch. ONT-012/015 enforced rather than reviewed.
