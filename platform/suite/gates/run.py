@@ -270,6 +270,57 @@ def portability_checks(res):
            json.dumps({p: model_measurement(c) for p, c in PROVIDERS.items()}))
 
 
+def injection_coverage_checks(inj, res):
+    """What the injected law set covers, and what it silently leaves out.
+
+    `injection_set` selects laws and armed restrictions by `state == "active"`. That is
+    lawful — ONT-031 makes a claim enforceable only once active — but it means the
+    *contents* of a citizen's law payload depend on the lifecycle, and nothing was
+    reporting what fell outside it. An external reviewer asked whether the spawn gate
+    reads stale lifecycle state. The story-resolution path is immune by construction
+    (SPEC-0122: lifecycle is not a spawn precondition) and the corpus is re-parsed on
+    every spawn, so nothing is cached — but the *law-injection* path does depend on
+    state, and that is where nobody had looked.
+
+    So: assert the invariant, and report the shortfall. Two facts, kept apart on
+    purpose — a check that failed on the shortfall would be asserting that the current
+    lifecycle is wrong, which is a decision for the floor and not for a suite.
+    """
+    corpus_atoms, _errors = lint([str(CORPUS)], str(SCHEMA))
+    a = {aid: rec for aid, (rec, _s, _b) in corpus_atoms.items()}
+
+    def ids(kind, states):
+        return sorted(i for i, x in a.items()
+                      if x.get("type") == kind and x.get("state") in states)
+
+    injected = {l["id"] for l in inj["core"]["laws"]}
+    armed = set(inj["armed_restrictions"])
+
+    # The invariant: nothing enforceable is left out. This is what would break if a
+    # ratified document were merged and the injection set never picked it up.
+    doc_should = set(ids("document", ("ratified", "active")))
+    res.ok("every enforceable governed document reaches the injection set",
+           doc_should <= injected and bool(doc_should),
+           f"missing {sorted(doc_should - injected)}; injected {sorted(injected)}")
+    rstr_should = set(ids("restriction", ("active",)))
+    res.ok("every active restriction is armed around the session",
+           rstr_should <= armed and bool(rstr_should),
+           f"missing {sorted(rstr_should - armed)}; armed {len(armed)}")
+
+    # The shortfall: recorded, because a payload carrying two of six governed documents
+    # is a fact about what a citizen actually knows, and it was invisible.
+    draft_docs = ids("document", ("draft",))
+    res.record("law payload coverage over governed documents",
+               "pass" if not draft_docs else "skip",
+               f"{len(injected)} of {len(injected) + len(draft_docs)} injected; "
+               f"pre-ratification and therefore absent: {draft_docs}")
+    unarmed = ids("restriction", ("ratified",))
+    res.record("restrictions ratified but not armed (unbound, so not yet enforceable)",
+               "pass" if not unarmed else "skip",
+               f"{len(unarmed)} unarmed: {unarmed} — each is an unbound_claims line, and "
+               f"an unbound restriction is not in force around a live session")
+
+
 def injection_checks(res):
     """L0-051: what the harness assembles, and what it must never contain."""
     try:
@@ -290,6 +341,8 @@ def injection_checks(res):
     # ONT-032: restrictions are armed, never injected. The check is that the payload
     # carries ids and no restriction prose — a gate that pasted the text would prime
     # exactly the behaviour the restriction forbids.
+    injection_coverage_checks(inj, res)
+
     armed = inj["armed_restrictions"]
     blob = json.dumps(inj)
     leaked = [r for r in armed if r in blob and any(
@@ -381,10 +434,25 @@ def host_surface():
         try:
             surface[str(root)] = sorted(
                 str(p.relative_to(root)) for p in root.iterdir()
-                if not p.name.startswith("."))
+                if not p.name.startswith(".") and not RUNTIME_TEMP.match(p.name))
         except OSError as e:
             surface[str(root)] = [f"unreadable: {e}"]
     return surface
+
+
+# The container runtime's own scratch files, excluded from the watched surface.
+#
+# This criterion flaked once, reporting three `runc-process*` files in /tmp as citizen
+# residue. They are runc's — written by the runtime while *starting* a container, and
+# present only because another container came up inside the sampling window. The check's
+# subject is what a citizen can leave behind, and the runtime is not the citizen.
+#
+# Narrowed rather than tolerated: a criterion that fails for a reason unrelated to its
+# claim teaches the next reader to re-run until it passes, and a merge gate whose red
+# means "try again" is worse than no gate. The pattern is deliberately tight — it names
+# the runtime's known scratch prefixes and nothing else, so a citizen writing
+# `runc-anything` of its own is still caught by everything that does not match.
+RUNTIME_TEMP = re.compile(r"^(runc-process\d+|containerd-|docker-|buildkit)")
 
 
 def isolation_checks(mesh, image, res):

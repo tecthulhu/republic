@@ -20,10 +20,10 @@ Republic takes the mechanism position — *good intentions don't work; mechanism
 
 Five primitives, each opening one of those closed loops:
 
-- **Governed atoms** — the unit of governance is the atom, not the document: the smallest piece of normative content carrying its own identity, lifecycle state, authorship, and authorization. A requirement is *bound to enforcement* or it's a flagged, counted defect. "Is every requirement enforced?" becomes a number, not an audit.
+- **Governed atoms** — the unit of governance is the atom, not the document: the smallest piece of normative content carrying its own identity, lifecycle state, authorship, and authorization. A requirement is *bound to enforcement* or it's a flagged, counted defect. So **rule-binding coverage becomes a number** rather than an audit — and enforcement *effectiveness* is measured separately, because a rule can be bound to a control that runs perfectly while measuring the wrong property.
 - **A temporal truth model** — nothing mutable is stored. Every governed statement is an immutable, timestamped instance; the current state of anything is a *query* over those instances, never the latest edit of a mutable record. Claims can't quietly outrun their history.
 - **One identity type, one direction of authority** — humans and AI agents are the same kind of actor on a cryptographic signing chain rooted at a cold key. Authority can only *narrow* with delegation, never escalate. No trust scores — authority is granted, never inferred from behavior.
-- **An enforcement plane with no governance service** — six components (atom store, generated index, linter, gate library, evidence emitter, chain verifier) running on git mechanics and embedded gates at the chokepoints that already hold authority: the merge, the spawn, the message bus. Nothing to fail open.
+- **An enforcement plane with no governance service** — six components (atom store, generated index, linter, gate library, evidence emitter, chain verifier) running on git mechanics and embedded gates at the chokepoints that already hold authority: the merge, the spawn, the message bus. **No separate service to fail open** — the gates are embedded, versioned, and digest-pinned against drift.
 - **End-to-end provenance** — for every artifact the system produces, it answers by query: *who decided this, under what authority, executed by what, verified how* — from a verbatim human directive through the identity leaf that executed it to the commits that resulted.
 
 ## What runs today
