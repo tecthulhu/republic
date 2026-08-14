@@ -83,6 +83,14 @@ jobs:
         working-directory: platform
         run: python tools/test_provenance.py
 
+      # SPEC-0131/0133: the ingest lint's fixtures. The live tree lives outside this
+      # repository so CI cannot check it — but the lint's *judgement* is code in here,
+      # and code in here is gated. This is the enforceable half; the other half is
+      # invoked, and SPEC-0131 says so on every row it writes.
+      - name: SPEC-0131/0133 — ingest lint fixture suite
+        working-directory: platform
+        run: python tools/test_ingest_lint.py
+
       # SPEC-0130: the enforcement half of "a red suite blocks merge". Fixtures first —
       # they need no network, so a probe that cannot fail is caught before its live
       # verdict is believed.
