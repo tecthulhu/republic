@@ -354,11 +354,11 @@ so doing it first pays compounding interest.
 id: SPEC-0134
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T21:30:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:28.521984+00:00"
 author: agent-worker-dec-0007
-authorized_by: null
+authorized_by: DEC-0007
 title: "The injected payload carries all law and declares the force of each entry"
 tags: [acceptance-criterion, injection, knowledge-plane, enforcement-plane]
 binding: checked
@@ -393,11 +393,11 @@ to prevent exactly that. The check makes the honest answer the only one that pas
 id: RULE-0099
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T21:30:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T21:43:28.521984+00:00"
 author: agent-worker-dec-0007
-authorized_by: null
+authorized_by: DEC-0007
 title: "Bind SPEC-0134 via CTRL-0005"
 tags: [binding, injection]
 claim: SPEC-0134
