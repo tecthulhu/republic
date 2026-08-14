@@ -209,11 +209,11 @@ control asserts it, so binding it here would produce a rule with no enforcing ch
 id: RULE-0089
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T05:10:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T05:55:21.369341+00:00"
 author: agent-worker-dec-0005
-authorized_by: null
+authorized_by: DEC-0005
 title: "Bind SPEC-0081 via CTRL-0005"
 tags: [binding, spawn-contract, first-floor-touch]
 claim: SPEC-0081
@@ -232,11 +232,11 @@ CTRL-0005 checks the spawn gate's refusals and what it produces when it admits.
 id: RULE-0090
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T05:10:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T05:55:21.369341+00:00"
 author: agent-worker-dec-0005
-authorized_by: null
+authorized_by: DEC-0005
 title: "Bind SPEC-0082 via CTRL-0005"
 tags: [binding, spawn-contract, first-floor-touch]
 claim: SPEC-0082
@@ -255,11 +255,11 @@ CTRL-0005 checks the IO path: session stream to bus, live render, durable persis
 id: RULE-0091
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T05:10:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T05:55:21.369341+00:00"
 author: agent-worker-dec-0005
-authorized_by: null
+authorized_by: DEC-0005
 title: "Bind SPEC-0083 via CTRL-0005"
 tags: [binding, spawn-contract, first-floor-touch]
 claim: SPEC-0083
@@ -278,11 +278,11 @@ CTRL-0005 checks isolation: ephemeral workspace and the sanctioned egress paths.
 id: RULE-0092
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T05:10:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T05:55:21.369341+00:00"
 author: agent-worker-dec-0005
-authorized_by: null
+authorized_by: DEC-0005
 title: "Bind SPEC-0084 via CTRL-0005"
 tags: [binding, spawn-contract, first-floor-touch]
 claim: SPEC-0084
@@ -301,11 +301,11 @@ CTRL-0005 checks attribution: every envelope and commit chain-verifiable to the 
 id: RULE-0093
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T05:10:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-14T05:55:21.369341+00:00"
 author: agent-worker-dec-0005
-authorized_by: null
+authorized_by: DEC-0005
 title: "Bind SPEC-0085 via CTRL-0005"
 tags: [binding, spawn-contract, first-floor-touch]
 claim: SPEC-0085
