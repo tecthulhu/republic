@@ -12,10 +12,16 @@ One of the three chokepoints the gate library mounts. Everything here happens
      project the transport grant (ES-003), assemble the core-class injection
      set (L0-051), and start the container with zero host mounts.
 
-Restrictions are never injected. They are armed as checks around the session
-(ONT-032): a prohibition in a prompt primes the behaviour it forbids, so the
-gate carries RSTR- ids and evaluates them pre and post, and the injected
-context never contains their text.
+Restriction *text* is never injected (ONT-032): a prohibition in a prompt primes the
+behaviour it forbids, so the gate carries RSTR- ids and the injected context never
+contains their text.
+
+An earlier version of this paragraph said the gate "evaluates them pre and post". It
+does not — nothing in this platform evaluates a restriction around a session, and the
+ids travel as knowledge, not as armament. DEC-0007/O2 found the overclaim and rules
+that each entry carries `in_force`, uniformly false today, flipping per restriction
+only when a real evaluator lands. The sentence is corrected rather than deleted
+because the gap it hid is the point.
 """
 import argparse
 import json
@@ -32,6 +38,11 @@ from atom_lint import lint  # noqa: E402
 from paths import CORPUS, SCHEMA  # noqa: E402
 
 SUPPORTED_BASE = ("BASE-v1",)
+
+# DEC-0007/D1: the knowledge-plane threshold. Ratified law reaches a citizen whether or
+# not a control yet arms around it; binding is an enforcement-plane event and is
+# reported per entry rather than deciding membership.
+LAW_STATES = ("ratified", "active")
 
 
 class SpawnRefused(Exception):
@@ -190,24 +201,50 @@ def injection_set(story_ref, citizen, strategy_id="STRAT-0001", mandate_id=None)
         return hashlib.sha256(json.dumps({"record": a, "body": body}, sort_keys=True,
                                          default=str).encode()).hexdigest()[:16]
 
-    laws = sorted(i for i, (a, _s, _b) in atoms.items()
-                  if a.get("type") == "document" and a.get("state") == "active")
-    restrictions = sorted(i for i, (a, _s, _b) in atoms.items()
-                          if a.get("type") == "restriction" and a.get("state") == "active")
+    def of_type(kind, states):
+        return sorted(i for i, (a, _s, _b) in atoms.items()
+                      if a.get("type") == kind and a.get("state") in states)
+
+    # DEC-0007 / O1-a: ratification, not binding, is the knowledge-plane threshold. A
+    # citizen knows the law of the land the moment it is law, whether or not a gate yet
+    # enforces it. Today this changes nothing for documents — there are no ratified
+    # documents, only active and draft — and moves restrictions from 12 to 16. Recorded
+    # here because the filter is right in principle and a no-op in fact, and a reader
+    # of this code should not have to measure the corpus to learn that.
+    laws = of_type("document", LAW_STATES)
+    restrictions = of_type("restriction", LAW_STATES)
     story = atoms[story_ref][0] if story_ref in atoms else None
 
     core = {
-        "laws": [{"id": i, "instance_hash": instance_hash(i)} for i in laws],
+        # DEC-0007 / O2-a: every entry says whether it is in force, so presence in the
+        # payload is never read as enforcement. For a document that means `active`
+        # rather than merely ratified.
+        "laws": [{"id": i, "instance_hash": instance_hash(i),
+                  "state": atoms[i][0].get("state"),
+                  "in_force": atoms[i][0].get("state") == "active"} for i in laws],
         "strategy": ({"id": strategy_id, "instance_hash": instance_hash(strategy_id)}
                      if strategy_id in atoms else None),
         "mandate": {"id": mandate_id} if mandate_id else None,
         "story": ({"id": story_ref, "title": story.get("title"),
                    "acceptance": story.get("acceptance")} if story else {"id": story_ref}),
+        # DEC-0007 / D3: draft is not law and its text never enters the payload. Ids
+        # and titles only, so a citizen working near a document that is in flight knows
+        # it exists and knows it is not yet binding on anyone.
+        "pending_law": [{"id": i, "title": atoms[i][0].get("title"), "state": "draft"}
+                        for i in of_type("document", ("draft",))],
     }
     return {
         "core": core,
-        # Ids only. A gate that pasted these would prime what they forbid.
-        "armed_restrictions": restrictions,
+        # Ids only, never prose: a gate that pasted these would prime what they forbid
+        # (ONT-032). `in_force` is uniformly false, and that is a measurement rather
+        # than a placeholder — nothing in this platform evaluates a restriction around
+        # a session yet. The module docstring above claimed such evaluation existed;
+        # it did not, and DEC-0007/O2-b rules that this flag flips per restriction only
+        # when an evaluator lands in code, never by declaration.
+        "armed_restrictions": [{"id": i, "state": atoms[i][0].get("state"),
+                                "in_force": False} for i in restrictions],
+        "enforcement_note": "no restriction evaluator exists; in_force is false for all "
+                            "(DEC-0007/O2-a). Presence arms nothing yet — it informs.",
         "reference_cues": {"resolve": "/run/l0/agent.sock", "recall": "/run/l0/agent.sock"},
     }
 

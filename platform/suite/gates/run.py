@@ -294,31 +294,49 @@ def injection_coverage_checks(inj, res):
                       if x.get("type") == kind and x.get("state") in states)
 
     injected = {l["id"] for l in inj["core"]["laws"]}
-    armed = set(inj["armed_restrictions"])
+    armed = {r["id"] for r in inj["armed_restrictions"]}
 
-    # The invariant: nothing enforceable is left out. This is what would break if a
-    # ratified document were merged and the injection set never picked it up.
+    # DEC-0007 / D1: ratification is the knowledge-plane threshold. Every governed
+    # document and restriction that is law — ratified or active — must reach the
+    # citizen, whether or not a control yet arms around it.
     doc_should = set(ids("document", ("ratified", "active")))
-    res.ok("every enforceable governed document reaches the injection set",
+    res.ok("SPEC-0134 every ratified or active document reaches the citizen",
            doc_should <= injected and bool(doc_should),
            f"missing {sorted(doc_should - injected)}; injected {sorted(injected)}")
-    rstr_should = set(ids("restriction", ("active",)))
-    res.ok("every active restriction is armed around the session",
+    rstr_should = set(ids("restriction", ("ratified", "active")))
+    res.ok("SPEC-0134 every ratified or active restriction reaches the citizen",
            rstr_should <= armed and bool(rstr_should),
-           f"missing {sorted(rstr_should - armed)}; armed {len(armed)}")
+           f"missing {sorted(rstr_should - armed)}; carried {len(armed)}")
 
-    # The shortfall: recorded, because a payload carrying two of six governed documents
-    # is a fact about what a citizen actually knows, and it was invisible.
+    # DEC-0007 / D2+O2-a: presence must never read as enforcement. Every entry declares
+    # its own force, and no restriction may claim any — nothing evaluates them.
+    entries = list(inj["core"]["laws"]) + list(inj["armed_restrictions"])
+    res.ok("SPEC-0134 every payload entry declares whether it is in force",
+           bool(entries) and all("in_force" in e for e in entries),
+           f"{sum('in_force' not in e for e in entries)} entry(s) without the field")
+    claiming = [r["id"] for r in inj["armed_restrictions"] if r.get("in_force")]
+    res.ok("SPEC-0134 no restriction claims force while no evaluator exists (O2-b)",
+           not claiming,
+           f"{claiming} claim in_force with nothing evaluating them — the flag flips "
+           f"per restriction when an evaluator lands, never by declaration")
+
+    # DEC-0007 / D3: draft is not law. Ids and titles orient; text never enters.
     draft_docs = ids("document", ("draft",))
-    res.record("law payload coverage over governed documents",
-               "pass" if not draft_docs else "skip",
-               f"{len(injected)} of {len(injected) + len(draft_docs)} injected; "
-               f"pre-ratification and therefore absent: {draft_docs}")
-    unarmed = ids("restriction", ("ratified",))
-    res.record("restrictions ratified but not armed (unbound, so not yet enforceable)",
-               "pass" if not unarmed else "skip",
-               f"{len(unarmed)} unarmed: {unarmed} — each is an unbound_claims line, and "
-               f"an unbound restriction is not in force around a live session")
+    manifest = {p["id"] for p in inj["core"].get("pending_law", [])}
+    res.ok("SPEC-0134 pending law is listed by id and title, with no draft text",
+           manifest == set(draft_docs)
+           and all(p.get("state") == "draft" for p in inj["core"]["pending_law"]),
+           f"manifest {sorted(manifest)} vs draft {draft_docs}")
+
+    # DEC-0007 / D4: the shortfall is reported, never gated. A red here would assert
+    # the lifecycle is wrong when the binding work is simply not done — a schedule
+    # opinion wearing a gate's authority.
+    res.record("unarmed_in_payload — carried as knowledge, enforced by nothing",
+               "pass",
+               f"{len(inj['armed_restrictions'])} restrictions carried, 0 in force; "
+               f"{len(draft_docs)} governed document(s) still draft and therefore not "
+               f"law: {draft_docs} — ratifying them is a separate ruling, on the "
+               f"register, not closed by the injection filter")
 
 
 def injection_checks(res):
@@ -343,13 +361,13 @@ def injection_checks(res):
     # exactly the behaviour the restriction forbids.
     injection_coverage_checks(inj, res)
 
-    armed = inj["armed_restrictions"]
+    armed = [r["id"] for r in inj["armed_restrictions"]]
     blob = json.dumps(inj)
     leaked = [r for r in armed if r in blob and any(
         w in blob for w in ("never", "MUST NOT", "prohibited"))]
     res.ok("ONT-032 restrictions appear as ids only, with no prose injected",
-           bool(armed) and all(isinstance(r, str) and r.startswith("RSTR-") for r in armed)
-           and not leaked, f"{len(armed)} armed; leaked={leaked[:3]}")
+           bool(armed) and all(r.startswith("RSTR-") for r in armed) and not leaked,
+           f"{len(armed)} carried; leaked={leaked[:3]}")
 
 
 def live_spawn_checks(mesh, image, res):
