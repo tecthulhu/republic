@@ -31,7 +31,7 @@ Five primitives, each opening one of those closed loops:
 Reported honestly, from the repository — including what doesn't run yet.
 
 - **The substrate is enacted and self-governing.** The founding decision (`DEC-0001`) landed by signed merge under its own ratification machinery; subsequent decisions activated the rule set and corrected the coverage meters when operation revealed a defect. The lifecycle isn't a diagram — every edge has run.
-- **The build gate is live and emits public evidence.** A conformance workflow runs the control suite on every change; a red suite blocks merge; the evidence rows are uploaded publicly, so you can check the claim rather than trust the badge.
+- **The build gate is live and emits public evidence.** A conformance workflow runs the control suite on every change; a red suite blocks merge; the evidence rows are uploaded publicly, so you can check the claim rather than trust the badge. *Blocks merge* is itself evidenced rather than asserted — see below.
 - **The riskiest hop is walked.** The spawn contract — a supervised, interruptible AI-agent session in a hardened, isolated, credential-less container, running in bidirectional streaming mode under harness control — ran its acceptance suite green: spawn gate refusing unresolvable spawns, container isolation and per-act attribution verified, network egress deny-by-default and enforced, supervision demonstrated as interrupt-in-flight / mid-session injection / clean termination, credential minting confined to the harness. Proven portable across two model providers by changing two arguments.
 - **The evidence machinery catches its own defects.** Adversarial "rogue" fixtures caught real verifier defects before they shipped; the supervision proof was built to assert *truncation*, not just survival, because a buffering proxy would otherwise have faked the whole capability. The standing query for unenforced rules moved from 22 to 8 across this work.
 
@@ -46,6 +46,14 @@ The whole point is that you don't have to take this document's word for it:
 - Evidence records live under `platform/acta/`.
 - The conformance workflow and its uploaded evidence rows are in the repository's Actions history.
 - The standing queries are re-runnable from the tools directory against any commit: `python platform/tools/embedder.py --report`.
+
+**"A red suite blocks merge" is the load-bearing claim here, so it is evidenced separately.** A CI job that detects a violation is a *control*; a repository rule that refuses the merge when that control is red is *enforcement*, and the two are different facts. `CTRL-0009` captures the second from the live branch-protection setting on every run — never from a constant — and writes it to `platform/acta/` as `EVID-ctrl0009-*`. Re-run it yourself with `python platform/suite/enforcement/run.py`, or check the setting directly without any credential at all:
+
+```
+curl -s https://api.github.com/repos/tecthulhu/republic/rules/branches/main
+```
+
+What that returns today: both conformance contexts required by name, direct push and force-push refused, and no bypass actor — administrators included. Two honest qualifications ride with it: **branches are not required to be up to date with the base before merging**, so a green check describes what the PR tested rather than always what lands; and **no approving review is required**, so the merge is the owner's act alone. Both are recorded in the evidence rather than omitted from the claim.
 
 Under the system's own truth model, this README is a *rendering*. Where it and the resolved record disagree, **the record wins.**
 

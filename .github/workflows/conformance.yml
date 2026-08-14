@@ -18,6 +18,14 @@ on:
 
 permissions:
   contents: read
+# `administration: read` is NOT available here. It is a valid PAT scope but not a
+# GITHUB_TOKEN workflow permission, and naming it fails workflow validation before any
+# job is created — which reports as the required contexts never arriving, not as a red
+# check, so the merge gate silently stops existing. It did exactly that once.
+#
+# Consequence for CTRL-0009: the Actions token cannot read `bypass_actors`, so the CI
+# capture records that fact as unobserved rather than assuming it. The authenticated
+# capture is an operator run committed to the Acta. See SPEC-0130.
 
 jobs:
   corpus:
@@ -74,6 +82,20 @@ jobs:
       - name: SPEC-0119/0121 — provenance and tree-shape suite
         working-directory: platform
         run: python tools/test_provenance.py
+
+      # SPEC-0130: the enforcement half of "a red suite blocks merge". Fixtures first —
+      # they need no network, so a probe that cannot fail is caught before its live
+      # verdict is believed.
+      - name: SPEC-0130 — merge-enforcement fixture suite
+        working-directory: platform
+        run: python suite/enforcement/test_probe.py
+
+      # Runs anonymously on purpose: the rules endpoint needs no credential, which is
+      # what makes this reproducible by any reader. The bypass scope is out of reach
+      # here and is recorded as unobserved.
+      - name: CTRL-0009 — capture the live merge-enforcement state
+        working-directory: platform
+        run: python suite/enforcement/run.py --evidence-dir acta
 
       # SPEC-0113 applied to this change: no atom may have been edited in place
       # relative to the base branch. ONT-012/015 enforced rather than reviewed.

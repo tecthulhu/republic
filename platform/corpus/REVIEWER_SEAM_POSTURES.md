@@ -179,9 +179,9 @@ id: SPEC-0124
 type: specification
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T04:30:00Z"
-author: agent-worker-story-0013
+version: 1.1.0
+instantiated_at: "2026-08-14T17:30:00Z"
+author: agent-worker-story-0017
 authorized_by: null
 title: "Interim posture: SPEC-0085's acceptance evidence is locally produced, not CI-produced"
 tags: [declared-posture, interim-posture, spec-0085, ci, d42]
@@ -203,10 +203,28 @@ not through a bespoke local script. What CI cannot supply is the credential at t
 far end of the adapter, so the criterion does not execute there.
 
 Self-failing condition (PRIN-0005): CTRL-0005 asserts that no workflow file under
-`.github/workflows/` supplies a provider credential. The day a scoped key is added
-this turns red, and the correct response is to supersede this posture — at that point
-the evidence *is* CI-produced and the hedge has become a false statement rather than
-a true one.
+`.github/workflows/` supplies a **model-provider** credential. The day a scoped key is
+added this turns red, and the correct response is to supersede this posture — at that
+point the evidence *is* CI-produced and the hedge has become a false statement rather
+than a true one.
+
+v1.1.0 — the check now distinguishes a provider credential from the runner's own
+`GITHUB_TOKEN`, which is minted per run by Actions, scoped by the workflow's own
+`permissions:` block, valid against this repository alone, and cannot buy a model
+token. The first version matched any `secrets.` reference, and went red the moment
+CTRL-0009 needed that token to read the branch-protection state — a legitimate change
+firing a posture about something else entirely.
+
+Worth recording as an amendment rather than a quiet edit, because the wrong fix was
+available and cheap: `${{ github.token }}` is the same value under an expression the
+old pattern did not match, and using it would have turned the check green while
+changing nothing about the world. That is softening the claim to match the tool. The
+claim was always about provider credentials; `secrets.` was a stand-in for it, and a
+stand-in that fires on legitimate work is one that gets narrowed later under deadline
+pressure with less care than this. The matcher's discrimination is itself now
+asserted — a provider-key line must match and a `GITHUB_TOKEN` line must not — because
+a matcher that fires on everything and one that fires on nothing both produce a green
+line, and only one of them is checking anything.
 
 Open to the floor: whether SPEC-0085 should stay locally-evidenced under this
 declared posture, or whether CI should get a scoped, spend-capped key. This atom
