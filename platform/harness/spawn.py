@@ -33,6 +33,7 @@ import uuid
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "tools"))
 
+import baseline  # noqa: E402
 import mint as minting  # noqa: E402
 from atom_lint import lint  # noqa: E402
 from paths import CORPUS, SCHEMA  # noqa: E402
@@ -262,6 +263,19 @@ def prepare(request, network=None, handoff_volume=None, argv=None, extra_env=Non
     """
     ctx = check(request)
     story, citizen, image = ctx["story_ref"], ctx["citizen"], ctx["image"]
+
+    # SPEC-0129: the spawn act, written before anything runs. This is the anchor the
+    # acceptance-baseline pin resolves against (SPEC-0126), and it has to be recorded
+    # at the moment of authorisation — a baseline reconstructed afterwards from
+    # whatever the corpus then says is not a baseline. Written even for a supervised
+    # session, because a session that skipped the record would be a spawn whose
+    # criteria nothing pinned.
+    atoms, _errors = lint([str(CORPUS)], str(SCHEMA))
+    act = baseline.write_spawn_act(
+        baseline.build_spawn_act(ctx["resolved_story"], atoms, f"harness:{citizen}"),
+        request.get("acta_dir"))
+    ctx["spawn_act"] = act["id"]
+    ctx["acceptance_digest"] = act["acceptance_digest"]
 
     minted = minting.mint(citizen, story, audience=story,
                           leaf_caveats=ctx["caveats"],

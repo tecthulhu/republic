@@ -32,6 +32,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "tools"))
 
 import merge_gate  # noqa: E402
 import mint as minting  # noqa: E402
+import baseline  # noqa: E402
 import spawn as gate  # noqa: E402
 from atom_lint import lint  # noqa: E402
 from paths import CORPUS, SCHEMA  # noqa: E402
@@ -268,6 +269,55 @@ def portability_checks(res):
                              for c in PROVIDERS.values()),
            f"literal leaked for: {leaks}" if leaks else
            json.dumps({p: model_measurement(c) for p, c in PROVIDERS.items()}))
+
+
+def baseline_checks(res):
+    """SPEC-0129/0126: the spawn act, and grading against what the floor touched.
+
+    Run against the real corpus, not a fixture: the two-way disagreement is proven in
+    `harness/test_baseline.py`, and what this asserts is that the machinery is anchored
+    *here* — that STORY-0014's own criteria are pinned by a committed act, and that
+    grading resolves through it rather than through whatever the corpus currently says.
+    """
+    corpus_atoms, _errors = lint([str(CORPUS)], str(SCHEMA))
+    story = "STORY-0014"
+
+    acts = baseline.spawn_acts_for(story)
+    res.ok("SPEC-0129 a committed spawn act pins this story's criteria",
+           bool(acts), f"no {baseline.SPAWN_ACT_PREFIX}* record for {story}")
+    if not acts:
+        return
+
+    act = acts[-1]
+    res.ok("SPEC-0129 the act names the story instance, not just the story",
+           set(act.get("story_ref", {})) == {"id", "version", "instantiated_at"},
+           json.dumps(act.get("story_ref")))
+    res.ok("SPEC-0129 the act pins an instance for every acceptance criterion",
+           bool(act.get("acceptance_pinned")) and bool(act.get("acceptance_digest")),
+           json.dumps(act.get("artifacts")))
+
+    try:
+        base = baseline.graded_acceptance(story, corpus_atoms)
+    except baseline.BaselineUnanchored as e:
+        res.record("SPEC-0126 grading resolves through the pin", "fail", str(e))
+        return
+    res.ok("SPEC-0126 grading resolves through the pin, and says why per criterion",
+           set(base["graded"]) == {p["id"] for p in act["acceptance_pinned"]}
+           and all(p.get("basis") for p in base["provenance"]),
+           "; ".join(f"{p['id']}: {p['basis']}" for p in base["provenance"]))
+
+    # Fail-closed is the load-bearing half: without an anchor the grader must stop,
+    # never fall back to the current corpus — that fallback is what the pin replaces.
+    try:
+        baseline.graded_acceptance("STORY-0002", corpus_atoms)
+        res.record("SPEC-0126 an unanchored story refuses grading", "fail",
+                   "graded a story with no spawn act instead of refusing")
+    except baseline.BaselineUnanchored as e:
+        res.ok("SPEC-0126 an unanchored story refuses grading rather than falling back",
+               True, str(e)[:120])
+
+    res.record("acceptance criteria added after the spawn act", "pass",
+               f"{base['added_since_spawn'] or 'none'} — reported, never silently graded")
 
 
 def injection_coverage_checks(inj, res):
@@ -1081,6 +1131,7 @@ def main():
     injection_checks(res)
     evidence_locality_checks(res)
     portability_checks(res)
+    baseline_checks(res)
 
     with Mesh(a.image) as mesh:
         live_spawn_checks(mesh, a.image, res)
