@@ -1,0 +1,28 @@
+{
+ "id": "EVID-ctrl0010-2026-08-14T214619",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-14T21:46:19.837502+00:00",
+ "author": "ctrl-0010",
+ "authorized_by": null,
+ "title": "ingest structure over 32 file(s): valid",
+ "control_ref": "CTRL-0010",
+ "subject": "ingest@84b14a2c7c358704#files=32",
+ "verdict": "pass",
+ "checked_at": "2026-08-14T21:46:19.837502+00:00",
+ "checker": "ctrl-0010-ingest-lint",
+ "ingest_root": "/home/tecthulhu/tecthulhu/atomic_ingest",
+ "counts": {
+  "proposed": 0,
+  "active": 2,
+  "executed": 25,
+  "parked": 2,
+  "artifacts": 3
+ },
+ "findings": [],
+ "posture": "the ingest tree lives outside the repository, so no CI gate runs this \u2014 a control without enforcement until the tree is tracked somewhere CI can read (SPEC-0131)",
+ "state_coherence": "checked",
+ "referenced_files": 10
+}
