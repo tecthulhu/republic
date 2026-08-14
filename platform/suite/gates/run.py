@@ -28,10 +28,13 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "harness"))
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "tools"))
 
 import merge_gate  # noqa: E402
 import mint as minting  # noqa: E402
 import spawn as gate  # noqa: E402
+from atom_lint import lint  # noqa: E402
+from paths import CORPUS, SCHEMA  # noqa: E402
 from supervise import Session, cli_session_args  # noqa: E402
 from mesh import Mesh, image_digest, observed, sh, wait_and_logs  # noqa: E402
 
@@ -78,6 +81,22 @@ def refusal_checks(image, res):
     ok, detail = refuses({**base, "story_ref": None}, "SPEC-0081")
     res.ok("SPEC-0081 story-less spawn refused before container creation", ok, detail)
 
+    # SPEC-0122's first half: a reference that names nothing is refused. Before this
+    # existed the gate took any non-empty string, so "no story, no spawn" was enforced
+    # against the empty string and a typo spawned happily.
+    ok, detail = refuses({**base, "story_ref": "story-9999"}, "SPEC-0122")
+    res.ok("SPEC-0122 a story reference that resolves to no atom is refused", ok, detail)
+
+    # ...and it must be refused for being unresolvable, not for looking wrong. A
+    # syntactically alien reference and a well-formed-but-absent one fail the same way.
+    ok, detail = refuses({**base, "story_ref": "not-even-an-id"}, "SPEC-0122")
+    res.ok("SPEC-0122 an unresolvable reference is refused whatever its shape",
+           ok, detail)
+
+    # An id that resolves to a real atom of the wrong type is not a story reference.
+    ok, detail = refuses({**base, "story_ref": "SPEC-0081"}, "SPEC-0122")
+    res.ok("SPEC-0122 a reference resolving to a non-story atom is refused", ok, detail)
+
     ok, detail = refuses({**base, "story_ref": STORY, "mounts": ["/etc:/etc:ro"]},
                          "BASE-AC-9")
     res.ok("BASE-AC-9 spawn spec with a host mount refused", ok, detail)
@@ -106,6 +125,114 @@ def refusal_checks(image, res):
     except gate.SpawnRefused as e:
         res.record("a story-bearing request against the agent layer is admitted", "fail",
                    f"[{e.criterion}] {e.reason}")
+
+    preratified_spawn_check(base, res)
+
+
+def preratified_spawn_check(base, res):
+    """SPEC-0122's self-failing half (PRIN-0005, D42).
+
+    The posture is that *lifecycle state is not a spawn precondition* — a story is
+    necessarily pre-ratified while the work earning its ratification is in flight, so
+    a ratified-only gate would be circular. Asserting the leniency is what makes the
+    posture self-retiring: the first commit that adds a lifecycle precondition turns
+    this red, and the only way back to green is to supersede SPEC-0122.
+
+    The subject is chosen from the corpus rather than pinned to one story on purpose.
+    Pinning STORY-0002 would have turned this red the day STORY-0002 was legitimately
+    ratified — a fixture failing for the one reason that is not the retirement
+    condition.
+    """
+    ac = "SPEC-0122 a pre-ratified story is admitted (lifecycle is not a precondition)"
+    corpus_atoms, _errors = lint([str(CORPUS)], str(SCHEMA))
+    pre = sorted(aid for aid, (a, _s, _b) in corpus_atoms.items()
+                 if a.get("type") == "story" and a.get("state") in ("draft", "proposed"))
+    if not pre:
+        # Not a pass. The posture claims something about pre-ratified stories, and with
+        # none in the corpus this suite is not entitled to say it held.
+        res.record(ac, "skip", "no draft or proposed story in the corpus to spawn against")
+        return
+    try:
+        ctx = gate.check({**base, "story_ref": pre[0]})
+        res.ok(ac, ctx["resolved_story"] == pre[0],
+               f"{pre[0]} state={ctx['story_state']} admitted")
+    except gate.SpawnRefused as e:
+        # Name the retirement condition only when the refusal is actually about the
+        # story. A refusal for an absent image says nothing about lifecycle, and a
+        # hint that misattributes the cause sends the next reader after the wrong fix.
+        hint = (" — the gate now gates on lifecycle: supersede SPEC-0122 rather than "
+                "weakening this check") if e.criterion in ("SPEC-0122", "SPEC-0081") else ""
+        res.record(ac, "fail", f"[{e.criterion}] {e.reason}{hint}")
+
+
+def evidence_locality_checks(res):
+    """SPEC-0124's self-failing condition (PRIN-0005, D42).
+
+    SPEC-0085 is the one criterion that spends a model credential, and CI holds none —
+    so the acceptance rows were produced on an operator workstation and the CI job
+    records `skip`. That is a real qualification on what "green in CI" means for this
+    story, and the corpus should carry it rather than leave a reader to infer it from
+    a missing step.
+
+    Asserting the absence retires the posture: the day a scoped key reaches the
+    conformance workflow this turns red, and the fix is to supersede SPEC-0124 —
+    because at that point the evidence *is* CI-produced and the qualification is a
+    lie rather than a hedge.
+    """
+    ac = "SPEC-0124 the conformance workflow supplies no provider credential"
+    wf = pathlib.Path(__file__).resolve().parents[3] / ".github" / "workflows"
+    files = sorted(wf.glob("*.yml")) + sorted(wf.glob("*.yaml"))
+    if not files:
+        res.record(ac, "skip", f"no workflow files under {wf}")
+        return
+    leaked = []
+    for f in files:
+        for i, line in enumerate(f.read_text().splitlines(), 1):
+            if re.search(r"secrets\.|_API_KEY|ANTHROPIC_|OPENAI_|DEEPSEEK_", line):
+                leaked.append(f"{f.name}:{i}: {line.strip()[:80]}")
+    res.ok(ac, not leaked,
+           "; ".join(leaked[:3]) + (" — a credential now reaches CI: supersede "
+                                    "SPEC-0124, the evidence is no longer local-only"
+                                    if leaked else f"{len(files)} workflow file(s) clean"))
+
+
+def portability_checks(res):
+    """SPEC-0125: supervision is provider-agnostic, and every row says which provider.
+
+    Two distinct claims, and the second is the one that keeps the first honest.
+    "Supervision works" and "supervision works against the provider this platform
+    pins" are different sentences, and evidence that does not name the provider
+    silently asserts the stronger one.
+    """
+    sup = pathlib.Path(__file__).resolve().parents[2] / "harness" / "supervise.py"
+    text = sup.read_text()
+    # Prose may name providers — the module docstring explains the acceptance and
+    # portability split. Executable lines may not: a hostname in the code is the
+    # provider leaking out of configuration and into the session path.
+    code = [l for l in text.splitlines()
+            if l.strip() and not l.strip().startswith("#")]
+    hosts = [l.strip()[:80] for l in code if re.search(r"https?://", l)]
+    res.ok("SPEC-0125 the session path carries no provider endpoint",
+           not hosts, "; ".join(hosts[:3]) or "supervise.py holds no URL literal")
+
+    roles = {c["role"] for c in PROVIDERS.values()}
+    res.ok("SPEC-0125 an acceptance provider and a portability provider are configured",
+           {"acceptance", "portability"} <= roles
+           and len({c["upstream"] for c in PROVIDERS.values()}) == len(PROVIDERS),
+           json.dumps({p: c["role"] for p, c in PROVIDERS.items()}))
+
+    # ONT-039: a row may carry the band it resolved from and a digest of what it
+    # resolved to, never the identifier. The measurement is checked for both
+    # providers, because the previous version of this leaked the literal for whichever
+    # one the scan pattern happened to miss.
+    leaks = [p for p, cfg in PROVIDERS.items()
+             if cfg["model"] in json.dumps(model_measurement(cfg))]
+    res.ok("SPEC-0125 the model measurement names a band and a digest, never a literal",
+           not leaks and all(model_measurement(c).get("model_band")
+                             and model_measurement(c).get("model_digest")
+                             for c in PROVIDERS.values()),
+           f"literal leaked for: {leaks}" if leaks else
+           json.dumps({p: model_measurement(c) for p, c in PROVIDERS.items()}))
 
 
 def injection_checks(res):
@@ -828,9 +955,11 @@ def main():
     res = Results()
     sessions = []
 
-    # Refusals and injection need no infrastructure at all.
+    # Refusals, injection and the declared postures need no infrastructure at all.
     refusal_checks(a.image, res)
     injection_checks(res)
+    evidence_locality_checks(res)
+    portability_checks(res)
 
     with Mesh(a.image) as mesh:
         live_spawn_checks(mesh, a.image, res)
