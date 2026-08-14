@@ -51,11 +51,11 @@ is not a gate.
 id: SPEC-0131
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "The instruction staging tree has one state per instruction and a declared type"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -107,11 +107,11 @@ purpose.
 id: RULE-0096
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Bind SPEC-0131 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
 claim: SPEC-0131
@@ -138,11 +138,11 @@ preventing it. It becomes ENF-0001 when the tree is somewhere CI can read.
 id: SPEC-0132
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Interim posture: no instruction reaches the mesh except through atomic_ingest"
 tags: [declared-posture, interim-posture, instruction-layer, d42]
 binding: checked
@@ -179,11 +179,11 @@ measurement that decides when that is.
 id: RULE-0097
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Bind SPEC-0132 via CTRL-0010"
 tags: [binding, declared-posture, interim]
 claim: SPEC-0132
@@ -205,11 +205,11 @@ relations:
 id: SPEC-0133
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "An instruction's folder must agree with the state of the work it references"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -257,11 +257,11 @@ while passing in the earlier states.
 id: RULE-0098
 type: rule
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Bind SPEC-0133 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
 claim: SPEC-0133
@@ -283,11 +283,11 @@ relations:
 id: STRAT-0002
 type: strategy
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Ingest atomization and the courier: retiring the instruction interim"
 tags: [instruction-layer, destination, gated]
 horizon: "after the interim proves the workflow and measured friction justifies the build"
@@ -324,11 +324,11 @@ produced the two meters, and the reason DEC-0004 exists.
 id: STORY-0018
 type: story
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "Ingest governance bootstrap: the instruction layer gets a lifecycle and a check"
 tags: [instruction-layer, interim, bootstrap, ingest]
 tracker_ref: "gh:tecthulhu/republic#34"
@@ -344,3 +344,70 @@ Does not preempt STORY-0014. The bootstrap is small and it makes every subsequen
 instruction — STORY-0014's dispositions included — arrive through the governed channel,
 so doing it first pays compounding interest.
 <!-- atom:end id=STORY-0018 -->
+
+---
+
+## The injection payload contract (DEC-0007)
+
+<!-- atom:begin id=SPEC-0134 -->
+```yaml
+id: SPEC-0134
+type: specification
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0007
+title: "The injected payload carries all law and declares the force of each entry"
+tags: [acceptance-criterion, injection, knowledge-plane, enforcement-plane]
+binding: checked
+check: machine
+relations:
+  - { rel: derives, target: DEC-0007 }
+```
+CTRL-0005 asserts the payload contract DEC-0007 rules:
+
+- **Completeness of law.** Every governed document and restriction whose state is
+  `ratified` or `active` reaches the citizen. Ratification is the knowledge threshold;
+  binding is not.
+- **Force declared, never inferred.** Every entry carries `in_force`. Presence in the
+  payload is knowledge; enforcement is a separate fact and says so.
+- **No unearned force.** No restriction may carry `in_force: true` while nothing
+  evaluates restrictions. The flag tracks implementation, not intention, and flips per
+  restriction as evaluators land.
+- **Draft is not law.** Pending documents appear as ids and titles under `pending_law`,
+  marked `draft`, with no draft text anywhere in the payload.
+- **The shortfall reports and never gates.** `unarmed_in_payload` sits beside
+  `unbound_claims`; neither moves the verdict.
+
+The third assertion is the load-bearing one, and it exists because the obligation that
+became it would have done the opposite. Marking the active restrictions enforced was
+the intuitive reading of "declare the force of each entry", and it would have put a
+false enforcement claim into every citizen's payload — inside the disposition written
+to prevent exactly that. The check makes the honest answer the only one that passes.
+<!-- atom:end id=SPEC-0134 -->
+
+<!-- atom:begin id=RULE-0099 -->
+```yaml
+id: RULE-0099
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0007
+title: "Bind SPEC-0134 via CTRL-0005"
+tags: [binding, injection]
+claim: SPEC-0134
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0134 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+ENF-0001 here, unlike the ingest rules: CTRL-0005 runs in CI on every change, so this
+claim genuinely blocks a merge.
+<!-- atom:end id=RULE-0099 -->

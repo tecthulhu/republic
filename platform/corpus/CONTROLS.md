@@ -175,11 +175,11 @@ see, and enforcement is the one load-bearing fact that lives outside it.
 id: CTRL-0010
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T19:45:00Z"
-author: agent-worker-story-0018
-authorized_by: null
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0006
 title: "ingest structure lint"
 tags: [enforcement-plane, instruction-layer, interim]
 target: artifact
