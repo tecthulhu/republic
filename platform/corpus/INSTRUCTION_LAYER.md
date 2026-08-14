@@ -51,10 +51,10 @@ is not a gate.
 id: SPEC-0131
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "The instruction staging tree has one state per instruction and a declared type"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
@@ -107,10 +107,10 @@ purpose.
 id: RULE-0096
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Bind SPEC-0131 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
@@ -138,10 +138,10 @@ preventing it. It becomes ENF-0001 when the tree is somewhere CI can read.
 id: SPEC-0132
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Interim posture: no instruction reaches the mesh except through atomic_ingest"
 tags: [declared-posture, interim-posture, instruction-layer, d42]
@@ -179,10 +179,10 @@ measurement that decides when that is.
 id: RULE-0097
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Bind SPEC-0132 via CTRL-0010"
 tags: [binding, declared-posture, interim]
@@ -205,10 +205,10 @@ relations:
 id: SPEC-0133
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "An instruction's folder must agree with the state of the work it references"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
@@ -257,10 +257,10 @@ while passing in the earlier states.
 id: RULE-0098
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Bind SPEC-0133 via CTRL-0010"
 tags: [binding, instruction-layer, interim]
@@ -283,10 +283,10 @@ relations:
 id: STRAT-0002
 type: strategy
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Ingest atomization and the courier: retiring the instruction interim"
 tags: [instruction-layer, destination, gated]
@@ -324,10 +324,10 @@ produced the two meters, and the reason DEC-0004 exists.
 id: STORY-0018
 type: story
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:17.502423+00:00"
-author: agent-worker-story-0018
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0006
 title: "Ingest governance bootstrap: the instruction layer gets a lifecycle and a check"
 tags: [instruction-layer, interim, bootstrap, ingest]
@@ -354,10 +354,10 @@ so doing it first pays compounding interest.
 id: SPEC-0134
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:28.521984+00:00"
-author: agent-worker-dec-0007
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0007
 title: "The injected payload carries all law and declares the force of each entry"
 tags: [acceptance-criterion, injection, knowledge-plane, enforcement-plane]
@@ -393,10 +393,10 @@ to prevent exactly that. The check makes the honest answer the only one that pas
 id: RULE-0099
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-14T21:43:28.521984+00:00"
-author: agent-worker-dec-0007
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T21:43:37.871489+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0007
 title: "Bind SPEC-0134 via CTRL-0005"
 tags: [binding, injection]
