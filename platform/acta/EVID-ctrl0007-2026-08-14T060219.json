@@ -1,0 +1,16 @@
+{
+ "id": "EVID-ctrl0007-2026-08-14T060219",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-14T06:02:19.546718+00:00",
+ "author": "ctrl-0007",
+ "authorized_by": null,
+ "title": "embedder pipeline suite: 1244 rows, 0 failure(s)",
+ "control_ref": "CTRL-0007",
+ "subject": "corpus@ce02fa6714ed8a5d#atoms=1244@tfidf-local-lexical@c5d1234d471179d2",
+ "verdict": "pass",
+ "checked_at": "2026-08-14T06:02:19.546718+00:00",
+ "checker": "ctrl-0007-embedder-suite"
+}

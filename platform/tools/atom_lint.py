@@ -224,18 +224,20 @@ def atoms_at(ref, repo):
 ROOT_ALLOWLIST = {"CLAUDE.md", "README.md", "LICENSE", "LICENSE.md",
                   "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"}
 GOVERNED_NAME = re.compile(r"^(DOC|DEC|SPEC|RSTR|CTRL|ENF|RULE|MAND|STRAT|SPRINT|"
-                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^(ARCHITECT|FLOOR)_")
-# ARCHITECT_ rather than ARCHITECT_RESPONSE_: the first version of this pattern
-# named only responses, and an ARCHITECT_NOTE_ file sat untracked at the root with
-# the gate passing — the hole was exactly the shape of the thing it was built to
-# catch. Correspondence is correspondence whatever the delivery calls it.
+                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^(ARCHITECT|FLOOR|BRIDGE)_")
+# This pattern was widened three times in four days, once per new correspondence
+# family: ARCHITECT_RESPONSE_ missed ARCHITECT_NOTE_, ARCHITECT_ missed FLOOR_, and
+# both missed BRIDGE_. Each widening closed the instance and left the class open,
+# because a pattern that enumerates the senders it has already seen catches only the
+# past — and every one of those files sat at the repository root with the gate green.
 #
-# FLOOR_ joins it for the same reason and on the same evidence: the first floor
-# ruling to arrive by bridge (FLOOR_RESPONSE_whitepaper_currency_and_dilution) would
-# have sat at the root with the gate green. A pattern that enumerates the senders it
-# has already seen catches only the past, so this one now names the two correspondence
-# families the bridge actually carries — and the next new sender is a gate change,
-# which is the point: it has to be noticed to be admitted.
+# The root no longer relies on it. Below the root the heuristic still earns its keep:
+# an atom-bearing or governed-looking file under platform/ or suite/ is a violation
+# and an ordinary note is not. At the root there is no such ambiguity — the root
+# belongs to the repository's front matter, and governed content has exactly one home
+# (SPEC-0091). So the root is allowlist-or-violation, whatever the file is called,
+# and the fourth correspondence family will be caught by the rule rather than by
+# someone noticing in time to widen a regex.
 
 
 def tree_findings(repo):
@@ -251,13 +253,19 @@ def tree_findings(repo):
         if corpus in resolved.parents:
             continue                       # governed: parsed and validated elsewhere
         rel = resolved.relative_to(repo.resolve())
-        if len(rel.parts) == 1 and rel.name in ROOT_ALLOWLIST:
+        at_root = len(rel.parts) == 1
+        if at_root and rel.name in ROOT_ALLOWLIST:
             continue                       # enumerated root allowlist
         text = p.read_text(encoding="utf-8", errors="replace")
         carries_atoms = bool(re.search(r"^<!--\s*atom:begin\s", text, re.M))
         governed_name = bool(GOVERNED_NAME.match(rel.name))
-        if carries_atoms or governed_name:
-            why = "carries atom markers" if carries_atoms else "governed naming family"
+        if at_root or carries_atoms or governed_name:
+            # Most specific reason first. "Not on the root allowlist" is true of an
+            # atom-bearing root file too, and is the least useful thing to tell someone
+            # about it.
+            why = ("carries atom markers" if carries_atoms else
+                   "governed naming family" if governed_name else
+                   "not on the root allowlist")
             findings.append(
                 f"{rel}: governed document outside platform/corpus ({why}) — "
                 f"SPEC-0091's canonical tree is the only home for governed content "
@@ -302,7 +310,7 @@ def authorship_posture_findings(atoms):
             f"authorship to the granted scope; do not delete this check to go green."]
 
 
-def provenance_findings(atoms, before):
+def provenance_findings(atoms, before, label=""):
     """SPEC-0119 / D41: a new version must carry a new authoring act.
 
     SPEC-0113 catches content moving without a version bump. This catches the level
@@ -323,14 +331,15 @@ def provenance_findings(atoms, before):
             findings.append(
                 f"{src}: {aid} version moved {old_v} -> {new_v} with instantiated_at "
                 f"unchanged ({atom.get('instantiated_at')}) — an instance claiming "
-                f"the previous instance's moment is not a new instance (ONT-015).")
+                f"the previous instance's moment is not a new instance "
+                f"(ONT-015){label}.")
         if (atom.get("author") == RECONCILER
                 and _changed_beyond_lifecycle(atom, body, old_atom, old_body)):
             findings.append(
                 f"{src}: {aid} carries changes beyond a lifecycle transition while "
                 f"authored by {RECONCILER}, whose only legitimate change is that "
                 f"transition — an amendment is authored by whoever amended it "
-                f"(ONT-010).")
+                f"(ONT-010){label}.")
     return findings
 
 
@@ -349,16 +358,8 @@ def _changed_beyond_lifecycle(atom, body, old_atom, old_body):
     return atom_content_hash(strip(atom), body) != atom_content_hash(strip(old_atom), old_body)
 
 
-def immutability_findings(atoms, ref, repo):
-    """SPEC-0113: ONT-012/015 made structural.
-
-    An atom whose content changed while (version, instantiated_at) stayed put is an
-    edit to a published instance. Immutability had been a convention enforced by
-    reviewer attention; this is the same law enforced by the gate.
-    """
-    before, err = atoms_at(ref, repo)
-    if err:
-        return [err]
+def hop_findings(atoms, before, label):
+    """What may legitimately have changed across one hop between two instances."""
     findings = []
     for aid, (atom, src, body) in atoms.items():
         prior = before.get(aid)
@@ -373,11 +374,65 @@ def immutability_findings(atoms, ref, repo):
                 f"{src}: {aid} content changed at unchanged instance identity "
                 f"(version {atom.get('version')}, instantiated_at "
                 f"{atom.get('instantiated_at')}) — a published instance was edited "
-                f"in place (ONT-012/015). Emit a new instance instead.")
+                f"in place (ONT-012/015){label}. Emit a new instance instead.")
     # SPEC-0119 rides the same tree comparison: both questions are about what moved
     # between two instances, and reading the ref twice would be wasteful and could
     # disagree with itself.
-    findings += provenance_findings(atoms, before)
+    findings += provenance_findings(atoms, before, label)
+    return findings
+
+
+def revs_between(ref, repo):
+    """The commits from `ref` to HEAD, oldest first, as a chain of hops.
+
+    Returns [ref, c1, c2, ... HEAD] so consecutive pairs are the hops to check.
+    """
+    import subprocess
+    r = subprocess.run(["git", "-C", str(repo), "rev-list", "--reverse", f"{ref}..HEAD"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        return None, f"cannot enumerate commits {ref}..HEAD: {r.stderr[:200]}"
+    return [ref] + r.stdout.split(), None
+
+
+def immutability_findings(atoms, ref, repo):
+    """SPEC-0113 and SPEC-0119, checked per commit rather than across the branch.
+
+    An atom whose content changed while (version, instantiated_at) stayed put is an
+    edit to a published instance; an atom whose version moved without a new authoring
+    act is an instance claiming the previous one's provenance. Both are properties of
+    a *hop* between two adjacent instances, so both are checked hop by hop.
+
+    Comparing the branch's endpoints instead — which this did until a two-act branch
+    exposed it — asks the wrong question. A branch may legitimately contain several
+    acts on the same atom, and the endpoint delta attributes all of them to the last
+    author. DEC-0005's PR is the case that found it: SPEC-0081 was ratified by the
+    decision (which set `authorized_by`) and then activated by the reconciler (which
+    never does), and the net diff read as the reconciler having done both. The
+    endpoint view also hides the inverse — a hop that bumps the version alongside a
+    content change, followed by a hop that edits the same instance in place, nets out
+    to one legitimate-looking amendment.
+
+    Each intermediate commit is a published instance. That is what makes git history
+    the immutability mechanism (PA-002), and a check that skips the intermediates is
+    only checking the ones that happened to survive to the tip.
+    """
+    revs, err = revs_between(ref, repo)
+    if err:
+        return [err]
+    findings, prior_tree, prior_label = [], None, None
+    for rev in revs:
+        tree, err = atoms_at(rev, repo)
+        if err:
+            return [err]
+        if prior_tree is not None:
+            findings += hop_findings({aid: (a, f"{rev[:8]}:{aid}", b)
+                                      for aid, (a, b) in tree.items()},
+                                     prior_tree, f", at {prior_label[:8]}..{rev[:8]}")
+        prior_tree, prior_label = tree, rev
+    # And the last hop: the newest commit to the working tree, which is where an
+    # uncommitted edit-in-place would live.
+    findings += hop_findings(atoms, prior_tree, "")
     return findings
 
 

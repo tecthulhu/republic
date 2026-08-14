@@ -188,3 +188,134 @@ relations:
   - { rel: binds, target: ENF-0001 }
 ```
 <!-- atom:end id=RULE-0080 -->
+
+---
+
+## The spawn contract bindings (DEC-0005)
+
+STORY-0002's acceptance criteria were checked by CTRL-0005 for a week before
+anything bound them to it. The suite ran, the rows landed, the criteria passed —
+and no rule said the criteria were the suite's to check, so ONT-031 read them as
+unbound and ONT-060 had no trigger to activate them. A control that checks a claim
+nobody wired to it is doing the work without the law noticing.
+
+SPEC-0086 is deliberately absent from this set. It rides every evidence row and no
+control asserts it, so binding it here would produce a rule with no enforcing check
+— the SPEC-0091 shape. It stays a visible meter line until its control exists
+(floor Finding 4, STORY-0014 window).
+
+<!-- atom:begin id=RULE-0089 -->
+```yaml
+id: RULE-0089
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0005
+title: "Bind SPEC-0081 via CTRL-0005"
+tags: [binding, spawn-contract, first-floor-touch]
+claim: SPEC-0081
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0081 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+CTRL-0005 checks the spawn gate's refusals and what it produces when it admits.
+<!-- atom:end id=RULE-0089 -->
+
+<!-- atom:begin id=RULE-0090 -->
+```yaml
+id: RULE-0090
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0005
+title: "Bind SPEC-0082 via CTRL-0005"
+tags: [binding, spawn-contract, first-floor-touch]
+claim: SPEC-0082
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0082 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+CTRL-0005 checks the IO path: session stream to bus, live render, durable persistence.
+<!-- atom:end id=RULE-0090 -->
+
+<!-- atom:begin id=RULE-0091 -->
+```yaml
+id: RULE-0091
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0005
+title: "Bind SPEC-0083 via CTRL-0005"
+tags: [binding, spawn-contract, first-floor-touch]
+claim: SPEC-0083
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0083 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+CTRL-0005 checks isolation: ephemeral workspace and the sanctioned egress paths.
+<!-- atom:end id=RULE-0091 -->
+
+<!-- atom:begin id=RULE-0092 -->
+```yaml
+id: RULE-0092
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0005
+title: "Bind SPEC-0084 via CTRL-0005"
+tags: [binding, spawn-contract, first-floor-touch]
+claim: SPEC-0084
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0084 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+CTRL-0005 checks attribution: every envelope and commit chain-verifiable to the leaf.
+<!-- atom:end id=RULE-0092 -->
+
+<!-- atom:begin id=RULE-0093 -->
+```yaml
+id: RULE-0093
+type: rule
+scope: platform
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-14T05:55:28.534619+00:00"
+author: ont-060-reconciliation
+authorized_by: DEC-0005
+title: "Bind SPEC-0085 via CTRL-0005"
+tags: [binding, spawn-contract, first-floor-touch]
+claim: SPEC-0085
+control: CTRL-0005
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0085 }
+  - { rel: binds, target: CTRL-0005 }
+  - { rel: binds, target: ENF-0001 }
+```
+CTRL-0005 checks supervision: interrupt, mid-session injection, clean terminate.
+<!-- atom:end id=RULE-0093 -->
+

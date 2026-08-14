@@ -172,12 +172,35 @@ with tempfile.TemporaryDirectory() as td:
           r.returncode != 0 and "governed naming family" in r.stdout, r.stdout[-400:])
     (repo / "ARCHITECT_RESPONSE_099.md").unlink()
 
-    # Allowlisted root files are fine, and ordinary notes are not governed-looking.
-    (repo / "README.md").write_text("# readme\n")
+    # v1.2.0: at the root the allowlist is the whole rule. A file whose name matches
+    # no governed family and carries no atoms is still a violation there — this is the
+    # case the naming heuristic kept missing, once per new correspondence family.
+    (repo / "TRIBUNE_ruling.md").write_text("# a ruling by a sender no pattern has met\n")
+    r = lint_tree(repo)
+    check("an unrecognised root file is caught by the rule, not by a name pattern",
+          r.returncode != 0 and "not on the root allowlist" in r.stdout, r.stdout[-400:])
+    (repo / "TRIBUNE_ruling.md").unlink()
+
     (repo / "notes.md").write_text("# scratch, carries nothing governed\n")
     r = lint_tree(repo)
-    check("allowlisted and unremarkable root files pass", r.returncode == 0,
-          r.stdout[-400:])
+    check("an unremarkable root file is caught too — the root has no ordinary notes",
+          r.returncode != 0 and "not on the root allowlist" in r.stdout, r.stdout[-400:])
+    (repo / "notes.md").unlink()
+
+    # Below the root the heuristic still governs, and must not have become a blanket
+    # refusal: an ordinary note under platform/ is legitimate and stays legitimate.
+    (repo / "README.md").write_text("# readme\n")
+    (repo / "platform" / "notes.md").write_text("# scratch, nothing governed\n")
+    r = lint_tree(repo)
+    check("allowlisted root files and ordinary notes below the root pass",
+          r.returncode == 0, r.stdout[-400:])
+
+    # And the heuristic below the root has not been swallowed by the root rule.
+    (repo / "platform" / "ARCHITECT_RESPONSE_098.md").write_text("# a ruling, misfiled\n")
+    r = lint_tree(repo)
+    check("a governed-named file below the root is still caught by the heuristic",
+          r.returncode != 0 and "governed naming family" in r.stdout, r.stdout[-400:])
+    (repo / "platform" / "ARCHITECT_RESPONSE_098.md").unlink()
 
 # The real repository must pass both, or the gates are not deployable.
 r = subprocess.run([sys.executable, LINT, "--tree"], capture_output=True, text=True)
