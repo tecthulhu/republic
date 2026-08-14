@@ -120,6 +120,7 @@ author: agent-worker-story-0013
 authorized_by: null
 title: "Acceptance-baseline pinning: grade against what the floor touched"
 tags: [integrity, self-dilution, class-iii, floor-ruled]
+tracker_ref: "gh:tecthulhu/republic#26"
 acceptance: [SPEC-0126]
 relations:
   - { rel: advances, target: SPRINT-0001 }
@@ -200,6 +201,7 @@ author: agent-worker-story-0013
 authorized_by: null
 title: "Weakening-diff lint: make the pending-floor-touch state visible at the build gate"
 tags: [integrity, self-dilution, class-iii, floor-ruled]
+tracker_ref: "gh:tecthulhu/republic#27"
 acceptance: [SPEC-0127]
 relations:
   - { rel: advances, target: SPRINT-0001 }
@@ -284,6 +286,7 @@ author: agent-worker-story-0013
 authorized_by: null
 title: "The composition posture: declare the Class III gap and its time-boxed mitigation"
 tags: [integrity, self-dilution, class-iii, declared-posture, floor-ruled]
+tracker_ref: "gh:tecthulhu/republic#28"
 acceptance: [SPEC-0128]
 relations:
   - { rel: advances, target: SPRINT-0001 }
