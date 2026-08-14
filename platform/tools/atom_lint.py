@@ -224,11 +224,18 @@ def atoms_at(ref, repo):
 ROOT_ALLOWLIST = {"CLAUDE.md", "README.md", "LICENSE", "LICENSE.md",
                   "CONTRIBUTING.md", "SECURITY.md", "CODE_OF_CONDUCT.md"}
 GOVERNED_NAME = re.compile(r"^(DOC|DEC|SPEC|RSTR|CTRL|ENF|RULE|MAND|STRAT|SPRINT|"
-                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^ARCHITECT_")
+                           r"STORY|EVID|WVR|BLK|PROV|MEM|PRIN)-|^(ARCHITECT|FLOOR)_")
 # ARCHITECT_ rather than ARCHITECT_RESPONSE_: the first version of this pattern
 # named only responses, and an ARCHITECT_NOTE_ file sat untracked at the root with
 # the gate passing — the hole was exactly the shape of the thing it was built to
 # catch. Correspondence is correspondence whatever the delivery calls it.
+#
+# FLOOR_ joins it for the same reason and on the same evidence: the first floor
+# ruling to arrive by bridge (FLOOR_RESPONSE_whitepaper_currency_and_dilution) would
+# have sat at the root with the gate green. A pattern that enumerates the senders it
+# has already seen catches only the past, so this one now names the two correspondence
+# families the bridge actually carries — and the next new sender is a gate change,
+# which is the point: it has to be noticed to be admitted.
 
 
 def tree_findings(repo):
@@ -257,6 +264,42 @@ def tree_findings(repo):
                 f"(SPEC-0121). Fixtures and test data belong under a tools/ or suite/ "
                 f"path that does not look governed.")
     return findings
+
+
+AUTHORSHIP_IMPERIUM = re.compile(r"author", re.I)
+
+
+def authorship_posture_findings(atoms):
+    """SPEC-0123's self-failing condition (PRIN-0005, D42).
+
+    The declared posture is that agent authorship of governed atoms is
+    *mandate-unbounded*: `author` records who wrote an atom, `authorized_by` records
+    who gave it force, and nothing binds an authoring identity to a granted scope
+    (ONT-013). The floor's ratification is the only check, and that state is declared
+    rather than assumed — a reviewer found it before the corpus did.
+
+    Asserting the absence is what retires the posture. The first MAND- atom carrying
+    an authorship imperium turns this red, and the only way back to green is to
+    supersede SPEC-0123 with the mechanism that replaced it. A posture whose
+    retirement depends on someone remembering is a note, not a posture.
+
+    The guard is on the posture, not on the mechanism: remove or supersede SPEC-0123
+    and the check goes with it, because a corpus that no longer makes the claim has
+    nothing here to keep honest.
+    """
+    posture = atoms.get("SPEC-0123")
+    if posture is None or posture[0].get("state") in ("superseded", "deprecated",
+                                                      "rejected"):
+        return []
+    mandates = sorted(aid for aid, (a, _s, _b) in atoms.items()
+                      if a.get("type") == "mandate"
+                      and any(AUTHORSHIP_IMPERIUM.search(str(i))
+                              for i in (a.get("imperium") or [])))
+    if not mandates:
+        return []
+    return [f"SPEC-0123: an authorship mandate now exists ({', '.join(mandates)}) — the "
+            f"mandate-unbounded posture is stale. Supersede SPEC-0123 and bind agent "
+            f"authorship to the granted scope; do not delete this check to go green."]
 
 
 def provenance_findings(atoms, before):
@@ -385,6 +428,7 @@ def lint(corpus_dirs, schema_path):
         for m in MODEL_LITERAL.finditer(text):
             line = text[:m.start()].count("\n") + 1
             errors.append(f"{p}:{line}: model literal '{m.group(0)}' (ONT-039: band labels only)")
+    errors += authorship_posture_findings(all_atoms)
     # SPEC-0092: the null case is a failure. A control that checked nothing must never
     # report pass — ENT-094's fail-closed law applied to controls themselves.
     if not all_atoms:
