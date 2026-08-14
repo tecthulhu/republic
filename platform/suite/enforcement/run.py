@@ -45,6 +45,9 @@ API = "https://api.github.com"
 # The contexts the claim depends on. Named here so a check being dropped from the
 # ruleset is a failure rather than a smaller list quietly passing.
 CLAIMED_CONTEXTS = ("corpus-controls", "citizenship-conformance")
+# Where committed captures are read from when this run cannot observe the bypass scope
+# itself. Module-level so the fixture suite can point it at a temp tree.
+ACTA_DIR = pathlib.Path(REPO) / "platform" / "acta"
 failures = []
 facts = {}
 
@@ -88,6 +91,43 @@ def published_contexts(repo_root):
         for job_id, job in (doc.get("jobs") or {}).items():
             names.add((job or {}).get("name") or job_id)
     return names
+
+
+def attested_bypass_check(unreadable):
+    """The bypass fact, carried by a committed capture when this run cannot see it.
+
+    Anonymous runs cannot read `bypass_actors`, so without this the claim would rest on
+    nothing for exactly the fact most worth checking. An operator run with a credential
+    writes the observation into the Acta, and every later run requires that record to
+    exist and to say the scope is empty. The unobserved run therefore asserts something
+    real — *somebody with sight of it recorded no bypass* — rather than staying silent.
+
+    It is weaker than a live read and the difference is time: this cannot notice a
+    bypass actor added since the last authenticated capture. That gap is the reason the
+    row records `bypass_observed: false`, and closing it needs a stored credential,
+    which is an owner's decision rather than a worker's.
+    """
+    rows = []
+    for f in sorted(pathlib.Path(ACTA_DIR).glob("EVID-ctrl0009-*.json")):
+        try:
+            row = json.loads(f.read_text())
+        except ValueError:
+            continue
+        if (row.get("observed") or {}).get("bypass_observed") and row.get("credential") == "authenticated":
+            rows.append(row)
+    if not rows:
+        check("an authenticated capture of the bypass scope is on record", False,
+              f"this run could not observe the bypass scope ({unreadable}) and no "
+              f"committed EVID-ctrl0009 row observed it either — the enforcement claim "
+              f"has nothing behind it. Run this with a credential and commit the row.")
+        return
+    newest = max(rows, key=lambda r: r.get("checked_at", ""))
+    actors = (newest.get("observed") or {}).get("bypass_actors") or []
+    check("an authenticated capture of the bypass scope is on record and shows none",
+          not actors,
+          f"{newest['id']} ({newest.get('checked_at')}) recorded bypass actors: {actors}")
+    facts["bypass_attested_by"] = newest["id"]
+    facts["bypass_attested_at"] = newest.get("checked_at")
 
 
 def probe(repo, branch, token):
@@ -143,18 +183,25 @@ def probe(repo, branch, token):
             unreadable.append(f"{rid}: {err or 'bypass_actors not returned'}")
         else:
             bypass += [f"{rid}:{a.get('actor_type')}:{a.get('actor_id')}" for a in actors]
-    facts["bypass_actors"] = sorted(bypass)
+    facts["bypass_actors"] = sorted(bypass) if not unreadable else None
     facts["bypass_unreadable"] = unreadable
-    if unreadable:
-        # Fail rather than record silence. An unverified bypass scope is exactly the
-        # unstated narrowing that turns "blocks merge" into an overclaim, and a
-        # credential that cannot see it is a reason to say so, not to assume none.
-        check("the bypass scope is observable", False,
-              f"{unreadable} — grant administration:read or run with a token that has it; "
-              f"an unverified bypass list cannot support an unqualified enforcement claim")
-    else:
+    if not unreadable:
+        facts["bypass_observed"] = True
         check("no actor may bypass the ruleset, administrators included", not bypass,
               f"bypass actors configured: {bypass}")
+    else:
+        # Unobserved, and said so — never assumed empty. `administration: read` is a
+        # PAT scope and not a GITHUB_TOKEN workflow permission, so the Actions runner
+        # cannot see this however the workflow is written. Failing here would redden
+        # the required check on every run and take the merge gate down with it, which
+        # is a worse outcome than a precisely stated limit.
+        #
+        # The claim stays whole through the Acta instead: an authenticated operator
+        # capture is committed, and this run requires one to exist.
+        facts["bypass_observed"] = False
+        print(f"  NOTE  bypass scope unobservable with this credential ({unreadable}) — "
+              f"falling back\n        to the committed authenticated capture")
+        attested_bypass_check(unreadable)
 
     # Recorded, not asserted: real qualifications on the claim that are not failures.
     facts["strict_required_status_checks_policy"] = \

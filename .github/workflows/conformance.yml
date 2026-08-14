@@ -18,12 +18,14 @@ on:
 
 permissions:
   contents: read
-  # CTRL-0009 reads the branch-protection state of the default branch. The rules
-  # endpoint answers anonymously, but `bypass_actors` does not — and the probe fails
-  # closed on an unreadable bypass scope rather than recording silence, because
-  # "enforced" and "enforced except for four people" are different claims. Read-only,
-  # and the narrowest scope that answers the question.
-  administration: read
+# `administration: read` is NOT available here. It is a valid PAT scope but not a
+# GITHUB_TOKEN workflow permission, and naming it fails workflow validation before any
+# job is created — which reports as the required contexts never arriving, not as a red
+# check, so the merge gate silently stops existing. It did exactly that once.
+#
+# Consequence for CTRL-0009: the Actions token cannot read `bypass_actors`, so the CI
+# capture records that fact as unobserved rather than assuming it. The authenticated
+# capture is an operator run committed to the Acta. See SPEC-0130.
 
 jobs:
   corpus:
@@ -88,10 +90,11 @@ jobs:
         working-directory: platform
         run: python suite/enforcement/test_probe.py
 
+      # Runs anonymously on purpose: the rules endpoint needs no credential, which is
+      # what makes this reproducible by any reader. The bypass scope is out of reach
+      # here and is recorded as unobserved.
       - name: CTRL-0009 — capture the live merge-enforcement state
         working-directory: platform
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python suite/enforcement/run.py --evidence-dir acta
 
       # SPEC-0113 applied to this change: no atom may have been edited in place

@@ -31,9 +31,23 @@ walkable thing, and check it on every run*, which is a smaller job and a better 
 the evidence is reproducible by the reader rather than being one more artifact to
 trust.
 
-One fact is not anonymous. `bypass_actors` is returned only to a credential, and the
-probe **fails closed** without one rather than recording silence — an unverified bypass
-list cannot support an unqualified enforcement claim.
+One fact is not anonymous. `bypass_actors` is returned only to a credential holding
+`administration: read` — and that is a personal-access-token scope, **not** a
+`GITHUB_TOKEN` workflow permission. The first attempt at this story named it in the
+workflow's `permissions:` block, which fails validation before any job is created: no
+run, no jobs, and the two required contexts simply never report. The pull request then
+reads *"Expected — waiting for status to be reported"* forever.
+
+That failure is worth recording rather than quietly fixing, because of its shape. An
+invalid permission does not present as a red check. It presents as **no check**, and a
+required context that never arrives blocks merges without ever saying why — the merge
+gate stops existing and looks like it is still thinking about it. A control that fails
+loudly is a control; one that fails by not appearing is a hole, and this repository's
+whole argument is about the difference.
+
+So the probe never assumes what it cannot see: the CI capture records the bypass scope
+as unobserved and falls back to the newest authenticated capture committed to the
+Acta (SPEC-0130).
 
 ## What the capture found
 
@@ -68,8 +82,8 @@ id: SPEC-0130
 type: specification
 scope: platform
 state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-14T17:30:00Z"
+version: 1.1.0
+instantiated_at: "2026-08-14T18:10:00Z"
 author: agent-worker-story-0017
 authorized_by: null
 title: "Merge enforcement is captured from the live setting, not asserted"
@@ -95,15 +109,40 @@ Three properties are load-bearing and each closes a way this could have been the
 **Captured, never constant:** a hardcoded assertion of enforcement is the attestational
 governance the whitepaper argues against, so every fact comes from the API each run.
 **Bound to the context name:** the actor being graded cannot quietly remove the
-required-check binding, because removing it turns this red. **Fails closed on an
-unobservable bypass scope:** silence about who may bypass is recorded as a failure, not
-as an absence, since "enforced" and "enforced except for four people" are different
-claims.
+required-check binding, because removing it turns this red. **Never assumes what it
+cannot see:** an unobserved bypass scope is recorded as unobserved.
 
-Fixtures demonstrate the probe passing against the real configuration, failing when a
-claimed context is absent from the rule set, failing when a required context is
-published by no job, failing when a bypass actor exists, and failing rather than
-passing when the bypass scope cannot be read.
+**The bypass scope is not observable from CI, and the claim says so.** `bypass_actors`
+is returned only to a credential holding `administration: read`, which is a personal
+access token scope and *not* a `GITHUB_TOKEN` workflow permission — naming it in a
+workflow's `permissions:` block fails validation before any job is created. So the CI
+capture records `bypass_observed: false` and falls back to the newest **authenticated
+operator capture committed to the Acta**, requiring it to exist, to have been taken
+with a credential, and to show no bypass actor. The unobserved run therefore still
+asserts something real — *somebody with sight of it recorded none* — instead of
+assuming emptiness or staying silent.
+
+That fallback is weaker than a live read and the difference is time: it cannot notice
+a bypass actor added since the last authenticated capture. The row records
+`bypass_observed: false` and names the capture it relied on, so the weaker basis is
+visible in the evidence rather than inferred. Closing the gap needs a stored
+administration-scoped token, which is an owner's decision about credential exposure on
+a public repository, not a worker's.
+
+Fixtures demonstrate seventeen cases, including: the real configuration passing; a
+claimed context absent from the rule set caught; a required context published by no
+job caught; a bypass actor caught; the fallback recording `unobserved` rather than
+`observed-empty`; a committed capture showing a bypass actor caught; an anonymous row
+refused as an attestation of something anonymous runs cannot see; the newest committed
+capture governing rather than the cleanest; and no committed capture at all failing.
+
+v1.1.0 — v1.0.0 required the probe to *fail closed* on an unobservable bypass scope.
+That was unimplementable in the environment it governs: the Actions token cannot hold
+`administration: read` at all, so the criterion would have reddened the required check
+on every future run and taken the merge gate down with it. This is not the tool being
+softened to fit the claim — the claim asked for a capability the runner cannot have,
+and the replacement is stricter about honesty (`bypass_observed: false` recorded, an
+authenticated capture required on record) while being satisfiable.
 <!-- atom:end id=SPEC-0130 -->
 
 <!-- atom:begin id=RULE-0095 -->

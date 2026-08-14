@@ -15,6 +15,8 @@ Run from anywhere: python3 suite/enforcement/test_probe.py
 import contextlib
 import importlib.util
 import io
+import json
+import tempfile
 import pathlib
 import sys
 
@@ -45,7 +47,23 @@ REAL_RULES = [
 ]
 
 
-def run_against(rules, bypass_actors=(), ruleset_readable=True, published=None):
+def acta_with(rows, td):
+    """A throwaway Acta holding the given committed captures."""
+    d = pathlib.Path(td)
+    d.mkdir(parents=True, exist_ok=True)
+    for i, r in enumerate(rows):
+        (d / f"EVID-ctrl0009-fixture-{i:02d}.json").write_text(json.dumps(r))
+    return d
+
+
+def attested_row(bypass_actors, checked_at="2026-01-01T00:00:00Z", credential="authenticated"):
+    return {"id": f"EVID-ctrl0009-{checked_at}", "checked_at": checked_at,
+            "credential": credential,
+            "observed": {"bypass_observed": True, "bypass_actors": list(bypass_actors)}}
+
+
+def run_against(rules, bypass_actors=(), ruleset_readable=True, published=None,
+                acta=None):
     """Drive the probe over a substituted API and return its findings."""
     def fake_get(path, token=None):
         if "/rules/branches/" in path:
@@ -57,9 +75,12 @@ def run_against(rules, bypass_actors=(), ruleset_readable=True, published=None):
         return None, f"unexpected path {path}"
 
     real_get, real_pub = probe_mod.get, probe_mod.published_contexts
+    real_acta = probe_mod.ACTA_DIR
     probe_mod.get = fake_get
     if published is not None:
         probe_mod.published_contexts = lambda _root: set(published)
+    if acta is not None:
+        probe_mod.ACTA_DIR = acta
     probe_mod.failures, probe_mod.facts = [], {}
     try:
         # The probe narrates its own PASS/FAIL lines. Interleaved with this suite's
@@ -70,6 +91,7 @@ def run_against(rules, bypass_actors=(), ruleset_readable=True, published=None):
         return list(probe_mod.failures), dict(probe_mod.facts)
     finally:
         probe_mod.get, probe_mod.published_contexts = real_get, real_pub
+        probe_mod.ACTA_DIR = real_acta
         probe_mod.failures, probe_mod.facts = [], {}
 
 
@@ -116,11 +138,51 @@ check("a bypass actor is caught", any("bypass" in f for f in found), found)
 check("the bypass actor is named in the captured facts",
       facts.get("bypass_actors") == ["1:Team:7"], facts.get("bypass_actors"))
 
-# Weakening 5 — the bypass scope cannot be read. Silence must be a failure, not an
-# absence: an unverified bypass list cannot support an unqualified claim.
-found, _ = run_against(REAL_RULES, ruleset_readable=False, published=DEFAULT_PUBLISHED)
-check("an unobservable bypass scope fails rather than passing quietly",
-      any("bypass scope is observable" in f for f in found), found)
+# Weakening 5 — the bypass scope cannot be read. This is the CI case and not a
+# hypothetical: `administration: read` is a PAT scope, not a GITHUB_TOKEN workflow
+# permission, so the runner can never see it. Silence must not become an assumption of
+# emptiness; the run falls back to a committed authenticated capture and asserts
+# against that, which is weaker than a live read and is recorded as such.
+with tempfile.TemporaryDirectory() as td:
+    clean = acta_with([attested_row([])], pathlib.Path(td, "clean"))
+    found, facts = run_against(REAL_RULES, ruleset_readable=False,
+                               published=DEFAULT_PUBLISHED, acta=clean)
+    check("an unobservable bypass scope falls back to the committed capture",
+          not found, found)
+    check("the fallback is recorded as unobserved, never as observed-empty",
+          facts.get("bypass_observed") is False and facts.get("bypass_actors") is None
+          and facts.get("bypass_attested_by"),
+          f"observed={facts.get('bypass_observed')} actors={facts.get('bypass_actors')} "
+          f"attested_by={facts.get('bypass_attested_by')}")
+
+    dirty = acta_with([attested_row(["1:Team:7"])], pathlib.Path(td, "dirty"))
+    found, _ = run_against(REAL_RULES, ruleset_readable=False,
+                           published=DEFAULT_PUBLISHED, acta=dirty)
+    check("a committed capture showing a bypass actor is caught",
+          any("bypass scope is on record" in f for f in found), found)
+
+    empty = acta_with([], pathlib.Path(td, "empty"))
+    found, _ = run_against(REAL_RULES, ruleset_readable=False,
+                           published=DEFAULT_PUBLISHED, acta=empty)
+    check("unobservable with no committed capture at all fails",
+          any("on record" in f for f in found), found)
+
+    # An anonymous capture is not an attestation of something anonymous runs cannot see.
+    anon = acta_with([attested_row([], credential="anonymous")], pathlib.Path(td, "anon"))
+    found, _ = run_against(REAL_RULES, ruleset_readable=False,
+                           published=DEFAULT_PUBLISHED, acta=anon)
+    check("an anonymous row does not count as an authenticated capture",
+          any("on record" in f for f in found), found)
+
+    # The newest authenticated capture governs: a later one showing a bypass actor is
+    # not excused by an older clean one.
+    both = acta_with([attested_row([], checked_at="2026-01-01T00:00:00Z"),
+                      attested_row(["1:User:9"], checked_at="2026-06-01T00:00:00Z")],
+                     pathlib.Path(td, "both"))
+    found, _ = run_against(REAL_RULES, ruleset_readable=False,
+                           published=DEFAULT_PUBLISHED, acta=both)
+    check("the newest committed capture governs, not the cleanest",
+          any("bypass scope is on record" in f for f in found), found)
 
 # Weakening 6 — direct pushes allowed. A required check is decoration on a branch that
 # accepts a push.
