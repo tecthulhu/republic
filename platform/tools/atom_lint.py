@@ -350,6 +350,86 @@ def canonical_doc_findings(repo):
     return []
 
 
+SPAWN_ACT_PREFIX = "PROV-spawn-"
+
+
+def stories_in_flight(atoms):
+    """Stories whose work is authorised and not yet concluded.
+
+    Authorised means a spawn act pins their criteria (SPEC-0129); concluded means the
+    story reached `active`, which happens only after a decision ratifies it on green
+    acceptance. Between those two points the criteria are what the work is graded
+    against, and moving them is the Class III attack.
+
+    A story with no spawn act is deliberately not in flight here, and that is not a
+    hole: SPEC-0126 refuses to grade such a story at all, so it cannot go green by
+    weakening anything. The two checks divide the space between them.
+    """
+    acts = {}
+    for f in sorted(pathlib.Path(ACTA).glob(f"{SPAWN_ACT_PREFIX}*.json")):
+        try:
+            rec = json.loads(f.read_text())
+        except ValueError:
+            continue
+        sid = ref_id(rec.get("story_ref"))
+        if sid:
+            acts.setdefault(sid, []).append(rec)
+    return {sid for sid in acts
+            if (atoms.get(sid) or ({},))[0].get("state") not in ("active", "deprecated",
+                                                                 "superseded", "rejected")}
+
+
+def acceptance_edit_findings(atoms, before, label=""):
+    """SPEC-0127: every non-floor edit to an in-flight story's criteria, flagged.
+
+    It flags *any* change — removal, threshold, or a pure rewrite that alters nothing
+    a grader would notice — and it deliberately does **not** judge whether the edit
+    weakens. A "loosens" predicate needs a mechanically decidable definition of looser,
+    and without one the check either fires on every edit or is walked straight past by
+    a semantic weakening dressed as a rewrite. An oracle nobody has to write is an
+    oracle nobody can attack.
+
+    The pin (SPEC-0126) does the load-bearing work: the baseline does not move whatever
+    this says. What this adds is that the pending state is *visible at the gate* rather
+    than discoverable later by someone diffing instances by hand.
+
+    Floor-touched edits pass. In this corpus a floor touch is a non-null
+    `authorized_by` — the durable trace of a ratifying act — so an acceptance revision
+    that arrives with a decision behind it is exactly what the mechanism is for, not
+    something it obstructs.
+    """
+    if not before:
+        return []
+    in_flight = stories_in_flight(atoms)
+    if not in_flight:
+        return []
+    findings = []
+    for aid, (atom, src, body) in sorted(atoms.items()):
+        if atom.get("type") not in ("specification", "restriction"):
+            continue
+        story = ref_id(atom.get("story_ref"))
+        if story not in in_flight:
+            continue
+        prior = before.get(aid)
+        if prior is None:
+            findings.append(
+                f"{src}: {aid} is a new acceptance criterion on in-flight {story} — a "
+                f"story may not enlarge its own criteria mid-flight; it is pending a "
+                f"floor touch and SPEC-0126 will not grade against it{label}")
+            continue
+        old_atom, old_body = prior
+        if atom_content_hash(atom, body) == atom_content_hash(old_atom, old_body):
+            continue
+        if atom.get("authorized_by"):
+            continue                       # floor-touched: the ratifying act is the point
+        findings.append(
+            f"{src}: {aid} changed on in-flight {story} with no floor touch "
+            f"(authorized_by is null) — pending floor touch, and the graded baseline "
+            f"stays pinned to the spawn act until a decision ratifies this instance "
+            f"(SPEC-0126/0127){label}")
+    return findings
+
+
 def provenance_findings(atoms, before, label=""):
     """SPEC-0119 / D41: a new version must carry a new authoring act.
 
@@ -419,6 +499,7 @@ def hop_findings(atoms, before, label):
     # between two instances, and reading the ref twice would be wasteful and could
     # disagree with itself.
     findings += provenance_findings(atoms, before, label)
+    findings += acceptance_edit_findings(atoms, before, label)
     return findings
 
 
