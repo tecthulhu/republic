@@ -83,6 +83,13 @@ jobs:
         working-directory: platform
         run: python tools/test_provenance.py
 
+      # SPEC-0129/0126: the Class III attack, run and refused. Needs no container
+      # and no network — the two-way disagreement between the pinned and the weakened
+      # grade is pure logic, and it is the assertion the whole story rests on.
+      - name: SPEC-0129/0126 — acceptance-baseline fixture suite
+        working-directory: platform
+        run: python harness/test_baseline.py
+
       # SPEC-0131/0133: the ingest lint's fixtures. The live tree lives outside this
       # repository so CI cannot check it — but the lint's *judgement* is code in here,
       # and code in here is gated. This is the enforceable half; the other half is
