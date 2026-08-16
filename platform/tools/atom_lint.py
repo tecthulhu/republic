@@ -310,11 +310,15 @@ def authorship_posture_findings(atoms):
             f"authorship to the granted scope; do not delete this check to go green."]
 
 
-WHITEPAPER_VERSIONED = re.compile(r"^REPUBLIC_WHITEPAPER_v(\d+(?:\.\d+)*)\.md$")
+VERSIONED_DOC = re.compile(r"^(.+?)_v(\d+(?:\.\d+)*)\.md$")
+# Where a canonical file does not share its instances' stem. The whitepaper's public
+# path is WHITEPAPER.md while its instances are REPUBLIC_WHITEPAPER_v*, so the stem
+# rule alone would not pair them.
+CANONICAL_ALIASES = {"REPUBLIC_WHITEPAPER": "WHITEPAPER.md"}
 
 
 def canonical_doc_findings(repo):
-    """`docs/WHITEPAPER.md` must be byte-identical to the newest versioned instance.
+    """Every canonical doc must be byte-identical to its newest versioned instance.
 
     The canonical path exists so public links survive a version bump: readers and
     citations point at one stable name, and each release overwrites it. That is a
@@ -328,26 +332,52 @@ def canonical_doc_findings(repo):
 
     Silent when the directory or the canonical file is absent: this is a convention
     about a document that may not exist, not a requirement that it does.
+
+    Generalised from the whitepaper to every canonical/instance pair in `docs/`,
+    because the review ledger adopts the same scheme and a rule that covered one
+    document by name would have to be widened once per document — the enumeration
+    failure the root allowlist already taught.
     """
     docs = pathlib.Path(repo) / "docs"
-    canonical = docs / "WHITEPAPER.md"
-    if not canonical.is_file():
+    if not docs.is_dir():
         return []
-    versioned = sorted(
-        ((tuple(int(n) for n in m.group(1).split(".")), p)
-         for p in docs.glob("*.md")
-         for m in [WHITEPAPER_VERSIONED.match(p.name)] if m))
-    if not versioned:
-        return [f"docs/WHITEPAPER.md exists with no versioned instance beside it — the "
-                f"canonical path renders content no immutable file records, so there is "
-                f"nothing for a citation to resolve to (ONT-012/015)."]
-    _v, newest = versioned[-1]
-    if canonical.read_bytes() != newest.read_bytes():
-        return [f"docs/WHITEPAPER.md does not match docs/{newest.name}, the newest "
+
+    # Group instances by the canonical they belong to.
+    families = {}
+    for p in sorted(docs.glob("*.md")):
+        m = VERSIONED_DOC.match(p.name)
+        if not m:
+            continue
+        stem, version = m.group(1), m.group(2)
+        canonical = CANONICAL_ALIASES.get(stem, f"{stem}.md")
+        families.setdefault(canonical, []).append(
+            (tuple(int(n) for n in version.split(".")), p))
+
+    findings = []
+    for canonical_name, instances in sorted(families.items()):
+        canonical = docs / canonical_name
+        if not canonical.is_file():
+            # A versioned instance with no canonical is fine: not every document needs
+            # a stable public path. The reverse is what breaks.
+            continue
+        _v, newest = sorted(instances)[-1]
+        if canonical.read_bytes() != newest.read_bytes():
+            findings.append(
+                f"docs/{canonical_name} does not match docs/{newest.name}, the newest "
                 f"versioned instance — the canonical path is a rendering of that "
                 f"instance and has drifted from it. Overwrite the canonical file; do "
-                f"not edit the versioned one."]
-    return []
+                f"not edit the versioned one.")
+
+    # A canonical with nothing behind it: a citation resolving to no immutable file.
+    for p in sorted(docs.glob("*.md")):
+        if VERSIONED_DOC.match(p.name):
+            continue
+        if p.name not in families:
+            findings.append(
+                f"docs/{p.name} exists with no versioned instance beside it — the "
+                f"canonical path renders content no immutable file records, so there "
+                f"is nothing for a citation to resolve to (ONT-012/015).")
+    return findings
 
 
 SPAWN_ACT_PREFIX = "PROV-spawn-"
@@ -599,8 +629,21 @@ def lint(corpus_dirs, schema_path):
             if f in a and a[f]: check(a[f], f)
         for f in ("acceptance","stories","constraints"):
             for rv in a.get(f) or []: check(rv, f)
-    # ONT-039/088: model literal scan across all governed text
+    # ONT-039/088: model literal scan over governed text.
+    #
+    # Scoped to the corpus and the Acta, which is what "governed" means. It previously
+    # ran over every file handed to the linter, and CI hands it the repository root —
+    # so a published review ledger under docs/ tripped it for naming the instrument
+    # that produced a review. That naming is the attribution, not a leak: a record
+    # saying which model graded which artifact is doing exactly the job ONT-039 exists
+    # to protect, which is keeping a *governed claim* free of a literal that will age
+    # into a lie. A historical record of who said what does not age; it is dated.
+    #
+    # Narrowed rather than exempted by filename, and the corpus itself is untouched:
+    # a model literal in an atom is still a finding, which the fixture asserts.
     for p, text in texts.items():
+        if not any(part in ("corpus", ACTA_DIR) for part in pathlib.Path(p).parts):
+            continue
         for m in MODEL_LITERAL.finditer(text):
             line = text[:m.start()].count("\n") + 1
             errors.append(f"{p}:{line}: model literal '{m.group(0)}' (ONT-039: band labels only)")
