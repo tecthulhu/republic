@@ -52,10 +52,10 @@ id: SPEC-0131
 type: specification
 scope: platform
 state: active
-version: 1.2.0
-instantiated_at: "2026-08-14T21:43:37.871489+00:00"
-author: ont-060-reconciliation
-authorized_by: DEC-0006
+version: 1.3.0
+instantiated_at: "2026-08-20T16:30:00Z"
+author: agent-worker-dec-0008
+authorized_by: DEC-0008
 title: "The instruction staging tree has one state per instruction and a declared type"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -69,7 +69,7 @@ file and the rule has already looked.
 The rules, each an error the floor hit by hand:
 
 - **One instruction, one state.** A filename appearing in more than one of
-  `proposed`/`active`/`executed`/`parked` is a violation — the single-authoring-chain
+  `proposed`/`active`/`executed`/`parked`/`withdrawn` is a violation — the single-authoring-chain
   law with folders standing in for the `state` field.
 - **Type is declared, never inferred.** Each file carries
   `<!-- ingest: TYPE -->` in its head, from a closed set. A filename is a guess; this
@@ -84,6 +84,14 @@ The rules, each an error the floor hit by hand:
 - **Counts are reported, not judged.** An empty `proposed/` is legal; a crowded
   `active/` is legal and worth seeing.
 - **Empty input is a failure**, not a pass (SPEC-0092's law applied here).
+
+v1.3.0 adds `withdrawn` (DEC-0008). An instruction corrected and replaced *before*
+enactment is neither deferred nor done: `parked` says the floor chose to defer,
+`executed` says the work landed, and both misreport. The ferry charter forced it twice
+in one day — v0.2 superseded by v0.3, v0.3 by v0.4, each inside the window
+ratification-by-merge leaves open. A lifecycle that cannot say *replaced before it took
+effect* pushes that history into a comment, and a comment is where history stops being
+queryable.
 
 **Declared gap: this is a control without enforcement.** The ingest tree is outside the
 repository, so no CI check can run this and no merge is refused on it. Every evidence
@@ -411,3 +419,115 @@ relations:
 ENF-0001 here, unlike the ingest rules: CTRL-0005 runs in CI on every change, so this
 claim genuinely blocks a merge.
 <!-- atom:end id=RULE-0099 -->
+
+---
+
+## The ferry, chartered (DEC-0008)
+
+<!-- atom:begin id=STRAT-0003 -->
+```yaml
+id: STRAT-0003
+type: strategy
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-20T16:30:00Z"
+author: agent-worker-dec-0008
+authorized_by: null
+title: "The ferry system: a signed, spooled, acknowledged cross-plane channel"
+tags: [ferry, courier, transport, cross-plane, charter]
+horizon: "P0 in one sitting; P1 unlocks on P0's first acknowledged receipt"
+outcomes:
+  - "Artifacts cross planes under floor authority, never carrying authority (B-1)"
+  - "Two identities per shipment: an enrolled machine signs for custody, an enrolled principal approves in presence for authorization (B-2)"
+  - "Digest law at write and at read; register beats receipt beats label (B-3)"
+  - "Keys and provider credentials are per-machine local state, never on the chat plane, never copied between machines (B-4)"
+  - "Shipment, auth, acknowledgement and access logs are append-only (B-5)"
+  - "A shipment terminates only at a digest-bound acknowledgement, so transport success is never read as consumption success"
+  - "Both trust registers live on the reception plane with the verifier, so Republic carries no shipping infrastructure and superseding the ferry never touches Republic code"
+constraints: [SPEC-0132]
+relations:
+  - { rel: derives, target: STRAT-0002 }
+  - { rel: contains, target: SPEC-0135 }
+```
+The charter is admitted at `corpus/FERRY_SYSTEM_CHARTER.md`, v0.4, digest
+`416226d91e3c0150`. This atom is the governed handle; the document is the argument.
+
+**What forced it.** Three silent drops in one week, each caught by downstream
+discipline and none prevented. **The hand-ferry's failure mode is silence**, and
+silence is the one failure no care downstream converts into a signal. Two of the three
+this session met directly, and a fourth arrived while the charter was being ratified:
+the principal-verifier contract landed with perfect digests and could not be consumed,
+because the charter version it cites had not shipped.
+
+**Why the lifecycle terminates where it does.** `CREATED → AUTHORIZED → TRANSPORTED →
+RECEIVED → ACKNOWLEDGED`, and only the last is terminal. That contract is the proof: a
+flawless delivery whose shipment was unusable. A receipt can say the bytes arrived; it
+cannot say the shipment was consumable, and treating those as one fact is where the
+silent drops lived.
+
+**Two identities, two truth-levels, honestly labelled.** The machine signature is
+evidence-grade — an offline-verifiable artifact. The principal's Duo approval is
+attested-with-independent-witness — a third party's transaction record, not a
+cryptographic artifact. The registers state each factor's strength plainly and **never
+claim more verification than the factor provides**. The first principal row is recorded
+as a self-attested genesis act, because every identity system bootstraps from a root no
+higher authority certifies and the honest move is to write that down rather than let
+the row imply otherwise.
+
+Floor-touch and human-evidence stay cousins here too: machine enrollment is the floor's
+grant, principal approval is human presence, and neither substitutes for the other —
+the same separation STORY-0014 kept.
+
+**Derives from STRAT-0002 rather than superseding it.** STRAT-0002 names atomization
+and the courier; this concretizes the courier and leaves atomization where it was. It
+does not retire SPEC-0132: that posture ends when the courier is *live*, and a charter
+is a design.
+<!-- atom:end id=STRAT-0003 -->
+
+<!-- atom:begin id=SPEC-0135 -->
+```yaml
+id: SPEC-0135
+type: specification
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-20T16:30:00Z"
+author: agent-worker-dec-0008
+authorized_by: null
+title: "The principal-verifier port: one contract, swappable providers, declared strength"
+tags: [ferry, identity, principal, provider-port, truth-level]
+binding: checked
+check: human
+relations:
+  - { rel: derives, target: STRAT-0003 }
+```
+Admitted at `corpus/FERRY_PRINCIPAL_VERIFIER_CONTRACT.md`, v0.1, digest
+`e5b68c93860d6f09` — the substrate beneath the charter, ratified with it.
+
+One port, one method, `verify(principal, challenge, timeout_s) -> Verdict`. Only
+`APPROVED` authorizes; `DENIED`, `TIMEOUT`, `PROVIDER_ERROR` and any exception leave
+the shipment `CREATED`, and a provider may not retry into an approval after a deny.
+Evidence is returned on **every** path including refusals, because the refusal log is
+part of the custody record — an authorization system that records only its approvals
+has no way to show what it stopped.
+
+**The conformance clause that carries the weight is §1.3.** Every provider declares its
+own `truth_level` and `binding` statically, and the register copies those strings
+verbatim. `digest-in-challenge` and `session-only` are different facts: approving a
+blind prompt and approving a digest on screen both produce an approval, and only the
+declaration distinguishes them. **A provider that overstates its truth_level is
+non-conformant by definition** — which makes honest self-description a conformance
+requirement rather than a courtesy, and is the same move SPEC-0134 made when it refused
+to let a restriction claim force no evaluator provides.
+
+`check: human`. The contract's central obligation is that a provider's declaration
+survives adversarial reading, and no machine check can grade whether a sentence about a
+provider's own strength is honest. Recorded as human-checked rather than dressed as
+machine-checked, which is what this corpus does with SPEC-0072's class of claim.
+
+Duo Auth API is mapped end to end as the first conforming provider — an applicability
+proof, not a catalog. §3 declines to specify future providers on the grounds that each
+is a conformance exercise against §1 rather than a spec change, and the known display
+limit (pushinfo truncation on some devices) is recorded rather than smoothed over.
+<!-- atom:end id=SPEC-0135 -->

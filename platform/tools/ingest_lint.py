@@ -42,7 +42,12 @@ DEFAULT_ROOT = pathlib.Path("~/tecthulhu/atomic_ingest").expanduser()
 
 # The instruction lifecycle, as folders. This is the atom `state` field wearing a
 # directory for a hat, which is why one file may appear in exactly one of them.
-LIFECYCLE = ("proposed", "active", "executed", "parked")
+# `withdrawn` joins the lifecycle by the floor's ruling of 2026-08-20 (DEC-0008): an
+# instruction corrected and replaced *before* enactment is neither deferred (parked)
+# nor done (executed), and filing it as either would misreport it. Two inhabitants
+# already — ferry charter v0.2 and v0.3, both superseded inside the same correction
+# window while their ratifying pull request stayed open.
+LIFECYCLE = ("proposed", "active", "executed", "parked", "withdrawn")
 # Deliverables. Not instructions, no instruction lifecycle — the atom `type` field,
 # similarly disguised.
 ARTIFACTS = "artifacts"
