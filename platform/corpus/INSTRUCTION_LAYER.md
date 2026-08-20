@@ -429,10 +429,10 @@ claim genuinely blocks a merge.
 id: STRAT-0003
 type: strategy
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-20T16:44:09.366528+00:00"
-author: agent-worker-dec-0008
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-20T16:44:10.423195+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0008
 title: "The ferry system: a signed, spooled, acknowledged cross-plane channel"
 tags: [ferry, courier, transport, cross-plane, charter]
