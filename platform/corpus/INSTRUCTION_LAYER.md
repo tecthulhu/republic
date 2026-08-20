@@ -429,11 +429,11 @@ claim genuinely blocks a merge.
 id: STRAT-0003
 type: strategy
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-20T16:30:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-20T16:44:09.366528+00:00"
 author: agent-worker-dec-0008
-authorized_by: null
+authorized_by: DEC-0008
 title: "The ferry system: a signed, spooled, acknowledged cross-plane channel"
 tags: [ferry, courier, transport, cross-plane, charter]
 horizon: "P0 in one sitting; P1 unlocks on P0's first acknowledged receipt"
@@ -490,11 +490,11 @@ is a design.
 id: SPEC-0135
 type: specification
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-20T16:30:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-20T16:44:09.366528+00:00"
 author: agent-worker-dec-0008
-authorized_by: null
+authorized_by: DEC-0008
 title: "The principal-verifier port: one contract, swappable providers, declared strength"
 tags: [ferry, identity, principal, provider-port, truth-level]
 binding: checked
