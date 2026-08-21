@@ -65,10 +65,10 @@ DEC-0005 deliberately does not reach it.
 id: SPEC-0126
 type: specification
 scope: story:story-0014
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-dec-0005
+state: active
+version: 1.3.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Acceptance grading resolves to the last floor-touched instance, not the current one"
 tags: [acceptance-criterion, integrity, self-dilution, class-iii]
@@ -105,10 +105,10 @@ and not one an agent made on its own authority.*
 id: SPEC-0129
 type: specification
 scope: story:story-0014
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-dec-0005
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Every spawn persists a durable record of what it was authorized against"
 tags: [acceptance-criterion, integrity, self-dilution, class-iii, spawn]
@@ -145,10 +145,10 @@ being refused rather than written when the story resolves to nothing.
 id: RULE-0094
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-dec-0005
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0129 via CTRL-0005"
 tags: [binding, integrity]
@@ -167,10 +167,10 @@ relations:
 id: RULE-0086
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0126 via CTRL-0005"
 tags: [binding, integrity]
@@ -230,10 +230,10 @@ is not an agent's own call.*
 id: SPEC-0127
 type: specification
 scope: story:story-0015
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "The build gate flags every non-floor edit to an in-flight acceptance spec"
 tags: [acceptance-criterion, integrity, self-dilution, atom-lint]
@@ -261,10 +261,10 @@ on a story that is not in flight left alone.
 id: RULE-0087
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0127 via CTRL-0001"
 tags: [binding, integrity]
@@ -306,10 +306,10 @@ that must land.
 id: SPEC-0128
 type: specification
 scope: story:story-0016
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Declared posture: the SPEC-0122/SPEC-0123 composition and its time-boxed mitigation"
 tags: [acceptance-criterion, declared-posture, interim-posture, integrity, class-iii, d42]
@@ -346,10 +346,10 @@ name SPEC-0128 by id once STORY-0016 lands; until then "posture atom pending
 id: RULE-0088
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0128 via CTRL-0005"
 tags: [binding, declared-posture, integrity]

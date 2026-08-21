@@ -1,0 +1,21 @@
+{
+ "id": "EVID-ctrl0011-2026-08-21T015852",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-21T01:58:52.902297+00:00",
+ "author": "ctrl-0011",
+ "authorized_by": null,
+ "title": "CLI pin: declaration and 855 pin-bearing row(s) agree",
+ "control_ref": "CTRL-0011",
+ "subject": "cli-pin@v2.1.228",
+ "verdict": "pass",
+ "checked_at": "2026-08-21T01:58:52.902297+00:00",
+ "checker": "ctrl-0011-cli-pin",
+ "declared": {
+  "version": "2.1.228",
+  "platform_integrity": "sha512-LMrLUYW5FY3r8wsQk/U5HWacHmxlEWKxaOgNzmDn1f5FhgKsSAPpioqf2JE5AusRRKXyWvhYM1crOE/CKIqoNQ=="
+ },
+ "failing": []
+}

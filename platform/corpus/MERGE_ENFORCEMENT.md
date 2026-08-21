@@ -81,10 +81,10 @@ tightening; the second is the ratified model working as designed.
 id: SPEC-0130
 type: specification
 scope: platform
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0017
+state: active
+version: 1.3.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Merge enforcement is captured from the live setting, not asserted"
 tags: [acceptance-criterion, enforcement, meta-control, public-claim]
@@ -150,10 +150,10 @@ authenticated capture required on record) while being satisfiable.
 id: RULE-0095
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0017
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0130 via CTRL-0009"
 tags: [binding, enforcement, meta-control]

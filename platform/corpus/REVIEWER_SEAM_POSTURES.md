@@ -29,10 +29,10 @@ mechanism: an absence nobody checks is how a hedge outlives its reason.
 id: SPEC-0122
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Spawn requires a resolvable story reference, not a ratified one"
 tags: [declared-posture, interim-posture, spawn, bootstrap, reviewer-seam, d42]
@@ -76,10 +76,10 @@ next reader to ignore it.
 id: RULE-0082
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0122 via CTRL-0005"
 tags: [binding, declared-posture]
@@ -102,10 +102,10 @@ relations:
 id: SPEC-0123
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Interim posture: agent authorship of governed atoms is mandate-unbounded"
 tags: [declared-posture, interim-posture, authorship, magistracy-d1, reviewer-seam, d42]
@@ -146,10 +146,10 @@ mechanism. Until then, agent authorship is permitted-but-unbounded, and that is
 id: RULE-0083
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0123 via CTRL-0001"
 tags: [binding, declared-posture]
@@ -178,10 +178,10 @@ control's remit by habit.
 id: SPEC-0124
 type: specification
 scope: platform
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0017
+state: active
+version: 1.3.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Interim posture: SPEC-0085's acceptance evidence is locally produced, not CI-produced"
 tags: [declared-posture, interim-posture, spec-0085, ci, d42]
@@ -237,10 +237,10 @@ someone makes rather than one that persists by default.
 id: RULE-0084
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0124 via CTRL-0005"
 tags: [binding, declared-posture]
@@ -263,10 +263,10 @@ relations:
 id: SPEC-0125
 type: specification
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Supervision is provider-agnostic, and every evidence row names its provider"
 tags: [portability, spec-0085, ont-039, adapter-boundary]
@@ -301,10 +301,10 @@ pattern that matched one vendor's identifiers and passed the other's through.
 id: RULE-0085
 type: rule
 scope: platform
-state: ratified
-version: 1.1.0
-instantiated_at: "2026-08-21T01:58:19.595960+00:00"
-author: agent-worker-story-0013
+state: active
+version: 1.2.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0009
 title: "Bind SPEC-0125 via CTRL-0005"
 tags: [binding, portability]
