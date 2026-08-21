@@ -1,0 +1,96 @@
+{
+ "id": "EVID-reconcile-2026-08-21T015820",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-21T01:58:20.663072+00:00",
+ "author": "ont-060-reconciliation",
+ "authorized_by": null,
+ "title": "reconciliation: 22 activated, 13 held ratified",
+ "control_ref": "CTRL-0003",
+ "subject": "corpus@a2fe816bbf156436",
+ "verdict": "pass",
+ "checked_at": "2026-08-21T01:58:20.663072+00:00",
+ "checker": "enact-reconcile",
+ "applied": true,
+ "authorization": "ONT-060 (ratified by DEC-0001)",
+ "activated": [
+  "CTRL-0011",
+  "DEC-0009",
+  "RULE-0082",
+  "RULE-0083",
+  "RULE-0084",
+  "RULE-0085",
+  "RULE-0086",
+  "RULE-0087",
+  "RULE-0088",
+  "RULE-0094",
+  "RULE-0095",
+  "RULE-0100",
+  "SPEC-0086",
+  "SPEC-0122",
+  "SPEC-0123",
+  "SPEC-0124",
+  "SPEC-0125",
+  "SPEC-0126",
+  "SPEC-0127",
+  "SPEC-0128",
+  "SPEC-0129",
+  "SPEC-0130"
+ ],
+ "held_ratified": [
+  {
+   "id": "CTRL-0008",
+   "reason": "implementation does not resolve: suite/index (ONT-033)"
+  },
+  {
+   "id": "RSTR-0002",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0004",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0009",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "RSTR-0012",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0001",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0003",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0010",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0032",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0042",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0064",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0070",
+   "reason": "no active rule binds this claim (ONT-031)"
+  },
+  {
+   "id": "SPEC-0135",
+   "reason": "no active rule binds this claim (ONT-031)"
+  }
+ ]
+}

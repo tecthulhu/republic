@@ -83,6 +83,14 @@ jobs:
         working-directory: platform
         run: python tools/test_provenance.py
 
+      # SPEC-0086: the CLI pin, checked at last. Declaration against measurement for
+      # the version; measurement against measurement for the binary.
+      - name: SPEC-0086 — CLI pin check and fixtures
+        working-directory: platform
+        run: |
+          python tools/test_cli_pin.py
+          python tools/cli_pin_check.py --no-evidence
+
       # SPEC-0127: the pending-floor-touch flag over in-flight criteria.
       - name: SPEC-0127 — acceptance-edit lint fixtures
         working-directory: platform

@@ -262,10 +262,10 @@ definition. This is the distinguishing hop over API-mode fleet evidence.
 id: SPEC-0086
 type: specification
 scope: story:story-0002
-state: ratified
-version: 1.2.0
-instantiated_at: "2026-08-14T05:55:21.369341+00:00"
-author: agent-worker-story-0002
+state: active
+version: 1.3.0
+instantiated_at: "2026-08-21T01:58:20.663072+00:00"
+author: ont-060-reconciliation
 authorized_by: DEC-0005
 title: "Versioned measurement: CLI pinned, instabilities re-verified on bump"
 tags: [acceptance-criterion, spawn-ac-pin]

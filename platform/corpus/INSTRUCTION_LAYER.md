@@ -52,10 +52,10 @@ id: SPEC-0131
 type: specification
 scope: platform
 state: active
-version: 1.3.0
-instantiated_at: "2026-08-20T16:30:00Z"
-author: agent-worker-dec-0008
-authorized_by: DEC-0008
+version: 1.4.0
+instantiated_at: "2026-08-21T02:00:00Z"
+author: agent-worker-dec-0009
+authorized_by: DEC-0009
 title: "The instruction staging tree has one state per instruction and a declared type"
 tags: [acceptance-criterion, instruction-layer, interim, ingest]
 binding: checked
@@ -92,6 +92,20 @@ in one day — v0.2 superseded by v0.3, v0.3 by v0.4, each inside the window
 ratification-by-merge leaves open. A lifecycle that cannot say *replaced before it took
 effect* pushes that history into a comment, and a comment is where history stops being
 queryable.
+
+v1.4.0 (DEC-0009) makes the type marker **optional in `artifacts/`**, where the folder
+already declares the type. A ferried deliverable arrives with its bytes pinned by a
+receipt and a manifest; adding a marker to satisfy the lint would break both in one
+stroke, so the check would be demanding that the tree lie to it. The marker exists to
+catch folder/marker *disagreement*, and an absent marker cannot disagree. Nine
+digest-pinned artifacts go green with zero bytes changed.
+
+The same amendment declares `manifest` as an ingest type and exempts ferry
+infrastructure — dot-prefixed paths such as `.ferry/`, where DEC-0008 sites the trust
+registers, and detached `.sig` files, whose bytes cannot carry a marker without
+destroying what they sign. The charter requires the sweeper to find an
+"ingest-lint-conformant shipment manifest", which is only meaningful if the lint has a
+type for one.
 
 **Declared gap: this is a control without enforcement.** The ingest tree is outside the
 repository, so no CI check can run this and no merge is refused on it. Every evidence
