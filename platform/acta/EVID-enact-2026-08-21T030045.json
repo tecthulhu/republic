@@ -1,0 +1,21 @@
+{
+ "id": "EVID-enact-2026-08-21T030045",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-21T03:00:45.261359+00:00",
+ "author": "enact-ceremony",
+ "authorized_by": null,
+ "title": "DEC-0010 ceremony: 1 effects applied",
+ "control_ref": "CTRL-0003",
+ "subject": "corpus@681e58564e779ace",
+ "verdict": "pass",
+ "checked_at": "2026-08-21T03:00:45.261359+00:00",
+ "checker": "enact-ceremony",
+ "applied": true,
+ "decision": "DEC-0010",
+ "transitions": [
+  "DEC-0010"
+ ]
+}

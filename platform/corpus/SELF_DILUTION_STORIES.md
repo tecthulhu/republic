@@ -307,15 +307,16 @@ id: SPEC-0128
 type: specification
 scope: story:story-0016
 state: active
-version: 1.2.0
-instantiated_at: "2026-08-21T01:58:20.663072+00:00"
-author: ont-060-reconciliation
-authorized_by: DEC-0009
+version: 1.3.0
+instantiated_at: "2026-08-21T03:00:00Z"
+author: agent-worker-dec-0010
+authorized_by: DEC-0010
 title: "Declared posture: the SPEC-0122/SPEC-0123 composition and its time-boxed mitigation"
 tags: [acceptance-criterion, declared-posture, interim-posture, integrity, class-iii, d42]
 binding: checked
 check: machine
 story_ref: STORY-0016
+retirement_date: "2026-10-20"
 relations:
   - { rel: derives, target: SPEC-0122 }
   - { rel: derives, target: SPEC-0123 }
@@ -332,8 +333,19 @@ must fail the moment the mitigation is removed or demoted; otherwise the hedge
 outlives the thing it was hedging about, which is the failure mode PRIN-0005 exists
 to prevent.
 
-Time-boxed: the posture carries a retirement date as well as a retirement condition,
-and passing the date without either superseding it or restating it is itself a
+Time-boxed: **`retirement_date: 2026-10-20`**, ruled by the floor on 2026-08-21, sixty
+days out. On that date the posture must be re-ratified, superseded, or retired by an
+explicit floor act; it does not silently persist past it. CTRL-0005 asserts the date is
+present and fails the tree once it passes without such an act — the time-box enforced
+rather than decorative, which is the difference between a deadline and a wish.
+
+v1.3.0 carries the date. v1.2.0 did not, and STORY-0016 proved by blocked attempt that
+no agent could add it: SPEC-0113 refused the in-place edit, and SPEC-0127 flagged the
+lawful new instance as an untouched change to an in-flight story's criteria. The doors
+that refused the agent open to the floor's signed act, and that asymmetry is the whole
+of what the mitigation is for.
+
+Passing the date without either superseding it or restating it is itself a
 failure. Silence is not renewal.
 
 **This is the atom the whitepaper cites.** rc9 §7's account of the composition should

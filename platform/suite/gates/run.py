@@ -327,16 +327,27 @@ def composition_posture_checks(res):
                f"Magistracy D1 lane lands one, SPEC-0123 goes red and this posture is "
                f"superseded rather than quietly kept")
 
-    # The time-box, enrolled honest. SPEC-0128 says it carries a retirement date and
-    # the ratified instance carries none. An agent cannot add one: the atom is a
-    # floor-touched acceptance criterion of an in-flight story, so amending it is the
-    # exact move SPEC-0127 flags and SPEC-0126 refuses to grade against — demonstrated
-    # rather than assumed, in this story's PR.
-    res.record("SPEC-0128 time-box: a retirement date is declared", "skip",
-               "the ratified instance carries no retirement date, and adding one is an "
-               "agent-authored edit to a floor-touched criterion of an in-flight story "
-               "— the composition this posture declares. It needs a floor act, so the "
-               "sub-claim enrolls honest rather than green")
+    # The time-box, now checkable. It was enrolled honest in STORY-0016 — the ratified
+    # instance carried no date and no agent could add one, which SPEC-0113 and
+    # SPEC-0127 each demonstrated by refusal. DEC-0010 is the floor act that supplied
+    # it, so the sub-claim moves from skip to checked.
+    date = posture.get("retirement_date")
+    res.ok("SPEC-0128 time-box: a retirement date is declared", bool(date),
+           "no retirement_date on the posture — a time-box nobody can read is a wish")
+    if date:
+        today = datetime.date.today().isoformat()
+        # Expiry is a failure, not a warning. The posture's own text says it must not
+        # silently persist past the date, and a check that merely mentioned the lapse
+        # would be the thing PRIN-0005 calls a promise to revisit.
+        res.ok("SPEC-0128 the posture has not outlived its time-box",
+               today < date,
+               f"retirement_date {date} has passed (today {today}) and the posture is "
+               f"still {posture.get('state')} — re-ratify it, supersede it, or retire "
+               f"it by explicit floor act; it may not persist by default")
+        if today < date:
+            left = (datetime.date.fromisoformat(date)
+                    - datetime.date.fromisoformat(today)).days
+            print(f"        {left} day(s) until the posture must be renewed or retired")
 
 
 def baseline_checks(res):
