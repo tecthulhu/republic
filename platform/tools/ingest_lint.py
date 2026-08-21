@@ -53,7 +53,12 @@ LIFECYCLE = ("proposed", "active", "executed", "parked", "withdrawn")
 ARTIFACTS = "artifacts"
 KNOWN_FOLDERS = LIFECYCLE + (ARTIFACTS,)
 
-INSTRUCTION_TYPES = {"instruction", "initiator", "decision", "posture", "plan"}
+# `manifest` arrives with DEC-0008: the charter's §5 step 1 requires the sweeper to find
+# an "ingest-lint-conformant shipment manifest", which is only meaningful if the lint
+# has a type for one. A manifest is not an instruction — it is the bill of lading for
+# the instructions beside it — but it moves through the same folders and needs the same
+# classification, so it joins the vocabulary rather than being exempted from it.
+INSTRUCTION_TYPES = {"instruction", "initiator", "decision", "posture", "plan", "manifest"}
 ARTIFACT_TYPES = {"artifact"}
 ALL_TYPES = INSTRUCTION_TYPES | ARTIFACT_TYPES
 
@@ -81,7 +86,15 @@ def scan(root):
     root = pathlib.Path(root)
     entries = []
     for p in sorted(root.rglob("*")):
-        if p.is_dir() or p.name.startswith("."):
+        # Dot-prefixed path components are infrastructure, not instructions — the same
+        # exemption `.git` already has. DEC-0008 sites the ferry's trust registers at
+        # `.ferry/`, so the shipment machinery lives inside the tree it serves and must
+        # not be graded as cargo.
+        if p.is_dir() or any(part.startswith(".") for part in p.relative_to(root).parts):
+            continue
+        # A detached signature is a shipment control file: bytes over which a marker
+        # cannot be added without destroying the thing it signs.
+        if p.suffix == ".sig":
             continue
         rel = p.relative_to(root)
         folder = rel.parts[0] if len(rel.parts) > 1 else None
@@ -133,6 +146,17 @@ def findings_for(entries):
             continue                       # already reported as unclassified
         m = e["marker"]
         if m is None:
+            if e["folder"] == ARTIFACTS:
+                # DEC-0009 / SPEC-0131 v1.4.0: in artifacts/ the folder declares the
+                # type, and a marker is optional for digest-pinned deliverables.
+                #
+                # The rule yields because the alternative is worse. A ferried artifact
+                # arrives with its bytes pinned by a receipt and a manifest; adding a
+                # marker to satisfy this check would break both in one stroke, so the
+                # lint would be demanding that the tree lie to it. The marker's job is
+                # catching folder/marker *disagreement*, and an absent marker cannot
+                # disagree with anything — the folder has already said what it is.
+                continue
             findings.append(
                 f"{e['rel']}: no `<!-- ingest: TYPE -->` marker in the first "
                 f"{MARKER_HEAD_LINES} lines — type is declared, never inferred from a "

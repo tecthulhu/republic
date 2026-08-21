@@ -319,3 +319,29 @@ relations:
 CTRL-0005 checks supervision: interrupt, mid-session injection, clean terminate.
 <!-- atom:end id=RULE-0093 -->
 
+
+<!-- atom:begin id=RULE-0100 -->
+```yaml
+id: RULE-0100
+type: rule
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-21T02:00:00Z"
+author: agent-worker-dec-0009
+authorized_by: null
+title: "Bind SPEC-0086 via CTRL-0011"
+tags: [binding, versioned-measurement]
+claim: SPEC-0086
+control: CTRL-0011
+enforcement: ENF-0001
+relations:
+  - { rel: binds, target: SPEC-0086 }
+  - { rel: binds, target: CTRL-0011 }
+  - { rel: binds, target: ENF-0001 }
+```
+The last of the twelve unbound claims that was unbound by choice rather than by
+oversight. DEC-0005 left it so deliberately — binding a claim to a control that did
+not exist would have been the SPEC-0091 shape — and carried it in the open as a meter
+line for six days rather than hiding it. This closes it.
+<!-- atom:end id=RULE-0100 -->

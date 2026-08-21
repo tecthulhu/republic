@@ -192,3 +192,30 @@ file names the work it directs — a folder state agreeing with that work's real
 The only control whose subject is outside the repository, and therefore the only one
 no CI gate can run. It is invoked, and it says so on every evidence row (SPEC-0131).
 <!-- atom:end id=CTRL-0010 -->
+
+<!-- atom:begin id=CTRL-0011 -->
+```yaml
+id: CTRL-0011
+type: control
+scope: platform
+state: proposed
+version: 1.0.0
+instantiated_at: "2026-08-21T02:00:00Z"
+author: agent-worker-dec-0009
+authorized_by: null
+title: "CLI pin check"
+tags: [enforcement-plane, versioned-measurement]
+target: artifact
+implementation: tools/cli_pin_check.py
+```
+SPEC-0086's enforcing control. Compares the CLI pin the agent build declares against
+the pin every evidence row records: each row must carry the executed binary's hash, no
+row may drift from the declared version, and one declared version must resolve to
+exactly one binary.
+
+The last assertion is the load-bearing one. The binary hash is measured at build and
+cannot be declared in the Dockerfile, so the check works both ways round —
+declaration against measurement for the version, measurement against measurement for
+the binary. A wrapper bump that silently swaps the executable underneath a fixed
+version string is then a finding rather than a pin that still reads correctly.
+<!-- atom:end id=CTRL-0011 -->
