@@ -271,6 +271,74 @@ def portability_checks(res):
            json.dumps({p: model_measurement(c) for p, c in PROVIDERS.items()}))
 
 
+def composition_posture_checks(res):
+    """SPEC-0128: the Class III posture, and the mitigation it hedges on.
+
+    SPEC-0122 (spawn admits a pre-ratified story) and SPEC-0123 (agent authorship is
+    mandate-unbounded) compose into a hole: an agent authors a weakening of its own
+    in-flight criteria and the gate grades against it. SPEC-0126's pin and SPEC-0127's
+    lint stand in for the mandate mechanism that does not exist yet.
+
+    A posture that hedges on a mitigation must fail the moment the mitigation is
+    removed or demoted, or the hedge outlives the thing it was hedging about — which is
+    the failure PRIN-0005 exists to prevent. So while this posture stands, the
+    mitigation must be *active*, and both halves of it: a claim that is active but
+    unbound is a mitigation with nothing enforcing it.
+
+    Self-retiring by construction: the whole check is guarded on SPEC-0128's own state.
+    Supersede the posture and its guard goes with it, because a corpus that no longer
+    makes the claim has nothing here to keep honest.
+    """
+    corpus_atoms, _errors = lint([str(CORPUS)], str(SCHEMA))
+    a = {aid: rec for aid, (rec, _s, _b) in corpus_atoms.items()}
+
+    posture = a.get("SPEC-0128")
+    if posture is None or posture.get("state") in ("superseded", "deprecated", "rejected"):
+        res.record("SPEC-0128 the composition posture stands", "skip",
+                   "posture retired or absent — its guard retires with it")
+        return
+    res.ok("SPEC-0128 the composition posture stands", posture.get("state") == "active",
+           f"state={posture.get('state')}")
+
+    def rid(r):
+        return r if isinstance(r, str) else (r or {}).get("id")
+
+    # The mitigation, both halves: the claim active AND a rule binding it active.
+    for claim, what in (("SPEC-0126", "the acceptance-baseline pin"),
+                        ("SPEC-0127", "the non-floor acceptance-edit lint")):
+        c = a.get(claim, {})
+        bound = [i for i, x in a.items() if x.get("type") == "rule"
+                 and rid(x.get("claim")) == claim and x.get("state") == "active"]
+        res.ok(f"SPEC-0128 {what} ({claim}) is active while the posture stands",
+               c.get("state") == "active" and bool(bound),
+               f"{claim} state={c.get('state')}, active rules binding it: {bound} — "
+               f"the posture hedges on this mitigation; if it is gone, supersede the "
+               f"posture rather than letting the hedge outlive it")
+
+    # And the spawn-act record the pin anchors to, without which the pin grades nothing.
+    anchor = a.get("SPEC-0129", {})
+    res.ok("SPEC-0128 the spawn-act record (SPEC-0129) the pin anchors to is active",
+           anchor.get("state") == "active", f"state={anchor.get('state')}")
+
+    # The retirement condition, cross-checked against the fact that would end it.
+    mandates = sorted(i for i, x in a.items() if x.get("type") == "mandate")
+    res.record("SPEC-0128 retirement condition: mandate-bounded authorship", "pass",
+               f"not yet met — {len(mandates)} mandate atom(s) in the corpus; when the "
+               f"Magistracy D1 lane lands one, SPEC-0123 goes red and this posture is "
+               f"superseded rather than quietly kept")
+
+    # The time-box, enrolled honest. SPEC-0128 says it carries a retirement date and
+    # the ratified instance carries none. An agent cannot add one: the atom is a
+    # floor-touched acceptance criterion of an in-flight story, so amending it is the
+    # exact move SPEC-0127 flags and SPEC-0126 refuses to grade against — demonstrated
+    # rather than assumed, in this story's PR.
+    res.record("SPEC-0128 time-box: a retirement date is declared", "skip",
+               "the ratified instance carries no retirement date, and adding one is an "
+               "agent-authored edit to a floor-touched criterion of an in-flight story "
+               "— the composition this posture declares. It needs a floor act, so the "
+               "sub-claim enrolls honest rather than green")
+
+
 def baseline_checks(res):
     """SPEC-0129/0126: the spawn act, and grading against what the floor touched.
 
@@ -1144,6 +1212,7 @@ def main():
     evidence_locality_checks(res)
     portability_checks(res)
     baseline_checks(res)
+    composition_posture_checks(res)
 
     with Mesh(a.image) as mesh:
         live_spawn_checks(mesh, a.image, res)
