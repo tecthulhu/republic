@@ -198,11 +198,11 @@ no CI gate can run. It is invoked, and it says so on every evidence row (SPEC-01
 id: CTRL-0011
 type: control
 scope: platform
-state: proposed
-version: 1.0.0
-instantiated_at: "2026-08-21T02:00:00Z"
+state: ratified
+version: 1.1.0
+instantiated_at: "2026-08-21T01:58:19.595960+00:00"
 author: agent-worker-dec-0009
-authorized_by: null
+authorized_by: DEC-0009
 title: "CLI pin check"
 tags: [enforcement-plane, versioned-measurement]
 target: artifact
