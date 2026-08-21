@@ -1,0 +1,29 @@
+{
+ "id": "PROV-spawn-STORY-0016-2026-08-21T022202",
+ "type": "provenance-link",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-08-21T02:22:02.175716+00:00",
+ "author": "harness:agent-worker-story-0016",
+ "authorized_by": null,
+ "title": "spawn act: STORY-0016 pinned at v1.1.0 with 1 acceptance instance(s)",
+ "directive": "spawn against STORY-0016",
+ "actor": "harness:agent-worker-story-0016",
+ "story_ref": {
+  "id": "STORY-0016",
+  "version": "1.1.0",
+  "instantiated_at": "2026-08-14T05:10:00Z"
+ },
+ "artifacts": [
+  "SPEC-0128@1.2.0@2026-08-21T01:58:20.663072+00:00"
+ ],
+ "acceptance_pinned": [
+  {
+   "id": "SPEC-0128",
+   "version": "1.2.0",
+   "instantiated_at": "2026-08-21T01:58:20.663072+00:00"
+  }
+ ],
+ "acceptance_digest": "aca7b6017a021607"
+}
