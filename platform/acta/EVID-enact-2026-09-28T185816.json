@@ -1,0 +1,21 @@
+{
+ "id": "EVID-enact-2026-09-28T185816",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-09-28T18:58:16.134640+00:00",
+ "author": "enact-ceremony",
+ "authorized_by": null,
+ "title": "DEC-0012 ceremony: 1 effects applied (dry run)",
+ "control_ref": "CTRL-0003",
+ "subject": "corpus@d4b4fc71ef4b10c3",
+ "verdict": "pass",
+ "checked_at": "2026-09-28T18:58:16.134640+00:00",
+ "checker": "enact-ceremony",
+ "applied": false,
+ "decision": "DEC-0012",
+ "transitions": [
+  "DEC-0012"
+ ]
+}
