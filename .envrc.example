@@ -1,0 +1,43 @@
+# .envrc.example — direnv template. Copy to `.envrc` and fill in your own paths.
+#
+#   cp .envrc.example .envrc && $EDITOR .envrc && direnv allow
+#
+# `.envrc` is gitignored and `.envrc.example` is not, which is the whole pattern:
+# the repository carries the *shape* of every binding, your machine carries the
+# *values*. A committed file naming a real credential location would itself be the
+# leak CTRL-0013 exists to catch, so every path below is a placeholder.
+#
+# Resolution order is the same one every tool here uses (SPEC-0136):
+#   environment variable  ->  gitignored local file  ->  a clear error naming
+#   docs/LOCAL_CONFIGURATION.md
+# Nothing guesses a default. An unset binding is a named error, because a guessed
+# default is how machine-truth got committed the first time.
+
+# --- read a secret from a file without ever echoing it -----------------------------
+# Defined as a function so a missing file is a named error rather than an empty
+# export that fails later, somewhere else, as a confusing 401.
+export_from_file() {
+  local var="$1" path="${2/#\~/$HOME}"
+  if [ ! -r "$path" ]; then
+    echo "direnv: $var NOT set — no readable file at the configured path." >&2
+    echo "direnv: see docs/LOCAL_CONFIGURATION.md" >&2
+    return 0
+  fi
+  export "$var=$(tr -d '[:space:]' < "$path")"
+}
+
+# --- GitHub ------------------------------------------------------------------------
+# Used by the `gh` CLI to open and inspect pull requests. Never used to merge:
+# the merge is the owner's signing act (PA-002, ENT-079).
+export_from_file GITHUB_TOKEN "<your-token-directory>/<your-token-file>"  # topology-ok: angle-bracket placeholder, not a location — the committed half names nothing real
+export GH_TOKEN="$GITHUB_TOKEN"
+
+# --- Ingest ------------------------------------------------------------------------
+# The reception plane's instruction tree that CTRL-0010 lints. No default exists.
+export REPUBLIC_INGEST_ROOT="<path-to-your-ingest-tree>"
+
+# --- Providers ---------------------------------------------------------------------
+# Optional here: these also resolve from platform/tools/providers.local.json, which
+# `python3 platform/tools/setup_local.py` writes for you. Uncomment to override.
+# export_from_file REPUBLIC_API_KEY_ANTHROPIC "<path-to-your-anthropic-key-file>"
+# export_from_file REPUBLIC_API_KEY_DEEPSEEK  "<path-to-your-deepseek-key-file>"

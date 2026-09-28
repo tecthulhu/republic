@@ -74,3 +74,12 @@ Thumbs.db
 # A6/A7 — machine bindings. The repo carries structure; machines carry bindings.
 platform/tools/providers.local.json
 platform/tools/hosts.denylist
+
+# direnv. `.envrc` is the per-machine delivery of those bindings into the shell, so it
+# holds credential-file locations and is machine-truth by definition; `.direnv/` is its
+# cache. `.envrc.example` is the committed template and is deliberately not ignored.
+# Note these are not covered by the `.env` / `.env.*` patterns above — `.env.*` requires
+# a dot after `env`, and `.envrc` has none. The near-miss is why they are listed here.
+.envrc
+.direnv/
+!.envrc.example
