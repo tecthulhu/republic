@@ -36,6 +36,7 @@ import datetime
 import json
 import pathlib
 import re
+import subprocess
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -130,13 +131,44 @@ def resolved_bindings(root):
     return found
 
 
+def committed_paths(root):
+    """The paths git would carry: tracked, plus untracked files it does not ignore.
+
+    **The control's domain is committed content, and only committed content.** Every
+    class here asks "would this leak if the repository were public", and a file git
+    ignores is never in the repository — it is the machine-truth half of the split this
+    whole story draws. `.envrc`, `providers.local.json` and `hosts.denylist` hold real
+    credential locations and real host names *by design*: that is what makes them local.
+
+    Walking the working tree instead flagged exactly those files, which inverted the
+    control. It passed in CI, where no local configuration exists, and went red on any
+    developer machine that had actually run `setup_local.py` — green precisely where
+    there was nothing to check and red precisely where the split was working. A control
+    that punishes correct configuration teaches people to stop running it.
+
+    Returns None outside a git work tree, where the question cannot be asked and
+    scanning everything is the loud answer rather than the silent one.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others",
+             "--exclude-standard"],
+            capture_output=True, check=True)
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return {pathlib.Path(n) for n in out.stdout.decode("utf-8", "replace").split("\0") if n}
+
+
 def scan(root, denylist):
     findings, exempted = [], []
+    tracked = committed_paths(root)
     for p in sorted(pathlib.Path(root).rglob("*")):
         if p.is_dir() or p.suffix in SKIP_SUFFIX:
             continue
         rel = p.relative_to(root)
         if any(part in SKIP_DIRS or part.startswith(".git") for part in rel.parts):
+            continue
+        if tracked is not None and rel not in tracked:
             continue
         try:
             text = p.read_text(encoding="utf-8", errors="replace")

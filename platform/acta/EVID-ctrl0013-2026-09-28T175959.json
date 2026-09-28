@@ -1,0 +1,79 @@
+{
+ "id": "EVID-ctrl0013-2026-09-28T175959",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-09-28T17:59:59.960401+00:00",
+ "author": "ctrl-0013",
+ "authorized_by": null,
+ "title": "topology hygiene: 1 finding(s), 10 exemption(s)",
+ "control_ref": "CTRL-0013",
+ "subject": "repo:topology-hygiene",
+ "verdict": "fail",
+ "checked_at": "2026-09-28T17:59:59.960401+00:00",
+ "checker": "ctrl-0013-topology-lint",
+ "class4_active": false,
+ "exemptions": [
+  {
+   "file": ".envrc.example",
+   "line": 32,
+   "class": "C2 credential-location",
+   "reason": "angle-bracket placeholder, not a location \u2014 the committed half names nothing real"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 50,
+   "class": "C1 secret-material",
+   "reason": "fixture input, a synthetic key header proving C1 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 52,
+   "class": "C1 secret-material",
+   "reason": "fixture input, a synthetic secret format proving C1 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 54,
+   "class": "C2 credential-location",
+   "reason": "fixture input, a synthetic credential path proving C2 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 56,
+   "class": "C2 credential-location",
+   "reason": "fixture input, the case that caught the over-broad container exemption"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 58,
+   "class": "C3 machine-path",
+   "reason": "fixture input, a synthetic path proving C3 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 60,
+   "class": "C3 machine-path",
+   "reason": "fixture input, a synthetic path proving C3 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 86,
+   "class": "C3 machine-path",
+   "reason": "fixture data\")"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 90,
+   "class": "C3 machine-path",
+   "reason": "\")"
+  },
+  {
+   "file": "platform/tools/topology_lint.py",
+   "line": 29,
+   "class": "C3 machine-path",
+   "reason": "<why>"
+  }
+ ]
+}

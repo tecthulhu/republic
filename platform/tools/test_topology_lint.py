@@ -10,6 +10,7 @@ carries the appearance of coverage.
 Run from anywhere: python3 tools/test_topology_lint.py
 """
 import pathlib
+import subprocess
 import sys
 import tempfile
 
@@ -102,6 +103,32 @@ with tempfile.TemporaryDirectory() as td:
     (root / "docs" / "LOCAL_CONFIGURATION.md").write_text("| REPUBLIC_THING | the thing |\n")
     undoc = tl.resolved_bindings(root) - (tl.documented_bindings(root) or set())
     check("C5 documenting the binding clears it", not undoc, undoc)
+
+# --- the scan's domain is committed content --------------------------------
+# The control asks "would this leak if the repository were public". A file git ignores
+# is never in the repository, and the local-configuration files hold real credential
+# locations *by design*. Scanning them inverted the control: green in CI, where no local
+# configuration exists, and red on every machine where the split was actually working.
+# Both halves are asserted, because excluding the ignored file is only correct if the
+# committed one is still caught.
+with tempfile.TemporaryDirectory() as td:
+    root = pathlib.Path(td)
+    (root / "platform").mkdir()
+    (root / "docs").mkdir()
+    (root / "docs" / "LOCAL_CONFIGURATION.md").write_text("no bindings here\n")
+    (root / ".gitignore").write_text(".envrc\n")
+    leak = 'p = "/opt/store/service.token"\n'  # topology-ok: fixture input, the line both halves are asserted against
+    (root / ".envrc").write_text(leak)
+    (root / "committed.sh").write_text(leak)
+    subprocess.run(["git", "-C", str(root), "init", "-q"], check=True)
+    found, _ = tl.scan(root, None)
+    hits = {f[0] for f in found}
+    check("the ignored local file is not scanned", ".envrc" not in hits, hits)
+    check("the identical line in committed content still fires",
+          "committed.sh" in hits, hits)
+
+    off = tl.committed_paths(pathlib.Path(tempfile.gettempdir()) / "definitely-not-a-repo-xyz")
+    check("outside a work tree the scan does not silently narrow", off is None, off)
 
 # --- the denylist is not committed -----------------------------------------
 committed = pathlib.Path(tl.REPO) / "platform" / "tools" / "hosts.denylist"
