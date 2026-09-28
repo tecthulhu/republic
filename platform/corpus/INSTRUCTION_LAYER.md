@@ -545,3 +545,39 @@ proof, not a catalog. §3 declines to specify future providers on the grounds th
 is a conformance exercise against §1 rather than a spec change, and the known display
 limit (pushinfo truncation on some devices) is recorded rather than smoothed over.
 <!-- atom:end id=SPEC-0135 -->
+
+## Drafting law: a diagnosis is a hypothesis (DEC-0012)
+
+Everything above governs how an instruction *travels* and how it is *consumed*. This
+governs how one is **written**, and it was bought at the price of an instruction that
+travelled perfectly and was wrong.
+
+> **Diagnoses in instructions are hypotheses until tested.** Either verify the diagnosis
+> before drafting, or write it as an Act 0 verification with the remedy conditioned on
+> its result.
+
+`INSTRUCTION_base_image_repin_v0.1` asserted that a registry had ceased serving a pinned
+digest and ordered a repin on that basis. The digest resolved. The premise was a
+checkable world-fact, stated without being checked, and the remedy was unconditional on
+it — so an instruction with a flawless custody chain ordered a change that would have
+been wrong to make.
+
+**The custody chain is not the defect, and improving it would not have helped.** Signing,
+digest-binding and principal approval establish *who ordered this and that these are the
+bytes they approved*. None of them inspect whether the order's claims are true, and no
+amount of additional custody rigour would. That is the same separation B-1 draws for
+cargo — artifacts, not authority — pointed at the instruction's own reasoning rather than
+at its payload.
+
+The conditional form is what makes the rule cheap to obey. "Act 0: verify X; if X, do Y;
+if not X, report and stop" costs a paragraph at drafting time, and it converts a wrong
+instruction into a correct one that stops. The Act 0 shape is how a hypothesis stays a
+hypothesis all the way to the agent, instead of arriving as a fact.
+
+It joins two rules that live on the drafting plane and have **not** crossed into this
+corpus — "cargo never asserts its own transport" and "gate facts verified or labeled
+unverified". DEC-0012 records that absence rather than importing them: a rule the floor
+did not ship is not a rule this corpus can mint on its own motion.
+
+This is recorded as prose, not minted as a claim. The reasoning, and the meter it would
+have moved, are in DEC-0012.
