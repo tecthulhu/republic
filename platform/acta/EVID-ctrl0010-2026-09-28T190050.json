@@ -1,0 +1,33 @@
+{
+ "id": "EVID-ctrl0010-2026-09-28T190050",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-09-28T19:00:50.117500+00:00",
+ "author": "ctrl-0010",
+ "authorized_by": null,
+ "title": "ingest structure over 65 file(s): 3 violation(s)",
+ "control_ref": "CTRL-0010",
+ "subject": "ingest@142c2026da56c13b#files=65",
+ "verdict": "fail",
+ "checked_at": "2026-09-28T19:00:50.117500+00:00",
+ "checker": "ctrl-0010-ingest-lint",
+ "ingest_root": "reception:ingest",
+ "counts": {
+  "proposed": 0,
+  "active": 3,
+  "executed": 44,
+  "parked": 2,
+  "withdrawn": 4,
+  "artifacts": 12
+ },
+ "findings": [
+  "active/MANIFEST_repin_ruling_v0.1_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)",
+  "executed/MANIFEST_story0010_go_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)",
+  "executed/MANIFEST_topology_remediation_v0.2_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)"
+ ],
+ "posture": "the ingest tree lives outside the repository, so no CI gate runs this \u2014 a control without enforcement until the tree is tracked somewhere CI can read (SPEC-0131)",
+ "state_coherence": "checked",
+ "referenced_files": 28
+}
