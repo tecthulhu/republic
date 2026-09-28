@@ -1,0 +1,73 @@
+{
+ "id": "EVID-ctrl0013-2026-09-28T185947",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-09-28T18:59:47.287676+00:00",
+ "author": "ctrl-0013",
+ "authorized_by": null,
+ "title": "topology hygiene: 1 finding(s), 9 exemption(s)",
+ "control_ref": "CTRL-0013",
+ "subject": "repo:topology-hygiene",
+ "verdict": "fail",
+ "checked_at": "2026-09-28T18:59:47.287676+00:00",
+ "checker": "ctrl-0013-topology-lint",
+ "class4_active": false,
+ "exemptions": [
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 49,
+   "class": "C1 secret-material",
+   "reason": "fixture input, a synthetic key header proving C1 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 51,
+   "class": "C1 secret-material",
+   "reason": "fixture input, a synthetic secret format proving C1 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 53,
+   "class": "C2 credential-location",
+   "reason": "fixture input, a synthetic credential path proving C2 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 55,
+   "class": "C2 credential-location",
+   "reason": "fixture input, the case that caught the over-broad container exemption"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 57,
+   "class": "C3 machine-path",
+   "reason": "fixture input, a synthetic path proving C3 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 59,
+   "class": "C3 machine-path",
+   "reason": "fixture input, a synthetic path proving C3 fires"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 85,
+   "class": "C3 machine-path",
+   "reason": "fixture data\")"
+  },
+  {
+   "file": "platform/tools/test_topology_lint.py",
+   "line": 89,
+   "class": "C3 machine-path",
+   "reason": "\")"
+  },
+  {
+   "file": "platform/tools/topology_lint.py",
+   "line": 29,
+   "class": "C3 machine-path",
+   "reason": "<why>"
+  }
+ ]
+}

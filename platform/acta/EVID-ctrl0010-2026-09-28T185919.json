@@ -1,0 +1,35 @@
+{
+ "id": "EVID-ctrl0010-2026-09-28T185919",
+ "type": "evidence",
+ "scope": "platform",
+ "state": "active",
+ "version": "1.0.0",
+ "instantiated_at": "2026-09-28T18:59:19.938186+00:00",
+ "author": "ctrl-0010",
+ "authorized_by": null,
+ "title": "ingest structure over 65 file(s): 5 violation(s)",
+ "control_ref": "CTRL-0010",
+ "subject": "ingest@59a1df2a28e1bea1#files=65",
+ "verdict": "fail",
+ "checked_at": "2026-09-28T18:59:19.938186+00:00",
+ "checker": "ctrl-0010-ingest-lint",
+ "ingest_root": "reception:ingest",
+ "counts": {
+  "proposed": 0,
+  "active": 0,
+  "executed": 47,
+  "parked": 2,
+  "withdrawn": 4,
+  "artifacts": 12
+ },
+ "findings": [
+  "executed/MANIFEST_repin_ruling_v0.1_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)",
+  "executed/MANIFEST_story0010_go_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)",
+  "executed/MANIFEST_topology_remediation_v0.2_AUTH_RECORD.json: no `<!-- ingest: TYPE -->` marker in the first 10 lines \u2014 type is declared, never inferred from a filename (one of: artifact, decision, initiator, instruction, manifest, plan, posture)",
+  "executed/INSTRUCTION_topology_hygiene_remediation_v0.2.md: claims executed against 'FERRY_SYSTEM_CHARTER_v0.4, CTRL-0010, SPEC-0113, DEC-0008, DEC-0011' with no PR reference \u2014 a story's lifecycle state is not a done-signal (SPEC-0122), so this cannot be resolved. Add PR#<n>.",
+  "executed/RULING_base_image_repin_disposition_v0.1.md: claims executed against 'INSTRUCTION_base_image_repin_v0.1, base/Dockerfile, DEC-0008' with no PR reference \u2014 a story's lifecycle state is not a done-signal (SPEC-0122), so this cannot be resolved. Add PR#<n>."
+ ],
+ "posture": "the ingest tree lives outside the repository, so no CI gate runs this \u2014 a control without enforcement until the tree is tracked somewhere CI can read (SPEC-0131)",
+ "state_coherence": "checked",
+ "referenced_files": 28
+}
